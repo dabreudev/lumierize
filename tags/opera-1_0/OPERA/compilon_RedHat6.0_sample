@@ -1,0 +1,62 @@
+set INC_ARGS = "-I$PGPLOT_DIR -I$CBUTTON_DIR -I$FITSIO_DIR -I$INC_C_DIR -I$WCSTOOLS_DIR"
+set LIBDIRS_ARGS = "-L$PGPLOT_DIR  -L$FITSIO_DIR -L$CBUTTON_DIR -L/usr/X11R6/lib/ -L$LIBC_DIR -L$WCSTOOLS_DIR"
+set LIBCOMP_ARGS = "-lC -lcbutton -lcpgplot -lpgplot -lcfitsio -lX11 -lm -lg2c -lwcs "
+#set COMP_OPTS = " -Wall"
+set COMP_OPTS = ""
+
+ 
+cd $SOURCE_C_PRG
+echo Directorio donde van los programas $PRGC_DIR
+echo Directorio donde estan los fuentes $SOURCE_C_PRG
+echo
+cd $PRGC_DIR
+echo Compilando SurveyReg   
+cc $COMP_OPTS -o SurveyReg    $SOURCE_C_PRG/SurveyReg.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando NumberCounts
+cc $COMP_OPTS -o NumberCounts $SOURCE_C_PRG/NumberCounts.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando Simula_narrow 
+cc $COMP_OPTS -o Simula_narrow  $SOURCE_C_PRG/Simula_narrow.c   $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando EmissionLines
+cc $COMP_OPTS -o EmissionLines  $SOURCE_C_PRG/EmissionLines.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando Select_drift
+cc $COMP_OPTS -o Select_drift $SOURCE_C_PRG/Select_drift.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando CombineSpec
+cc $COMP_OPTS -o CombineSpec $SOURCE_C_PRG/CombineSpec.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando GraphTable
+cc $COMP_OPTS -o GraphTable $SOURCE_C_PRG/GraphTable.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando Select      
+cc $COMP_OPTS -o Select     $SOURCE_C_PRG/Select.c     $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando PlotBuho
+cc $COMP_OPTS -o PlotBuho  $SOURCE_C_PRG/PlotBuho.c   $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando NarrowSearch
+cc $COMP_OPTS -o NarrowSearch $SOURCE_C_PRG/NarrowSearch.c   $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando PlateAstrom
+cc $COMP_OPTS -o PlateAstrom $SOURCE_C_PRG/PlateAstrom.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando BuhoFits 
+cc $COMP_OPTS -o BuhoFits  $SOURCE_C_PRG/BuhoFits.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando QuickFot    
+cc $COMP_OPTS -o QuickFot   $SOURCE_C_PRG/QuickFot.c    $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando CrossCat    
+cc $COMP_OPTS -o CrossCat $SOURCE_C_PRG/CrossCat.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando CreateSky
+cc $COMP_OPTS -o CreateSky $SOURCE_C_PRG/CreateSky.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando calcz     
+cc $COMP_OPTS -o calcz $SOURCE_C_PRG/calcz.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando LumFunc   
+cc $COMP_OPTS -o LumFunc $SOURCE_C_PRG/LumFunc.c   $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando SearchLine  
+cc $COMP_OPTS -o SearchLine $SOURCE_C_PRG/SearchLine.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando ExtractSpec
+cc $COMP_OPTS -o ExtractSpec $SOURCE_C_PRG/ExtractSpec.c   $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando SimulaOP_field
+cc $COMP_OPTS -o SimulaOP_field $SOURCE_C_PRG/SimulaOP_field.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando SimulaOP_single
+cc $COMP_OPTS -o SimulaOP_single $SOURCE_C_PRG/SimulaOP_single.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando CheckCounts 
+cc $COMP_OPTS -o CheckCounts $SOURCE_C_PRG/CheckCounts.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando PlotCat 
+cc $COMP_OPTS -o PlotCat   $SOURCE_C_PRG/PlotCat.c   $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+echo Compilando HistTable
+cc $COMP_OPTS -o HistTable $SOURCE_C_PRG/HistTable.c  $INC_ARGS $LIBDIRS_ARGS $LIBCOMP_ARGS
+
+

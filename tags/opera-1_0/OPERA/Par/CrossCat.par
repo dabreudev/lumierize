@@ -1,0 +1,36 @@
+COMMENT  Parameter file for CrossCat                                           
+CAT1    = '503.1.4.51.buho'                                   / Cat 1 to cross 
+CAT2    = '503.1.4.51.fits.usno'                              / Cat 2 to cross 
+CROSSCAT= '503.1.4.51.buho.usno.match'                        / Cat 2 to cross 
+RADIUS  =             2.500000 / Maximum radius for matching. Pixel or arcsec. 
+XCOL1   =                   14 / Column with X pix or RA (WCS1='NONE')  in Cat1
+YCOL1   =                   15 / Column with Y pix or Dec(WCS1='NONE')  in Cat1
+ISRADEC1=                    0 / Are cat 1 RADEC? Set =1 else pixel =0         
+XCOL2   =                    3 / Column with X pix or RA (WCS2='NONE')  in Cat2
+YCOL2   =                    4 / Column with Y pix or Dec(WCS2='NONE')  in Cat2
+ISRADEC2=                    1 / Are cat 1 RADEC? Set =1 else pixel =0         
+WCS1    = '503.1.4.51.fits'                                   / WCS Image 1    
+WCS2    = 'NONE'                                              / WCS Image 2    
+DEVICE  = '/null'                                             / PGPLOT device  
+COMMENT  Blank lines to assure the last block of 2880 caracters is complete    
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+COMMENT                                                                        
+END                                                                            
