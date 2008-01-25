@@ -133,9 +133,9 @@ int  MLA_SWML_g_p_L(int n,double *flux,double *errflux, double *z,double *errz,d
   if(DEBUG) for(j=0;j<nbin;j++) printf(" AFTER  NORM LOG %d par %f sig %f\n",j,par[j],sigpar[j]);
 
 
-  VVmax_L(n,flux,z,flim,strrad,zlow,zup,cosmo,lf);
+  VVmax_L(n,flux,flux,z,flim,strrad,zlow,zup,cosmo,lf);
 
-  if(DEBUG) for(j=0;j<nbin;j++) printf(" Lum %g - %g LF %g\n",lf->lumi[j]/log(10),lf->lumi[j+1]/log(10),lf->lf[j]/log(10));
+  if(DEBUG) for(j=0;j<nbin;j++) printf(" Lum %g - %g LF %g\n",lf->lumi[j]/log(10),lf->lumi[j+1]/log(10),lf->lnlf[j]/log(10));
 
 
 /*   lf->lf[0]=-31*log(10); */
@@ -149,9 +149,10 @@ int  MLA_SWML_g_p_L(int n,double *flux,double *errflux, double *z,double *errz,d
 /*   lf->lf[8]=-32.5*log(10); */
 /*   lf->lf[9]=-33.5*log(10); */
 
-  for(j=0;j<nbin;j++) {
-    par[j]=lf->lf[j];
-    sigpar[j]=3*lf->errlf[j];
+  for(j=0;j<nbin;j++) 
+  {
+    par[j]=lf->lnlf[j];
+    sigpar[j]=3*lf->errlnlf[j];
   }
     
 
@@ -174,7 +175,7 @@ int  MLA_SWML_g_p_L(int n,double *flux,double *errflux, double *z,double *errz,d
   /* Meto la solucion en la salida */
 
 
-  for(j=0;j<nbin;j++) lf->lf[j]=par[j];  
+  for(j=0;j<nbin;j++) lf->lnlf[j]=par[j];  
 
 
 
@@ -242,12 +243,13 @@ double Amoe_Funk_SWML_g_p_L_main(int n, double *x, double *y, double *p) {
   struct Steplf_L lfamo;
 
 /*   for(j=0;j<nbin;j++) printf(" EN %f \n ",p[j]); */
-  lfamo.lumi =vector_d(nbin+1);
-  lfamo.lf   =vector_d(nbin);
-  lfamo.nbin =nbin;
+  lfamo.lumi   =vector_d(nbin+1);
+  lfamo.lnlf   =vector_d(nbin);
+  lfamo.nbin   =nbin;
 
-  for(j=0;j<nbin;j++) {
-    lfamo.lf[j]=p[j];
+  for(j=0;j<nbin;j++) 
+  {
+    lfamo.lnlf[j]=p[j];
     lfamo.lumi[j]=lumbin[j];
   }
   lfamo.lumi[nbin]=lumbin[nbin];
@@ -313,7 +315,7 @@ double Amoe_Funk_SWML_g_p_L_main(int n, double *x, double *y, double *p) {
   }
 
   free(lfamo.lumi);
-  free(lfamo.lf);
+  free(lfamo.lnlf);
 
   iter_m++;
   return(logL);
@@ -468,16 +470,18 @@ void   EmpiricalCovars_SWML_g_p_L(int n,double *flux,double *errflux, double *z,
   gaussj_d(covar,lf->nbin,bb,1);
   
   /* Deshago el cambio para el limite de confidencia */
-  for(i=0;i<lf->nbin;i++) {
-    for(j=0;j<lf->nbin;j++) {
+  for(i=0;i<lf->nbin;i++) 
+  {
+    for(j=0;j<lf->nbin;j++) 
+    {
       covar[i][j]/=(-2*log(conflim));
-      lf->covarlf[i][j]=covar[i][j];
+      lf->covarlnlf[i][j]=covar[i][j];
       if(DEBUG4) printf(" invcov %d %d %g\n",i,j,covar[i][j]);
    }
   }
 
 
-  for(i=0;i<lf->nbin;i++) lf->errlf[i]=sqrt(covar[i][i]);
+  for(i=0;i<lf->nbin;i++) lf->errlnlf[i]=sqrt(covar[i][i]);
   for(i=0;i<lf->nbin;i++) parconf[i]=par[i];
 
   free_matrix_d(bb,lf->nbin,1);
@@ -508,12 +512,13 @@ void   ComputeNorma_SWML_g_p_L(int n, double flim, double strrad, double zlow, d
   Ntot=Int_step_L(*lf,zlow,zup,flim,*co)*strrad/4./pi; 
   
 
-  for(j=0;j<lf->nbin;j++) {
-    if(DEBUG) printf(" From %f ",lf->lf[j]);
-    lf->lf[j]=lf->lf[j]+log((float)(n)/Ntot);
-    if(DEBUG) printf(" to %f \n",lf->lf[j]);
+  for(j=0;j<lf->nbin;j++) 
+  {
+    if(DEBUG) printf(" From %f ",lf->lnlf[j]);
+    lf->lnlf[j]=lf->lnlf[j]+log((float)(n)/Ntot);
+    if(DEBUG) printf(" to %f \n",lf->lnlf[j]);
     /* El error, como es logaritmico, sigue intacto */
-    lf->errlf[j]=lf->errlf[j];
+    lf->errlnlf[j]=lf->errlnlf[j];
   }
 
 }

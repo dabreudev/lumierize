@@ -108,13 +108,14 @@ double Sch_rhoz_L(double zint, struct Schlf_L lf, double zlow,double zup,double 
 
 
 
-double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct cosmo_param cosmo) {
+double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct cosmo_param cosmo) 
+{
   double z;
   int nz,nM;
   int i;
   double Mlow;
   double Llow,Lstar;
-  double N,Npar;
+  double N,Ngal;
   double zlow_l;
   double zup_l;
 
@@ -139,7 +140,8 @@ double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct co
   printf(" nM %i\n",nM);
   printf("===================\n\n");  */
 
-  for(i=0;i<nz;i++) {
+  for(i=0;i<nz;i++) 
+  {
     z=zlow_l+i*(zup_l-zlow_l)/(nz-1.);
     Mlow=Mag(z,mlim,cosmo);
 
@@ -164,17 +166,17 @@ double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct co
     /* debido a un underflow, tuvimos que poner este if */
     if(Llow/Lstar > 0.25 && (lf.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
     {
-      Npar=GSL_DBL_MIN;
+      Ngal=GSL_DBL_MIN;
     }
     else
     {
-      Npar=lf.phistar*(gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
+      Ngal=lf.phistar*(gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
     }
 
 /*    printf(" i %d Npar_old %g Npar %g z %g diff %g\n",i,Npar_old, Npar,z,
 Npar-Npar_old);  */
         
-    N=N+Npar;
+    N=N+Ngal;
   }
   N=N/nz*(zup_l-zlow_l);
   /* printf(" N %g phi %g mst %g\n",N,lf.phistar,lf.Mstar); */
@@ -299,7 +301,8 @@ double Int_sch_f_M(struct Schlf_M lf, double zlow, double zup, struct fermifsel_
   N=0;
   if(lf.Mstar-Mup> 5 ) Mup=lf.Mstar-5.;  /* Para que irse tan lejos!, si es cero */
 
-  for(i=0;i<nz;i++) {
+  for(i=0;i<nz;i++) 
+  {
     z=zlow+i*(zup-zlow)/(nz-1.);
     /* Integro primero hasta 5 veces más a la izquierda del corte en Fermi */
     Mleft =Mag(z,fsel.magcut-5*fsel.deltamag,cosmo);
@@ -311,7 +314,8 @@ double Int_sch_f_M(struct Schlf_M lf, double zlow, double zup, struct fermifsel_
     if(DEBUG) printf(" z %f Mleft %f Mrith %f\n",z,Mleft,Mright);
     if(Lup/Lstar>200) Lup=200*Lstar;
     if(Lright/Lstar>=200)      Npar=0;
-    else {
+    else 
+    {
       /* Esto que viene es haciendo la integral a pelo: de Mleft hasta Mright*/
       Npar=0;
       if(Mleft<lf.Mstar && Mright>lf.Mstar) {

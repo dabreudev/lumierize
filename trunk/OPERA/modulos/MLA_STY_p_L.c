@@ -85,20 +85,20 @@ int  MLA_STY_p_L   (int n,double *flux,double *z,double flim, double strrad, dou
   lfvvmax.nbin=(int)(n/3);
   if(lfvvmax.nbin>30) lfvvmax.nbin=30;
 
-  lfvvmax.lumi   =vector_d(lfvvmax.nbin+1);
-  lfvvmax.errlumi=vector_d(lfvvmax.nbin+1);
-  lfvvmax.lf     =vector_d(lfvvmax.nbin);
-  lfvvmax.errlf  =vector_d(lfvvmax.nbin);
-  lfvvmax.covarlf=matrix_d(lfvvmax.nbin,lfvvmax.nbin);
+  lfvvmax.lumi      =vector_d(lfvvmax.nbin+1);
+  lfvvmax.errlumi   =vector_d(lfvvmax.nbin+1);
+  lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
+  lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   for(i=0;i<n;i++)   lumi[i]=log(Lum(z[i],flux[i],cosmo));
   MinMax_d(n,lumi,&minlum,&maxlum);
   for(i=0;i<=lfvvmax.nbin;i++) lfvvmax.lumi[i]=minlum+i*(maxlum-minlum)/lfvvmax.nbin;
-  VVmax_L(n,flux,z,flim,strrad,zlow,zup,cosmo,&lfvvmax);
+  VVmax_L(n,flux,flux,z,flim,strrad,zlow,zup,cosmo,&lfvvmax);
 /*   cpgopen("?"); */
 /*   PlotStepLF_L(lfvvmax); */
   if(DEBUG) printf(" Salida VVmax\n");
-  if(DEBUG) for(i=0;i<lfvvmax.nbin;i++) printf(" Lum %g - %g LF %g\n",lfvvmax.lumi[i]/log(10),lfvvmax.lumi[i+1]/log(10),lfvvmax.lf[i]/log(10));
+  if(DEBUG) for(i=0;i<lfvvmax.nbin;i++) printf(" Lum %g - %g LF %g\n",lfvvmax.lumi[i]/log(10),lfvvmax.lumi[i+1]/log(10),lfvvmax.lnlf[i]/log(10));
   FitSch2StepLF_L(lfvvmax,&lffit, &chisq);
   if(DEBUG) {
     printf(" Desuess ajuste MRQ\n");
@@ -196,9 +196,9 @@ int  MLA_STY_p_L   (int n,double *flux,double *z,double flim, double strrad, dou
   free(lumi);
   free(lfvvmax.lumi);
   free(lfvvmax.errlumi);
-  free(lfvvmax.lf);
-  free(lfvvmax.errlf);
-  free_matrix_d(lfvvmax.covarlf,lfvvmax.nbin,lfvvmax.nbin);
+  free(lfvvmax.lnlf);
+  free(lfvvmax.errlnlf);
+  free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
   return(iter_amo);
 }
 

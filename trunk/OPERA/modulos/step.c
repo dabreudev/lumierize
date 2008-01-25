@@ -9,32 +9,40 @@
 
 void mrqfunc_fitsch2steplf_L(double x,double *p,double *y,double *dyda,int n);
 void mrqfunc_fitsch2steplf_M(double x,double *p,double *y,double *dyda,int n);
+/* Estas no se están usando de momento, ya que se usa mrqfunc */
+double amofunc_schechterfitmag_d(int n, double *x, double *y, double *p);
+double amofunc_schechterfitlum_d(int n, double *x, double *y, double *p);
 
 
-double Step_M(double M, struct Steplf_M lf) {
+double Step_M(double M, struct Steplf_M lf) 
+{
   
   int j;
 
   if(M<lf.magni[0] || M>lf.magni[lf.nbin]) 
     return(0);
   else 
-    for(j=0;j<lf.nbin;j++) if(M<=lf.magni[j+1]) return(exp(lf.lf[j]));
+    for(j=0;j<lf.nbin;j++) 
+      if(M<=lf.magni[j+1]) return(exp(lf.lnlf[j]));
   return(0);
 }
 
-double Step_L(double L, struct Steplf_L lf) {
+double Step_L(double L, struct Steplf_L lf) 
+{
   
   int j;
 
   if(log(L)<lf.lumi[0] || log(L)>lf.lumi[lf.nbin]) 
     return(0);
   else 
-    for(j=0;j<lf.nbin;j++) if(log(L)<=lf.lumi[j+1]) return(exp(lf.lf[j]));
+    for(j=0;j<lf.nbin;j++) 
+      if(log(L)<=lf.lumi[j+1]) return(exp(lf.lnlf[j]));
   return(0);
 }
 
 
-double Steplfdev_M(struct Steplf_M lf, double Mlow,double Mup) {
+double Steplfdev_M(struct Steplf_M lf, double Mlow,double Mup)
+{
 
   double r;
   double M=0;
@@ -50,19 +58,21 @@ double Steplfdev_M(struct Steplf_M lf, double Mlow,double Mup) {
   if(nbin!=-1) free(PLFcum);
   PLFcum=vector_d(nbin);
 
-  PLFcum[0]=exp(lf.lf[0])*(lf.magni[1]-lf.magni[0]);
+  PLFcum[0]=exp(lf.lnlf[0])*(lf.magni[1]-lf.magni[0]);
   for(i=1;i<nbin;i++) {
-    PLFcum[i]=exp(lf.lf[i])*(lf.magni[i+1]-lf.magni[i])+PLFcum[i-1];
+    PLFcum[i]=exp(lf.lnlf[i])*(lf.magni[i+1]-lf.magni[i])+PLFcum[i-1];
   }
   /* Normalizo */
   for(i=0;i<nbin;i++)  PLFcum[i]=PLFcum[i]/PLFcum[nbin-1];
 
-  if(Mup >lf.magni[0])       {
+  if(Mup >lf.magni[0])       
+  {
     printf(" Mup >lf.lumi[0] shouldn't happen Mup %f magni[0] %f. Exiting\n",Mup,lf.magni[0]);
     exit(1);
    return(lf.magni[0]);
   }
-  if(Mlow<lf.magni[lf.nbin]) {
+  if(Mlow<lf.magni[lf.nbin]) 
+  {
     printf(" Mlow <lf.lumi[nbin] shouldn't happen Mlow %f magni[0] %f. Exiting\n",Mlow,lf.magni[nbin]);
     exit(1);
     return(lf.magni[lf.nbin]);
@@ -151,16 +161,16 @@ double zSteplfdev_M(struct Steplf_M lf, double zlow, double zup, double mlow, do
 	if(Mlow>lf.magni[j] && Mlow<lf.magni[j+1]) jend=j;
       }
       if(jstart!=-1 && jstart!=lf.nbin) {
-	step_int+=exp(lf.lf[jstart])*(lf.magni[jstart+1]-Mup);
- 	if(DEBUG) printf(" %d Sumando en mag %f-%f Mup %f   %g  : %g\n",jstart,lf.magni[jstart],lf.magni[jstart+1],Mup,lf.lf[jstart],step_int); 
+	step_int+=exp(lf.lnlf[jstart])*(lf.magni[jstart+1]-Mup);
+ 	if(DEBUG) printf(" %d Sumando en mag %f-%f Mup %f   %g  : %g\n",jstart,lf.magni[jstart],lf.magni[jstart+1],Mup,lf.lnlf[jstart],step_int); 
       }
       if(jend!=-1   && jend!=lf.nbin)   {
-	step_int+=exp(lf.lf[jend])*(Mlow-lf.magni[jend]);
-       	if(DEBUG) printf(" %d Sumando en mag %f-%f Mlow %f   %g  : %g\n",jend,lf.magni[jend],lf.magni[jend+1],Mlow,lf.lf[jend],step_int); 
+	step_int+=exp(lf.lnlf[jend])*(Mlow-lf.magni[jend]);
+       	if(DEBUG) printf(" %d Sumando en mag %f-%f Mlow %f   %g  : %g\n",jend,lf.magni[jend],lf.magni[jend+1],Mlow,lf.lnlf[jend],step_int); 
       }
       for(j=jstart+1;j<jend;j++) {
-	step_int+=exp(lf.lf[j])*(lf.magni[j+1]-lf.magni[j]);
- 	if(DEBUG) printf(" %d Sumando en mag %f-%f   %g  : %g\n",j,lf.magni[j],lf.magni[j+1],lf.lf[j],step_int); 
+	step_int+=exp(lf.lnlf[j])*(lf.magni[j+1]-lf.magni[j]);
+ 	if(DEBUG) printf(" %d Sumando en mag %f-%f   %g  : %g\n",j,lf.magni[j],lf.magni[j+1],lf.lnlf[j],step_int); 
       }
       if(DEBUG) printf(" Al final step %g\n",step_int); 
       /* Esto que viene a continuacion es como lo hacia antes, con magni[j] el centro del intervalo j */
@@ -243,9 +253,10 @@ double Steplfdev_L(struct Steplf_L lf, double Llow,double Lup) {
   if(nbin!=-1) free(PLFcum);
   PLFcum=vector_d(nbin);
 
-  PLFcum[0]=exp(lf.lf[0]+lf.lumi[1])-exp(lf.lf[0]+lf.lumi[0]);
-  for(i=1;i<nbin;i++) {
-    PLFcum[i]=(exp(lf.lf[i]+lf.lumi[i+1])-exp(lf.lf[i]+lf.lumi[i]))+PLFcum[i-1];
+  PLFcum[0]=exp(lf.lnlf[0]+lf.lumi[1])-exp(lf.lnlf[0]+lf.lumi[0]);
+  for(i=1;i<nbin;i++) 
+  {
+    PLFcum[i]=(exp(lf.lnlf[i]+lf.lumi[i+1])-exp(lf.lnlf[i]+lf.lumi[i]))+PLFcum[i-1];
   }
   /* Normalizo */
   for(i=0;i<nbin;i++)  {
@@ -343,16 +354,16 @@ double zSteplfdev_L(struct Steplf_L lf, double zlow, double zup, double ffaint, 
 	if(log(Llow)>lf.lumi[j] && log(Llow)<lf.lumi[j+1]) jstart=j;
       }
       if(jstart!=-1 && jstart!=lf.nbin) {
-	step_int+=exp(lf.lf[jstart]+lf.lumi[jstart+1])-exp(lf.lf[jstart]+log(Llow));
- 	if(DEBUG) printf(" %d Sumando en mag %f-%f Lup %g   %g  : %g\n",jstart,lf.lumi[jstart],lf.lumi[jstart+1],Lup,lf.lf[jstart],step_int); 
+	step_int+=exp(lf.lnlf[jstart]+lf.lumi[jstart+1])-exp(lf.lnlf[jstart]+log(Llow));
+ 	if(DEBUG) printf(" %d Sumando en mag %f-%f Lup %g   %g  : %g\n",jstart,lf.lumi[jstart],lf.lumi[jstart+1],Lup,lf.lnlf[jstart],step_int); 
       }
       if(jend!=-1   && jend!=lf.nbin)   {
-	step_int+=exp(lf.lf[jend]+log(Lup))-exp(lf.lf[jend]+lf.lumi[jend]);
-       	if(DEBUG) printf(" %d Sumando en mag %f-%f Llow %g   %g  : %g\n",jend,lf.lumi[jend],lf.lumi[jend+1],Llow,lf.lf[jend],step_int); 
+	step_int+=exp(lf.lnlf[jend]+log(Lup))-exp(lf.lnlf[jend]+lf.lumi[jend]);
+       	if(DEBUG) printf(" %d Sumando en mag %f-%f Llow %g   %g  : %g\n",jend,lf.lumi[jend],lf.lumi[jend+1],Llow,lf.lnlf[jend],step_int); 
       }
       for(j=jstart+1;j<jend;j++) {
-	step_int+=exp(lf.lf[j]+lf.lumi[j+1])-exp(lf.lf[j]+lf.lumi[j]);
- 	if(DEBUG) printf(" %d Sumando en lumi %f-%f   %g  : %g\n",j,log10(exp(lf.lumi[j])),lf.lumi[j+1]/log(10),lf.lf[j],step_int); 
+	step_int+=exp(lf.lnlf[j]+lf.lumi[j+1])-exp(lf.lnlf[j]+lf.lumi[j]);
+ 	if(DEBUG) printf(" %d Sumando en lumi %f-%f   %g  : %g\n",j,log10(exp(lf.lumi[j])),lf.lumi[j+1]/log(10),lf.lnlf[j],step_int); 
       }
       if(DEBUG) printf(" Al final step %g\n",step_int);
       Dang_DH=(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(1+z); /* La distancia angular * (1+z) */
@@ -408,8 +419,8 @@ double Int_step_M(struct Steplf_M lf, double zlow,double zup,double mlim,struct 
     if(Mlow<lf.magni[0])  jend=-1;
     if(Mlow>lf.magni[lf.nbin])   jend=lf.nbin;
     for(j=0;j<lf.nbin;j++) if(Mlow>lf.magni[j] && Mlow<lf.magni[j+1]) jend=j;
-    if(jend!=-1   && jend!=lf.nbin)   Npar+=exp(lf.lf[jend])*(Mlow-lf.magni[jend]);
-    for(j=0;j<jend;j++) 	Npar+=exp(lf.lf[j])*(lf.magni[j+1]-lf.magni[j]);
+    if(jend!=-1   && jend!=lf.nbin)   Npar+=exp(lf.lnlf[jend])*(Mlow-lf.magni[jend]);
+    for(j=0;j<jend;j++) 	Npar+=exp(lf.lnlf[j])*(lf.magni[j+1]-lf.magni[j]);
 
     /*     printf("i  %d  Npar %f\n",i,Npar); */
     Npar=Npar*dVdz(z,cosmo)/1.e18;
@@ -421,7 +432,10 @@ double Int_step_M(struct Steplf_M lf, double zlow,double zup,double mlim,struct 
 
 
 
-double Int_step_L(struct Steplf_L lf, double zlow,double zup,double fluxlim, struct cosmo_param cosmo) {
+double Int_step_L
+(struct Steplf_L lf, double zlow,double zup,double fluxlim,
+ struct cosmo_param cosmo) 
+{
   double z;
   int nz,nM;
   int i,j;
@@ -436,7 +450,8 @@ double Int_step_L(struct Steplf_L lf, double zlow,double zup,double fluxlim, str
   N=0;
   
 /*   if(Lup/lf.Lstar>100) Lup=100*lf.Lstar; */ /* Para que irse tan lejos!, si es cero */
-  for(i=0;i<nz;i++) {
+  for(i=0;i<nz;i++) 
+  {
     z=zlow+i*(zup-zlow)/(nz-1.);
     /* En luminosidades: */
 /*     printf(" Ho %f q0 %f\n",cosmo.H0,cosmo.q0); */
@@ -445,12 +460,15 @@ double Int_step_L(struct Steplf_L lf, double zlow,double zup,double fluxlim, str
     jini=lf.nbin;
     if(log(Llow)<lf.lumi[0])  jini=-1;
     if(log(Llow)>lf.lumi[lf.nbin])   jini=lf.nbin;
-    for(j=0;j<lf.nbin;j++) if(log(Llow)>lf.lumi[j] && log(Llow)<lf.lumi[j+1]) jini=j;
-    if(jini!=-1   && jini!=lf.nbin)   {
-      Npar+=exp(lf.lf[jini]+lf.lumi[jini+1])-exp(lf.lf[jini]+log(Llow));
+    for(j=0;j<lf.nbin;j++) 
+      if(log(Llow)>lf.lumi[j] && log(Llow)<lf.lumi[j+1]) jini=j;
+    if(jini!=-1   && jini!=lf.nbin)   
+    {
+      Npar+=exp(lf.lnlf[jini]+lf.lumi[jini+1])-exp(lf.lnlf[jini]+log(Llow));
     }
-    for(j=jini+1;j<lf.nbin;j++) 	{
-      Npar+=exp(lf.lf[j]+lf.lumi[j+1])-exp(lf.lf[j]+lf.lumi[j]);
+    for(j=jini+1;j<lf.nbin;j++) 	
+    {
+      Npar+=exp(lf.lnlf[j]+lf.lumi[j+1])-exp(lf.lnlf[j]+lf.lumi[j]);
     }
 
     Npar=Npar*dVdz(z,cosmo)/1.e18;
@@ -460,7 +478,27 @@ double Int_step_L(struct Steplf_L lf, double zlow,double zup,double fluxlim, str
   return(N);
 }
 
+void PrintStepLF_L(struct Steplf_L lf) 
+{
+  unsigned int i;
+  for(i=0;i<lf.nbin;i++) 
+  {
+    printf(" log(Lum) %11g  LF %11g (log=%9g) Err_LF %11g (log=%9g)\n",
+           lf.lumi[i]/log(10),exp(lf.lnlf[i]),lf.lnlf[i]/log(10),
+           exp(lf.lnlf[i])*lf.errlnlf[i],lf.errlnlf[i]);
+  }
+}
 
+void PrintStepLF_M(struct Steplf_M lf) 
+{
+  unsigned int i;
+  for(i=0;i<lf.nbin;i++) 
+  {
+    printf(" Mag %11g    LF %11g (log=%9g) Err_LF %11g (log=%9g)\n",
+           lf.magni[i],exp(lf.lnlf[i]),lf.lnlf[i]/log(10),
+           exp(lf.lnlf[i])*lf.errlnlf[i],lf.errlnlf[i]);
+  }
+}
 
 void PlotStepLF_L(struct Steplf_L lf) {
 
@@ -474,10 +512,14 @@ void PlotStepLF_L(struct Steplf_L lf) {
 
   ymin=1e38;
   ymax=-1e38;
-  for(i=0;i<lf.nbin;i++) {
-    if(!(lf.lf[i]==0 && lf.errlf[i]==0)) {
-      if((double)log10(exp(lf.lf[i]))>ymax) ymax=(double)log10(exp(lf.lf[i]));
-      if((double)log10(exp(lf.lf[i]))<ymin) ymin=(double)log10(exp(lf.lf[i]));
+  for(i=0;i<lf.nbin;i++)
+  {
+    if(!(lf.lnlf[i]==-1/0.))
+    {
+      if((double)log10(exp(lf.lnlf[i]))>ymax) 
+        ymax=(double)log10(exp(lf.lnlf[i]));
+      if((double)log10(exp(lf.lnlf[i]))<ymin)
+        ymin=(double)log10(exp(lf.lnlf[i]));
     }
   }
   
@@ -488,15 +530,17 @@ void PlotStepLF_L(struct Steplf_L lf) {
   xmax=xmax+1.5;
   cpgsci(1);
   cpgsch(1.2);
-  cpgswin((float)xmax/log(10),(float)xmin/log(10),(float)ymin,(float)ymax);
+  cpgswin((float)xmin/log(10),(float)xmax/log(10),(float)ymin,(float)ymax);
   cpgbox("BCTNSL",0,0,"BCTNS",0,0);
   
   
-  for(i=0;i<lf.nbin;i++) {
-    if(!(lf.lf[i]==0 && lf.errlf[i]==0)) {
+  for(i=0;i<lf.nbin;i++) 
+  {
+    if(!(lf.lnlf[i]==-1/0.))
+    {
       x=log10(exp((lf.lumi[i]+lf.lumi[i+1])/2.));
-      y=lf.lf[i]/log(10);
-      sigy=lf.errlf[i]/log(10.);
+      y=lf.lnlf[i]/log(10);
+      sigy=lf.errlnlf[i]/log(10.);
       cpgpt1(x,y,17);
       dum1=x;
       dum2=y-sigy;
@@ -525,11 +569,13 @@ void PlotStepLF_L_ov(struct Steplf_L lf) {
   cpgsci(color);
   cpgsch(1.2);
   
-  for(i=0;i<lf.nbin;i++) {
-    if(!(lf.lf[i]==0 && lf.errlf[i]==0)) {
+  for(i=0;i<lf.nbin;i++) 
+  {
+    if(!(lf.lnlf[i]==-1/0.)) 
+    {
       x=log10(exp((lf.lumi[i]+lf.lumi[i+1])/2.));
-      y=lf.lf[i]/log(10);
-      sigy=lf.errlf[i]/log(10.);
+      y=lf.lnlf[i]/log(10);
+      sigy=lf.errlnlf[i]/log(10.);
       cpgpt1(x,y,symbol);
       dum1=x;
       dum2=y-sigy;
@@ -542,7 +588,8 @@ void PlotStepLF_L_ov(struct Steplf_L lf) {
 }
 
 
-void PlotStepLF_M(struct Steplf_M lf) {
+void PlotStepLF_M(struct Steplf_M lf) 
+{
 
   float x, y, sigy;
   double dum1,dum2,dum3;
@@ -555,28 +602,38 @@ void PlotStepLF_M(struct Steplf_M lf) {
   ymin=1e38;
   ymax=-1e38;
   printf(" El bin %d\n",lf.nbin);
-  for(i=0;i<lf.nbin;i++) {
-    printf(" dentro %g \n",lf.lf[i]);
-    if(!(lf.lf[i]==0 && lf.errlf[i]==0)) {
-      if((double)(log10(exp(lf.lf[i])))>ymax) ymax=(double)log10(exp((lf.lf[i])));
-      if((double)(log10(exp(lf.lf[i])))<ymin) ymin=(double)log10(exp((lf.lf[i])));
+  for(i=0;i<lf.nbin;i++)
+  {
+    printf(" dentro %g \n",lf.lnlf[i]);
+    if(!(lf.lnlf[i]==-1/0.))
+    {
+      if((double)(log10(exp(lf.lnlf[i])))>ymax)
+         ymax=(double)log10(exp((lf.lnlf[i])));
+      if((double)(log10(exp(lf.lnlf[i])))<ymin) 
+         ymin=(double)log10(exp((lf.lnlf[i])));
     }
   }
 
   ymin=ymin-2.5;
   ymax=ymax+2.5;
-  pgLimits_d(lf.nbin,lf.magni,&xmin,&xmax); 
+  
+  pgLimits_d(lf.nbin,lf.magni,&xmin,&xmax);
   cpgsci(1);
-  cpgsch(1.2);  
-  cpgswin((float)xmin,(float)xmax,(float)ymin,(float)ymax);
+  cpgsch(1.2);
+  
+  printf("xmin %g xmax %g\n",xmin,xmax);
+    
+  cpgswin((float)xmax,(float)xmin,(float)ymin,(float)ymax);
   cpgbox("BCTNS",0,0,"BCTNS",0,0);
   
   
-  for(i=0;i<lf.nbin;i++) {
-    if(!(lf.lf[i]==0 && lf.errlf[i]==0)) {
+  for(i=0;i<lf.nbin;i++) 
+  {
+    if(!(lf.lnlf[i]==-1/0.))
+    {
       x=(lf.magni[i]+lf.magni[i+1])/2.;
-      y=log10(exp(lf.lf[i]));
-      sigy=lf.errlf[i]*log(10.);
+      y=log10(exp(lf.lnlf[i]));
+      sigy=lf.errlnlf[i] / log(10.);
       cpgpt1(x,y,17);
       dum1=x;
       dum2=y-sigy;
@@ -591,7 +648,8 @@ void PlotStepLF_M(struct Steplf_M lf) {
 
 
 
-void PlotStepSchLF_L(struct Steplf_L lfstep, struct Schlf_L lfsch) {
+void PlotStepSchLF_L(struct Steplf_L lfstep, struct Schlf_L lfsch) 
+{
 
   float x, y, sigy;
   double dum1,dum2,dum3;
@@ -605,10 +663,14 @@ void PlotStepSchLF_L(struct Steplf_L lfstep, struct Schlf_L lfsch) {
   
   ymin=1e38;
   ymax=-1e38;
-  for(i=0;i<lfstep.nbin;i++) {
-    if(!(lfstep.lf[i]==0 && lfstep.errlf[i]==0)) { 
-      if((double)log10(exp(lfstep.lf[i]))>ymax) ymax=(double)log10(exp(lfstep.lf[i]));
-      if((double)log10(exp(lfstep.lf[i]))<ymin) ymin=(double)log10(exp(lfstep.lf[i]));
+  for(i=0;i<lfstep.nbin;i++) 
+  {
+    if(!(lfstep.lnlf[i]==-1/0.)) 
+    { 
+      if((double)log10(exp(lfstep.lnlf[i]))>ymax) 
+        ymax=(double)log10(exp(lfstep.lnlf[i]));
+      if((double)log10(exp(lfstep.lnlf[i]))<ymin) 
+        ymin=(double)log10(exp(lfstep.lnlf[i]));
     }
   }
   
@@ -619,15 +681,17 @@ void PlotStepSchLF_L(struct Steplf_L lfstep, struct Schlf_L lfsch) {
   xmax=xmax+1.5;
   cpgsci(1);
   cpgsch(1.2);
-  cpgswin((float)xmax/log(10),(float)xmin/log(10),(float)ymin,(float)ymax);
+  cpgswin((float)xmin/log(10),(float)xmax/log(10),(float)ymin,(float)ymax);
   cpgbox("BCTNSL",0,0,"BCTNS",0,0);
   
   
-  for(i=0;i<lfstep.nbin;i++) {
-    if(!(lfstep.lf[i]==0 && lfstep.errlf[i]==0)) {
+  for(i=0;i<lfstep.nbin;i++) 
+  {
+    if(!(lfstep.lnlf[i]==-1/0.)) 
+    {
       x=log10(exp((lfstep.lumi[i]+lfstep.lumi[i+1])/2.));
-      y=log10(exp(lfstep.lf[i]));
-      sigy=lfstep.errlf[i]/log(10.);
+      y=log10(exp(lfstep.lnlf[i]));
+      sigy=lfstep.errlnlf[i]/log(10.);
       cpgpt1(x,y,17);
       dum1=x;
       dum2=y-sigy;
@@ -656,7 +720,8 @@ void PlotStepSchLF_L(struct Steplf_L lfstep, struct Schlf_L lfsch) {
 }
 
 
-void PlotStepSchLF_M(struct Steplf_M lfstep, struct Schlf_M lfsch) {
+void PlotStepSchLF_M(struct Steplf_M lfstep, struct Schlf_M lfsch)
+{
 
   float x, y, sigy;
   double dum1,dum2,dum3;
@@ -669,53 +734,64 @@ void PlotStepSchLF_M(struct Steplf_M lfstep, struct Schlf_M lfsch) {
 
   ymin=1e38;
   ymax=-1e38;
-  for(i=0;i<lfstep.nbin;i++) {
-    if(!(lfstep.lf[i]==0 && lfstep.errlf[i]==0)) {
-      if((double)(log10(exp(lfstep.lf[i])))>ymax) ymax=(double)log10(exp(lfstep.lf[i]));
-      if((double)(log10(exp(lfstep.lf[i])))<ymin) ymin=(double)log10(exp(lfstep.lf[i]));
+  for(i=0;i<lfstep.nbin;i++) 
+  {
+    if(!(lfstep.lnlf[i]==-1/0.)) 
+    {
+      if((double)(log10(exp(lfstep.lnlf[i])))>ymax) 
+        ymax=(double)log10(exp(lfstep.lnlf[i]));
+      if((double)(log10(exp(lfstep.lnlf[i])))<ymin)
+        ymin=(double)log10(exp(lfstep.lnlf[i]));
     }
   }
   
   ymin=ymin-2.5;
   ymax=ymax+2.5;
-  pgLimits_d(lfstep.nbin,lfstep.magni,&xmin,&xmax); 
+  /* dabreu: hay que mirar pgLimits_d.c y MinMax_d.c */
+  pgLimits_d(lfstep.nbin,lfstep.magni,&xmin,&xmax);
+  xmin=xmin-1.;
+  xmax=xmax+1.;
   cpgsci(1);
   cpgsch(1.2);
-  cpgswin((float)xmin,(float)xmax,(float)ymin,(float)ymax);
+  cpgswin((float)xmax,(float)xmin,(float)ymin,(float)ymax);
   cpgbox("BCTNS",0,0,"BCTNS",0,0);
   
   
-  for(i=0;i<lfstep.nbin;i++) {
-    if(!(lfstep.lf[i]==0 && lfstep.errlf[i]==0)) {
-      x=lfstep.magni[i]+lfstep.magni[i+1];
-      y=log10(exp(lfstep.lf[i]));
-      sigy=lfstep.errlf[i]*log(10.);
+  for(i=0;i<lfstep.nbin;i++) 
+  {
+    if(!(lfstep.lnlf[i]==-1/0.)) 
+    {
+      x=(lfstep.magni[i]+lfstep.magni[i+1]) / 2.;
+      y=lfstep.lnlf[i] / log(10);
+      sigy=lfstep.errlnlf[i] / log(10.);
       cpgpt1(x,y,17);
       dum1=x;
       dum2=y-sigy;
       dum3=y+sigy;
-      /*     printf(" dum2 %f dum3 %f \n",dum2,dum3); */
+      printf(" x %g y %g dum2 %g dum3 %g \n",x,y,dum2,dum3); 
       cpgerry_d(1,&dum1,&dum2,&dum3,0.35); 
     }
   }
 
   cpgsci(4);
   cpgmove(xmin,Schechter_M(xmin,lfsch));
-  for(i=0;i<nline;i++) {
+  for(i=0;i<nline;i++) 
+  {
     x=xmin+(xmax-xmin)*i/(nline-1);
     y=log10(Schechter_M(x,lfsch));
     cpgdraw(x,y);
-    printf(" Pinto %f %g \n",x,y);
+    /* printf(" Pinto %f %g \n",x,y); */
   }
   printf(" La sch %g %g %g\n",lfsch.Mstar,lfsch.alfa,lfsch.phistar);
   
   cpgsci(1);
-  cpglab("Mag","log\\dmag\\u(Phi) (#/Mpc\\u3\\d/Mag) ","");
-  
+  cpglab("Mag","log\\d10\\u \\gF (#/Mpc\\u3\\d/Mag) ","LF and Sch fit");  
 
 }
 
-int  FitSch2StepLF_L(struct Steplf_L lfstep, struct Schlf_L *lfsch, double *chisq) {
+int  FitSch2StepLF_L
+(struct Steplf_L lfstep, struct Schlf_L *lfsch, double *chisq) 
+{
   int iter;
   double par[3],sigpar[3];
   double **covarpar;
@@ -735,12 +811,14 @@ int  FitSch2StepLF_L(struct Steplf_L lfstep, struct Schlf_L *lfsch, double *chis
 
   par[2]=0;
   nfit=0;
-  for(i=0;i<lfstep.nbin;i++) {
-    if(!(lfstep.lf[i]==0 && lfstep.errlf[i]==0)) {
+  for(i=0;i<lfstep.nbin;i++) 
+  {
+    if(!(lfstep.lnlf[i]==-1/0.)) 
+    {
       lfx[nfit]=(lfstep.lumi[i+1]+lfstep.lumi[i])/2.;
-      lfy[nfit]=lfstep.lf[i]/log(10);
-      lfsigy[nfit]=lfstep.errlf[i]/log(10);
-/*       par[2]+=exp(lfstep.lf[i]); */
+      lfy[nfit]=lfstep.lnlf[i]/log(10);
+      lfsigy[nfit]=lfstep.errlnlf[i]/log(10);
+/*       par[2]+=exp(lfstep.lnlf[i]); */
       nfit++;
     }
   }
@@ -784,7 +862,9 @@ int  FitSch2StepLF_L(struct Steplf_L lfstep, struct Schlf_L *lfsch, double *chis
   return(iter);
 }
 
-int  FitSch2StepLF_M(struct Steplf_M lfstep, struct Schlf_M *lfsch, double *chisq) {
+int  FitSch2StepLF_M
+(struct Steplf_M lfstep, struct Schlf_M *lfsch, double *chisq) 
+{
   int iter;
   double par[3],sigpar[3];
   double **covarpar;
@@ -804,12 +884,14 @@ int  FitSch2StepLF_M(struct Steplf_M lfstep, struct Schlf_M *lfsch, double *chis
 
   par[2]=0;
   nfit=0;
-  for(i=0;i<lfstep.nbin;i++) {
-    if(!(lfstep.lf[i]==0 && lfstep.errlf[i]==0)) {
+  for(i=0;i<lfstep.nbin;i++) 
+  {
+    if(!(lfstep.lnlf[i]==-1/0.)) 
+    {
       lfx[nfit]=(lfstep.magni[i+1]+lfstep.magni[i])/2.;
-      lfy[nfit]=lfstep.lf[i]/log(10);
-      lfsigy[nfit]=lfstep.errlf[i]/log(10);
-/*       par[2]+=exp(lfstep.lf[i]); */
+      lfy[nfit]=lfstep.lnlf[i]/log(10);
+      lfsigy[nfit]=lfstep.errlnlf[i]/log(10);
+/*       par[2]+=exp(lfstep.lnlf[i]); */
       nfit++;
     }
   }
@@ -876,7 +958,8 @@ void mrqfunc_fitsch2steplf_L(double x,double *p,double *y,double *dyda,int n) {
 }
 
 
-void mrqfunc_fitsch2steplf_M(double x,double *p,double *y,double *dyda,int n) {
+void mrqfunc_fitsch2steplf_M(double x,double *p,double *y,double *dyda,int n) 
+{
   double log_L_Lstar;
 
   struct Schlf_M lf;
@@ -900,3 +983,53 @@ void mrqfunc_fitsch2steplf_M(double x,double *p,double *y,double *dyda,int n) {
 }
 
  
+double amofunc_schechterfitmag_d(int n, double *x, double *y, double *p)
+{
+
+  int i;
+  double f,s;
+
+  if(p[2]<=0) p[2]=-p[2];
+  
+  s=0.0;
+  for(i=0; i<n; i++)
+  {
+    /* dabreu: Creo que ya no se usa */
+    /* f=Schechter_M(x[i],p[0],p[1],p[2]); */
+    /*       //    f += p[3]+p[4]*x[i]; */
+      /*       //f += p[4]*x[i]; */
+      /*       //printf(" f %f y %f\n",f,y[i]); */
+      if(DEBUG) printf(" f %f log f %f y %f\n",f,log10(f),y[i]); 
+      if (f!=0 && y[i]!=0) s += (log10(f)-y[i])*(log10(f)-y[i]);
+  };
+
+  if(DEBUG) printf(" s = %f  p0 %g p1 %g p2 %g\n",s,p[0],p[1],p[2]); 
+  if(DEBUG) printf(" s = %f  p0 %g p1 %g P2 %g\n",s,p[0],p[1],p[2]); 
+  
+  return(s);
+}
+
+
+double amofunc_schechterfitlum_d(int n, double *x, double *y, double *p)
+{
+
+  int i;
+  double f,s;
+
+
+  if(p[2]<=0) p[2]=-p[2];
+ 
+  s=0.0;
+  for(i=0; i<n; i++)
+  {
+    /* dabreu: creo que ya no se usa */
+    /* f=Schechter_L_LF(pow(10.,x[i]),pow(10.,p[0]),p[1],p[2]); */
+    /*       //    f += p[3]+p[4]*x[i]; */
+      /*       //f += p[4]*x[i]; */
+      if(DEBUG2) printf("   f %f y %f\n",f,y[i]); 
+      if (f!=0 && y[i]!=0)  s += (f-y[i])*(f-y[i]);
+  }
+  if(DEBUG2)  printf(" s = %f  p0 %g p1 %g P2 %g\n",s,p[0],p[1],p[2]); 
+  
+  return(s);
+}

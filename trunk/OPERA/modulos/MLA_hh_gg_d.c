@@ -1,8 +1,14 @@
 #include "modulos.h"
-#define FTOL  1e-12
+/*#define FTOL  1e-12  <-- Valor anterior*/
+/*#define FTOL  1e-15  <-- Valos 2 */
+/*#define FTOL  1e-17  <-- Valos 3 */
+#define FTOL  1e-17
 #define FTOL2 1e-6
 #define FTOL3 1e-7
-#define MAXITER  2000
+/* #define MAXITER  2000 >-- Valor anterior */
+/* #define MAXITER  5000 >-- Valor2 */
+/* #define MAXITER  7000 >-- Valor3 */
+#define MAXITER  7000
 #define MAXITER2 200
 #define MAXITER3 150
 #define MAXTRIES   5

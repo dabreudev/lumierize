@@ -141,7 +141,7 @@ int  MLA_SWML_M(int n,double *magn,double *z,double mlim, double strrad, double 
   /* Meto la solucion en la salida */
 
 
-  for(j=0;j<nbin;j++) lf->lf[j]=par[j];  
+  for(j=0;j<nbin;j++) lf->lnlf[j]=par[j];  
 
 
   /* Estimacion de los errores en los parametros */
@@ -184,14 +184,14 @@ int  MLA_SWML_M(int n,double *magn,double *z,double mlim, double strrad, double 
 
   if(DEBUG) {
     printf(" Solution before norm:\n");
-    for(j=0;j<nbin;j++) printf(" Inter_mag %11g - %11g    LF %11g (log=%7g) Err_LF %11g (log=%7g)\n",lf->magni[j],lf->magni[j+1],exp(lf->lf[j]),log10(exp(lf->lf[j])),exp(lf->lf[j])*lf->errlf[j],lf->errlf[j]*log(10.));
+    for(j=0;j<nbin;j++) printf(" Inter_mag %11g - %11g    LF %11g (log=%7g) Err_LF %11g (log=%7g)\n",lf->magni[j],lf->magni[j+1],exp(lf->lnlf[j]),log10(exp(lf->lnlf[j])),exp(lf->lnlf[j])*lf->errlnlf[j],lf->errlnlf[j]*log(10.));
     for(j=0;j<nbin;j++)  printf(" %d par %f sig %f hisot %d magni %f - %f\n",j,par[j],sigpar[j],histo[j],magbin[j],magbin[j+1]);
   }
   ComputeNorma_SWML_M(n, mlim,  strrad, zlow,  zup, lf);
   
   if(DEBUG) {
     printf(" Solution after norm:\n");
-    for(j=0;j<nbin;j++) printf(" Inter_mag %11g - %11g    LF %11g (log=%7g) Err_LF %11g (log=%7g)\n",lf->magni[j],lf->magni[j+1],exp(lf->lf[j]),log10(exp(lf->lf[j])),exp(lf->lf[j])*lf->errlf[j],lf->errlf[j]*log(10.));
+    for(j=0;j<nbin;j++) printf(" Inter_mag %11g - %11g    LF %11g (log=%7g) Err_LF %11g (log=%7g)\n",lf->magni[j],lf->magni[j+1],exp(lf->lnlf[j]),log10(exp(lf->lnlf[j])),exp(lf->lnlf[j])*lf->errlnlf[j],lf->errlnlf[j]*log(10.));
     for(j=0;j<nbin;j++)  printf(" %d par %f sig %f hisot %d magni %f - %f\n",j,par[j],sigpar[j],histo[j],magbin[j],magbin[j+1]);
   }
   
@@ -494,12 +494,14 @@ void   EmpiricalCovars_SWML_M(int n,double *magn,double *z,double *par, double *
   for(i=0;i<lf->nbin;i++) {
     for(j=0;j<lf->nbin;j++) {
       covar[i][j]/=(-2*log(conflim));
-      lf->covarlf[i][j]=covar[i][j];
+      lf->covarlnlf[i][j]=covar[i][j];
    }
   }
 
-  for(i=0;i<lf->nbin;i++) lf->errlf[i]=sqrt(covar[i][i]);
-  for(i=0;i<lf->nbin;i++) parconf[i]=par[i];
+  for(i=0;i<lf->nbin;i++) 
+    lf->errlnlf[i]=sqrt(covar[i][i]);
+  for(i=0;i<lf->nbin;i++) 
+    parconf[i]=par[i];
 
   free_matrix_d(bb,lf->nbin-1,1);
   free(y);
@@ -539,11 +541,11 @@ void   ComputeNorma_SWML_M(int n, double mlim, double strrad, double zlow, doubl
   if(DEBUG) printf(" Normalacing Ntot %f\n",Ntot*4*pi/strrad);
 
   for(j=0;j<lf->nbin;j++) {
-    if(DEBUG) printf(" From %f ",lf->lf[j]);
-    lf->lf[j]=lf->lf[j]+log((float)(n)/Ntot);
-    if(DEBUG) printf(" to %f \n",lf->lf[j]);
+    if(DEBUG) printf(" From %f ",lf->lnlf[j]);
+    lf->lnlf[j]=lf->lnlf[j]+log((float)(n)/Ntot);
+    if(DEBUG) printf(" to %f \n",lf->lnlf[j]);
     /* El error, como es logaritmico, sigue intacto */
-    lf->errlf[j]=lf->errlf[j];
+    lf->errlnlf[j]=lf->errlnlf[j];
   }
 
 }

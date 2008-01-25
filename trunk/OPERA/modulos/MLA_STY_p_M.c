@@ -121,17 +121,17 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   lfvvmax.nbin=(int)(n/3);
   if(lfvvmax.nbin>30) lfvvmax.nbin=30;
 
-  lfvvmax.magni   =vector_d(lfvvmax.nbin+1);
-  lfvvmax.errmagni=vector_d(lfvvmax.nbin+1);
-  lfvvmax.lf      =vector_d(lfvvmax.nbin);
-  lfvvmax.errlf   =vector_d(lfvvmax.nbin);
-  lfvvmax.covarlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
+  lfvvmax.magni     =vector_d(lfvvmax.nbin+1);
+  lfvvmax.errmagni  =vector_d(lfvvmax.nbin+1);
+  lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
+  lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   Mabs            =vector_d(n);
   for(i=0;i<n;i++)   Mabs[i]=Mag(z[i],magn[i],cosmo);
   MinMax_d(n,Mabs,&minMabs,&maxMabs);
   for(i=0;i<=lfvvmax.nbin;i++) lfvvmax.magni[i]=minMabs+i*(maxMabs-minMabs)/lfvvmax.nbin;
-  VVmax_M(n,magn,z,mlim,strrad,zlow,zup,cosmo,&lfvvmax);
+  VVmax_M(n,magn,magn,z,mlim,strrad,zlow,zup,cosmo,&lfvvmax);
 
   /* Fit of the VVmax solution to a Schechter function */
   FitSch2StepLF_M(lfvvmax,&lffit, &chisq);
@@ -140,9 +140,9 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   free(Mabs);
   free(lfvvmax.magni);
   free(lfvvmax.errmagni);
-  free(lfvvmax.lf);
-  free(lfvvmax.errlf);
-  free_matrix_d(lfvvmax.covarlf,lfvvmax.nbin,lfvvmax.nbin);
+  free(lfvvmax.lnlf);
+  free(lfvvmax.errlnlf);
+  free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
   /* Feed the initial solution*/
   par[0]=lffit.alfa;  /* Alpha */
@@ -239,9 +239,6 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
   double Mlow;
   double Lstar;
   double Llow;
-/*   double Mup=-30; */
-/*   double Lup; */
-  double intsup;
   double Ntot;
 
   lfamo.alfa=p[0];
@@ -251,11 +248,6 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
   logL=0.;
 
   Lstar=pow(10.,-0.4*lfamo.Mstar);
-/*  intsup=incom(1+lfamo.alfa,200.); */
-  intsup=gsl_sf_gamma(1.+lfamo.alfa);
-
-  /* dabreu */
-/*  printf("   alfa %g incom %g  gamma %g  gamma_gsl %g\n",lfamo.alfa, intsup, exp(gammln(1+lfamo.alfa)), gsl_sf_gamma(1.+lfamo.alfa)); */
 
   for(i=0;i<_ndata_STY_p_M;i++)
   {
@@ -263,8 +255,13 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
     Mlow=Mag(y[i],_mlim_STY_p_M,*_cosmo_STY_p_M);
     Llow=pow(10.,-0.4*Mlow);
 
-    /* intsch=lfamo.phistar*(intsup-incom(1+lfamo.alfa,Llow/Lstar)); */
-    /* debido a un underflow, tuvimos que poner este if */
+    /* debido a un underflow, tuvimos que poner este if
+       El 0.25 es debido a que gsl_sfi_gamma_inc llama a gsl_sf_gamma_inc_CF
+       para x > 0.25 y nos devolvía un underflow cuando se cumplía la segunda
+       condición -> los fuentes de gsl están en:
+       /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/exp.c
+       /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/gamma_inc.c
+    */
     if(Llow/Lstar > 0.25 && (lfamo.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
     {
       log_gamma_int=GSL_LOG_DBL_MIN;
@@ -273,20 +270,23 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
     {
       log_gamma_int=log(gsl_sf_gamma_inc(1+lfamo.alfa,Llow/Lstar));
     }
+    /* log(lfamo.phistar) + log_gamma_int -> integral de la función de Schecter
+    entre Llow e inf */
     logL-= log(Schechter_M(Mabs,lfamo)) - log(lfamo.phistar) - log_gamma_int;
     
-/* dabreu    printf(" ndata %d  logL %g x %f  y %f Mabs %f Lstar %g Llow %g intsup %g  sch %g int %g\n",i,logL,x[i],y[i],Mabs,Lstar,Llow,intsup,Schechter_M(Mabs,lfamo),intsch); */
-/*     printf(" LF: lfamo.Mstar %g lfamo.phistar %f lf.alfa  %f\n",lfamo.Mstar,lfamo.phistar,lfamo.alfa); */
   }
 
   if(DEBUG) printf(" logL %g\n",logL);
+
   /* Aqui viene la parte de la poissoniana de npob */
   Ntot=Int_sch_M(lfamo,_zlow_STY_p_M,_zup_STY_p_M,_mlim_STY_p_M,*_cosmo_STY_p_M)*_strrad_STY_p_M/4./M_PI;
   logL-= (_ndata_STY_p_M*log(Ntot) - Ntot - gammln((double)_ndata_STY_p_M+1.));
 
+  _iter_m_STY_p_M++;
+
+
   if(DEBUG) printf(" Ntot %g ndata %d rad %g zlw %f zup %f mag %f lfamophi %f\n",Ntot, _ndata_STY_p_M, _strrad_STY_p_M,_zlow_STY_p_M,_zup_STY_p_M,_mlim_STY_p_M,lfamo.phistar);
 
-  _iter_m_STY_p_M++;
   if(DEBUG) printf(" Iter %d  logL %f par0 %g par1 %g par2 %g (%.10g)\n",_iter_m_STY_p_M,logL,p[0],p[1],exp(p[2]),p[2]);
   return(logL);
 }

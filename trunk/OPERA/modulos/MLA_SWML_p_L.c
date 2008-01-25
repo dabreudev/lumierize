@@ -82,36 +82,38 @@ int  MLA_SWML_p_L(int n,double *flux,double *z,double flim, double strrad, doubl
   iter_amo=0;
 
 
-  VVmax_L(n,flux,z,flim,strrad,zlow,zup,cosmo,lf);
-  if(DEBUG) for(j=0;j<nbin;j++) printf(" VVMAX Lum %g - %g LF %g\n",lf->lumi[j]/log(10),lf->lumi[j+1]/log(10),lf->lf[j]/log(10));
+  VVmax_L(n,flux,flux,z,flim,strrad,zlow,zup,cosmo,lf);
+  if(DEBUG) for(j=0;j<nbin;j++) printf(" VVMAX Lum %g - %g LF %g\n",lf->lumi[j]/log(10),lf->lumi[j+1]/log(10),lf->lnlf[j]/log(10));
   arezeros=1;
   while(arezeros) {
     arezeros=0;
     for(j=0;j<nbin;j++) {
-      if(lf->lf[j]==0 && lf->errlf[j]==0) {
+      if(lf->lnlf[j]==-1/0.) {
 	nullbin[j]=1;
 	arezeros=1;
 	if(j==0) {
-	  lf->lf[0]=lf->lf[1];
-	  lf->errlf[0]=lf->errlf[1];
+	  lf->lnlf[0]=lf->lnlf[1];
+	  lf->errlnlf[0]=lf->errlnlf[1];
 	}
 	else if(j==nbin-1) {
-	  lf->lf[nbin-1]=lf->lf[nbin-2];
-	  lf->errlf[nbin-1]=lf->errlf[nbin-2];
+	  lf->lnlf[nbin-1]=lf->lnlf[nbin-2];
+	  lf->errlnlf[nbin-1]=lf->errlnlf[nbin-2];
 	}
 	else {
-	  lf->lf[j]=(lf->lf[j+1]+lf->lf[j-1])/2.;
-	  lf->errlf[j]=(lf->errlf[j+1]+lf->errlf[j-1])/2.;
+	  lf->lnlf[j]=(lf->lnlf[j+1]+lf->lnlf[j-1])/2.;
+	  lf->errlnlf[j]=(lf->errlnlf[j+1]+lf->errlnlf[j-1])/2.;
 	}
       }
     }
   }
-  if(DEBUG) for(j=0;j<nbin;j++) printf(" VVMAX Lum %g - %g LF %g\n",lf->lumi[j]/log(10),lf->lumi[j+1]/log(10),lf->lf[j]/log(10));
+  if(DEBUG) for(j=0;j<nbin;j++) printf(" VVMAX Lum %g - %g LF %g\n",lf->lumi[j]/log(10),lf->lumi[j+1]/log(10),lf->lnlf[j]/log(10));
   printf(" Computing LF...\n");
-  while(iter_amo==0) { 
-    for(j=0;j<nbin;j++) {
-      par[j]=lf->lf[j];
-      sigpar[j]=4*lf->errlf[j];
+  while(iter_amo==0) 
+  { 
+    for(j=0;j<nbin;j++) 
+    {
+      par[j]=lf->lnlf[j];
+      sigpar[j]=4*lf->errlnlf[j];
     }
     iter_amo=Amoeba_d(n,flux,z,lf->nbin,par,sigpar,FTOL,MAXITER,Amoe_Funk_SWML_p_L_main);
   }
@@ -123,21 +125,21 @@ int  MLA_SWML_p_L(int n,double *flux,double *z,double flim, double strrad, doubl
   /* Meto la solucion en la salida */
 
 
-  for(j=0;j<nbin;j++) lf->lf[j]=par[j];  
+  for(j=0;j<nbin;j++) lf->lnlf[j]=par[j];  
 
   for(j=0;j<nbin;j++) {
     if(nullbin[j]) {
       if(j==0) {
-	lf->lf[0]=lf->lf[1];
-	lf->errlf[0]=lf->errlf[1];
+	lf->lnlf[0]=lf->lnlf[1];
+	lf->errlnlf[0]=lf->errlnlf[1];
       }
       else if(j==nbin-1) {
-	lf->lf[nbin-1]=lf->lf[nbin-2];
-	lf->errlf[nbin-1]=lf->errlf[nbin-2];
+	lf->lnlf[nbin-1]=lf->lnlf[nbin-2];
+	lf->errlnlf[nbin-1]=lf->errlnlf[nbin-2];
       }
       else {
-	lf->lf[j]=(lf->lf[j+1]+lf->lf[j-1])/2.;
-	lf->errlf[j]=(lf->errlf[j+1]+lf->errlf[j-1])/2.;
+	lf->lnlf[j]=(lf->lnlf[j+1]+lf->lnlf[j-1])/2.;
+	lf->errlnlf[j]=(lf->errlnlf[j+1]+lf->errlnlf[j-1])/2.;
       }
     }
   }
@@ -203,11 +205,11 @@ double Amoe_Funk_SWML_p_L_main(int n, double *x, double *y, double *p) {
 
 /*   for(j=0;j<nbin;j++) printf(" EN %f \n ",p[j]); */
   lfamo.lumi =vector_d(nbin+1);
-  lfamo.lf   =vector_d(nbin);
+  lfamo.lnlf   =vector_d(nbin);
   lfamo.nbin =nbin;
 
   for(j=0;j<nbin;j++) {
-    lfamo.lf[j]=p[j];
+    lfamo.lnlf[j]=p[j];
     lfamo.lumi[j]=lumbin[j];
   }
   lfamo.lumi[nbin]=lumbin[nbin];
@@ -273,7 +275,7 @@ double Amoe_Funk_SWML_p_L_main(int n, double *x, double *y, double *p) {
   }
 
   free(lfamo.lumi);
-  free(lfamo.lf);
+  free(lfamo.lnlf);
 
   iter_m++;
   return(logL);
@@ -449,7 +451,7 @@ void   EmpiricalCovars_SWML_p_L(int n,double *flux,double *z, double *par, doubl
   for(i=0;i<lf->nbin;i++) {
     for(j=0;j<lf->nbin;j++) {
       covar[i][j]/=(-2*log(conflim));
-      lf->covarlf[i][j]=covar[i][j];
+      lf->covarlnlf[i][j]=covar[i][j];
       if(DEBUG4) printf(" invcov %d %d %g\n",i,j,covar[i][j]);
    }
   }
@@ -457,10 +459,10 @@ void   EmpiricalCovars_SWML_p_L(int n,double *flux,double *z, double *par, doubl
   /* Pongo las covar a 0 de los que tienen un bin vacio */
   for(j=0;j<lf->nbin;j++) {
     if(nullbin[j]) {
-      lf->lf[j]=0;
+      lf->lnlf[j]=-1/0.;
       for(i=0;i<lf->nbin;i++) {
-	lf->covarlf[i][j]=0;
-	lf->covarlf[j][i]=0;
+	lf->covarlnlf[i][j]=0;
+	lf->covarlnlf[j][i]=0;
       }
     }
   }
@@ -469,7 +471,8 @@ void   EmpiricalCovars_SWML_p_L(int n,double *flux,double *z, double *par, doubl
 
   printf(" Aqui estoy acabando\n");
 
-  for(i=0;i<lf->nbin;i++) lf->errlf[i]=sqrt(lf->covarlf[i][i]);
+  for(i=0;i<lf->nbin;i++) 
+    lf->errlnlf[i]=sqrt(lf->covarlnlf[i][i]);
 
   free_matrix_d(bb,lf->nbin,1);
   free(y);
@@ -500,11 +503,11 @@ void   ComputeNorma_SWML_p_L(int n, double flim, double strrad, double zlow, dou
   
 
   for(j=0;j<lf->nbin;j++) {
-    if(DEBUG) printf(" From %f ",lf->lf[j]);
-    lf->lf[j]=lf->lf[j]+log((float)(n)/Ntot);
-    if(DEBUG) printf(" to %f \n",lf->lf[j]);
+    if(DEBUG) printf(" From %f ",lf->lnlf[j]);
+    lf->lnlf[j]=lf->lnlf[j]+log((float)(n)/Ntot);
+    if(DEBUG) printf(" to %f \n",lf->lnlf[j]);
     /* El error, como es logaritmico, sigue intacto */
-    lf->errlf[j]=lf->errlf[j];
+    lf->errlnlf[j]=lf->errlnlf[j];
   }
 
 }

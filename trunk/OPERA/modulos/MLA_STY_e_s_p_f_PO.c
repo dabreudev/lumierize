@@ -105,13 +105,14 @@ int  MLA_STY_e_s_p_f_PO  (int n,double *magn,double *ew,double *z,double *ebv,do
   lfvvmax.nbin=(int)(n/3);
   if(lfvvmax.nbin>30) lfvvmax.nbin=30;
 
-  lfvvmax.lumi   =vector_d(lfvvmax.nbin+1);
-  lfvvmax.errlumi=vector_d(lfvvmax.nbin+1);
-  lfvvmax.lf     =vector_d(lfvvmax.nbin);
-  lfvvmax.errlf  =vector_d(lfvvmax.nbin);
-  lfvvmax.covarlf=matrix_d(lfvvmax.nbin,lfvvmax.nbin);
+  lfvvmax.lumi      =vector_d(lfvvmax.nbin+1);
+  lfvvmax.errlumi   =vector_d(lfvvmax.nbin+1);
+  lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
+  lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
-  for(i=0;i<n;i++)   {
+  for(i=0;i<n;i++)   
+  {
     flux[i]=Flux_ew_mag(ew[i],magn[i],photband,gamma,delta,Kcoc);
     lumi[i]=log(Lum(z[i],flux[i],cosmo));
     printf(" Objeto %d flux %g \n",i,flux[i]);
@@ -138,11 +139,11 @@ int  MLA_STY_e_s_p_f_PO  (int n,double *magn,double *ew,double *z,double *ebv,do
   flim=Flux_ew_mag(ewmoda,magnlim,photband,gamma,delta,Kcoc);
 /*   strrad=Surveyrad(sdb); */
   strrad=319./180./180.*M_PI*M_PI;
-  VVmax_L(n,flux,z,flim,strrad,fsel.zbin[0],fsel.zbin[fsel.nz-1],cosmo,&lfvvmax);
+  VVmax_L(n,flux,flux,z,flim,strrad,fsel.zbin[0],fsel.zbin[fsel.nz-1],cosmo,&lfvvmax);
 /*   cpgopen("?"); */
 /*   PlotStepLF_L(lfvvmax); */
   if(DEBUG) printf(" Salida VVmax\n");
-  if(DEBUG) for(i=0;i<lfvvmax.nbin;i++) printf(" Lum %g - %g LF %g\n",lfvvmax.lumi[i]/log(10),lfvvmax.lumi[i+1]/log(10),lfvvmax.lf[i]/log(10));
+  if(DEBUG) for(i=0;i<lfvvmax.nbin;i++) printf(" Lum %g - %g LF %g\n",lfvvmax.lumi[i]/log(10),lfvvmax.lumi[i+1]/log(10),lfvvmax.lnlf[i]/log(10));
   FitSch2StepLF_L(lfvvmax,&lffit, &chisq);
   if(DEBUG) {
     printf(" Desuess ajuste MRQ\n");
@@ -255,9 +256,9 @@ int  MLA_STY_e_s_p_f_PO  (int n,double *magn,double *ew,double *z,double *ebv,do
   free(flux);
   free(lfvvmax.lumi);
   free(lfvvmax.errlumi);
-  free(lfvvmax.lf);
-  free(lfvvmax.errlf);
-  free_matrix_d(lfvvmax.covarlf,lfvvmax.nbin,lfvvmax.nbin);
+  free(lfvvmax.lnlf);
+  free(lfvvmax.errlnlf);
+  free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
   return(iter_amo);
 }
 
