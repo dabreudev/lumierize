@@ -1,6 +1,6 @@
 #include "modulos.h"
-       
-  
+         
+   
 struct gaussdist { 
   double mean;
   double errmean;
@@ -8,7 +8,7 @@ struct gaussdist {
   double errsigma;
   double covmeansigma;
 };   
-
+ 
 struct histodist {
   int nbin;
   double *p;
@@ -16,8 +16,8 @@ struct histodist {
   double *xbin;
   double xmin;
   double xmax; 
-};
-
+}; 
+ 
 struct histodist2D {
 /*Creado para tener un histograma de dos dimensiones. Terminado.*/
   int nbinx;
