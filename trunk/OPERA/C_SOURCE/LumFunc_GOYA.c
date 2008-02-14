@@ -111,6 +111,7 @@ int main()
 
   do{
     printf("\n C Compute number of galaxies with a given luminosity function \n"); 
+    printf(" D Compute number of galaxies with a given luminosity function using color distribution.\n"); 
     printf(" V Calculate luminosity function by V/Vmax method\n"); 
     
     printf(" L Calculate luminosity function by CEG method\n"); 
@@ -121,7 +122,7 @@ int main()
 /*    printf(" O Calculate luminosity function by C- method\n");  */
     printf(" G Generate a random catalogue for a given LF by Montecarlo simulations in magnitudes\n");
     printf(" H Generate a random catalogue for a given LF by Montecarlo simulations in luminosities\n");
-    printf(" I Generate a random catalogue for a given LF by Montecarlo simulations in magnitudes for two bands\n");
+    printf(" I Generate a random catalogue for a given LF by Montecarlo simulations in magnitudes using color distribution.\n");
     printf(" E Exit\n");
     opt=readc(opt);  
     switch (opt) { 
@@ -1290,16 +1291,15 @@ void Calc_Num()
 }
 
 
-/* only copy of Calc_Num */
-
 void Calc_Num_wC()
 { 
-
+  /* like Calc_Num but using Int_sch_M_wC instead of Int_sch_M */
   static double zup=0.5;
   static double zlow=0;
   double ztmp=0;
   static double mlimite=20;
   double mlim;
+  double color_mean=0., color_stddev=0.;
   double Mabs;
   
   double Ntot;
@@ -1336,6 +1336,10 @@ void Calc_Num_wC()
     mlimite=readf(mlimite);
     mlim=mlimite;
     set_Schechter_M();
+    printf("Introduce mean color:");
+    color_mean=readf(color_mean);
+    printf("Introduce stddev for the color:");
+    color_stddev=readf(color_stddev);
     break;
   }
 
@@ -1449,7 +1453,7 @@ void Calc_Num_wC()
 
   if(plots) cpgpanl(1,1);
   
-  if(opt=='M')   Ntot=Int_sch_M(schlf_M,zlow,zup,mlim,cosmo);
+  if(opt=='M')   Ntot=Int_sch_M_wC(schlf_M,zlow,zup,color_mean,color_stddev,mlim,cosmo);
   else           Ntot=Int_sch_L(schlf_L,zlow,zup,pow(10.,-0.4*mlim),cosmo);
       
   if(plots){
@@ -1461,7 +1465,7 @@ void Calc_Num_wC()
     cpgsch(3.);
   }
   for(mlim=mlimmin;mlim<mlimmax;mlim+=.25) {
-    if(opt=='M')  Nbin=-Int_sch_M(schlf_M,zlow,zup,mlim-.125,cosmo)+Int_sch_M(schlf_M,zlow,zup,mlim+.125,cosmo); 
+    if(opt=='M')  Nbin=-Int_sch_M_wC(schlf_M,zlow,zup,color_mean,color_stddev,mlim-.125,cosmo)+Int_sch_M_wC(schlf_M,zlow,zup,color_mean,color_stddev,mlim+.125,cosmo); 
     else          Nbin=-Int_sch_L(schlf_L,zlow,zup,pow(10.,-0.4*(mlim-.125)),cosmo)+Int_sch_L(schlf_L,zlow,zup,pow(10.,-0.4*(mlim+.125)),cosmo); 
     if(opt=='M')    printf(" %8.4f %8.4f  %10g  %10g/deg\n",mlim-.125,mlim+.125,Nbin,Nbin/41252.);
     else            printf(" %8.4f %8.4f  %10g  %10g/deg\n",-0.4*(mlim-.125),-0.4*(mlim+.125),Nbin,Nbin/41252.);
