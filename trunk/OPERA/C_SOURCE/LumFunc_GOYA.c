@@ -1454,7 +1454,7 @@ void Calc_Num_wC()
   if(plots) cpgpanl(1,1);
   
   if(opt=='M')   Ntot=Int_sch_M_wC(schlf_M,zlow,zup,color_mean,color_stddev,mlim,cosmo);
-  else           Ntot=Int_sch_L(schlf_L,zlow,zup,pow(10.,-0.4*mlim),cosmo);
+  else           Ntot=Int_sch_L(schlf_L,zlow,zup,pow(10.,-0.4*mlim),cosmo); /* FIXME: Añadir L_wC */
       
   if(plots){
     cpgscf(2);

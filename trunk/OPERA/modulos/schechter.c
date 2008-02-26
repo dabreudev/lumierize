@@ -174,8 +174,7 @@ double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct co
       Ngal=lf.phistar*(gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
     }
 
-/*    printf(" i %d Npar_old %g Npar %g z %g diff %g\n",i,Npar_old, Npar,z,
-Npar-Npar_old);  */
+    printf(" i %d Ngal %g z %g\n",i,Ngal,z);  
         
     N=N+Ngal;
   }
@@ -200,9 +199,11 @@ double Int_sch_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean
 
   zlow_l = (zlow < ZMIN ? ZMIN : zlow);
   zup_l = (zup < ZMIN ? ZMAX : zup);
+  colorLow=-5.*color_stddev+color_mean;
+  colorUp=5.*color_stddev+color_mean;
 
   nz=NSTEP_Z;
-  nColor=NSTEP_COLOR;
+  nColor=NSTEP_COLOR;  /* nColor -> nStepColor ... */
   nM=NSTEP_MAG;
 
   Lstar=pow(10.,-0.4*lf.Mstar);
@@ -227,9 +228,6 @@ double Int_sch_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean
     for(iColor=0; iColor<nColor;iColor++)
     {
 
-      colorLow=-5.*color_stddev+color_mean;
-      colorUp=5.*color_stddev+color_mean;
-
       /* color=distrib - detect -> J-K */
 
       color=colorLow+iColor*(colorUp-colorLow)/(nColor-1.);
@@ -237,39 +235,29 @@ double Int_sch_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean
       mDistLim=mDetectLim+color;
       Mlow=Mag(z,mDistLim,cosmo);
 
-      /* Esto que viene es haciendo la integral a pelo: */
-      /*     Npar=0; */
-      /*     for(j=0;j<nM;j++) { */
-      /*       M=Mup+j*(Mlow-Mup)/(nM-1.); */
-      /*       Npar=Npar+Schechter_M(M)*Vol(z)*3./z/1.e18;  Vol(z)*3/z es dV/dz */ 
-      /*       Npar=Npar+Schechter_M(M,schlf.Mstar,schlf.alfa,schlf.phistar);  */
-      /*     }  */
-      /*     Npar=Npar/nM*(Mlow-Mup)*dVdz(z)/1.e18;   */
-
       Llow=pow(10.,-0.4*Mlow);
 
       /* Y esto es con la funcion gamma incompleta incom */
-
       /* parece que había un error con las gamma incompleta*/
       /* Npar=lf.phistar*(gsl_sf_gamma(lf.alfa+1.)-incom(1+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18; */
-
       /* estamos haciendo la integral desde Llow/Lstar hasta infinito */
-    
       /* debido a un underflow, tuvimos que poner este if */
+      /* 0.25 es por la implementación de gamma_inc.c de gsl */
       if(Llow/Lstar > 0.25 && (lf.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
       {
         Ngal=GSL_DBL_MIN;
       }
       else
       {
-        Ngal=lf.phistar*(gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
+        /* printf("alfa %g Llow/Lstar %g dVdz(z,cosmo) %g gsl_sf_gamma %g gsl_sf_gamma %g\n", lf.alfa, Llow/Lstar, dVdz(z,cosmo), gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar), gsl_sf_gamma_inc(1.+lf.alfa,1.03162e-7)); */
+        Ngal=lf.phistar*(gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
       }
       Ncolor += gaussian(color, color_mean, color_stddev)*Ngal;
+      //printf(" icolor %d Ngal %g Ncolor %g z %g\n",iColor,Ngal,Ncolor,z); 
     }
+    Ncolor = Ncolor/nColor*(colorUp - colorLow);
+    /* printf(" iz %d Ncolor %g z %g\n",i,Ncolor,z); */  
 
-/*    printf(" i %d Npar_old %g Npar %g z %g diff %g\n",i,Npar_old, Npar,z,
-Npar-Npar_old);  */
-        
     N=N+Ncolor;
   }
   N=N/nz*(zup_l-zlow_l);
