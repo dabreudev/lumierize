@@ -2085,7 +2085,7 @@ void Generate_Cat_M()
           "# 1 Z (redshift without observational errors)\n"
           "# 2 Z_ERR (error in redshift)\n"
 	  "# 3 Z_OBS (observed redshift taking into account observational errors\n"
-          "# 4 M_APP (apparent magnitude without observatonal errors)\n"
+          "# 4 M_APP (apparent magnitude without observational errors)\n"
           "# 5 M_ABS (absolute magnitude)\n"
 	  "# 6 M_ERR (error in apparent magnitude)\n"
           "# 7 M_OBS (observed magnitudes taking into account observational errors\n"); 
@@ -2264,7 +2264,7 @@ void Generate_Cat_M_C()
           "# 1 Z (redshift without observational errors)\n"
           "# 2 Z_ERR (error in redshift)\n"
 	  "# 3 Z_OBS (observed redshift taking into account observational errors\n"
-          "# 4 M_APP (apparent magnitude without observatonal errors)\n"
+          "# 4 M_APP (apparent magnitude without observational errors)\n"
           "# 5 M_ABS (absolute magnitude)\n"
 	  "# 6 M_ERR (error in apparent magnitude)\n"
           "# 7 M_OBS (observed magnitudes taking into account observational errors\n"); 
@@ -2407,7 +2407,7 @@ void Generate_Cat_L()
   fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
   fprintf(fout,"# Square degrees covered = %f  (%f fraction of the sky)\n",area,area/41252.);
   /*fprintf(fout,"# Redshift   m_app   Mabs     merror   mobserved\n"); dabreu */
-  fprintf(fout,"#\n# 1 Z  (redshift)\n# 2 F_APP (apparent flux without observatonal errors)\n# "
+  fprintf(fout,"#\n# 1 Z  (redshift)\n# 2 F_APP (apparent flux without observational errors)\n# "
           "3 L_ABS (absolute luminosity)\n# 4 F_ERR (error in apparent flux)\n# "
           "5 F_OBS (observed flux taking into account observational errors\n"); 
   for(i=0;i<nobj;i++) {
@@ -2436,6 +2436,8 @@ void Generate_Cat_M_wC()
   double *colorsample;
   double *MDist, *mDist, *mDistError, *mDistObserved, *mSel;
   static int plots=0; /* not to do graphs */
+
+  /* color = mDist - mSel */
 
   int i;
   int nobj;
@@ -2518,7 +2520,7 @@ void Generate_Cat_M_wC()
     while((zerror[i] = zerror_mean + Gasdev() * zerror_stddev) < 0);
     zobserved[i] = zsample[i] + Gasdev()*zerror[i];
     colorsample[i] = color_mean + Gasdev() * color_stddev;
-    mSel[i] = mDist[i] - colorsample[i];
+    mSel[i] = mDist[i] - colorsample[i]; /* color = dist - sel */
     if(mSel[i] > mSelLow) /* This galaxy does not pass the selection function */
       i--; //FIXME; Esto hay que ponerlo mejor, así no mola.
   }
@@ -2538,7 +2540,7 @@ void Generate_Cat_M_wC()
      cpgswin(mh1-1.,mh2+1.,0.,nobj/2);
      cpgbox("BCTNS",0,0,"BCTNS",0,0);
      cpghist_d(nobj,msample,mh1-1.,mh2+1.,20,1); 
-     cpglab("Apparent magnitude","Number of galaxies"," Apparente magnitude distribution");
+     cpglab("Apparent magnitude","Number of galaxies"," Apparent magnitude distribution");
      /*     cpgpage(); */
      cpgpanl(1,2);
      cpgswin(Mh1-1.,Mh2+1.,0.,nobj/2);
@@ -2563,16 +2565,18 @@ void Generate_Cat_M_wC()
           "# 1 Z (redshift without observational errors)\n"
           "# 2 Z_ERR (error in redshift)\n"
 	  "# 3 Z_OBS (observed redshift taking into account observational errors)\n"
-          "# 4 M_APP (apparent magnitude without observatonal errors)\n"
+          "# 4 M_APP (apparent magnitude without observational errors)\n"
           "# 5 M_ABS (absolute magnitude)\n"
 	  "# 6 M_ERR (error in apparent magnitude)\n"
           "# 7 M_OBS (observed magnitudes taking into account observational errors)\n"
-          "# 8 COLOR (color for the object)\n");
+          "# 8 M_SEL (selection magnitud)\n"
+          "# 9 COLOR (color for the object = mDist - mSel)\n");
   for(i=0;i<nobj;i++) {
    /* fprintf(fout," %8.6f  %8.3f %8.3f",zsample[i],msample[i],Msample[i]); */
     fprintf(fout," %8.6f  %8.6f %8.6f",zsample[i],zerror[i],zobserved[i]);
-    fprintf(fout," %8.3f %8.3f",msample[i],Msample[i]);
-    fprintf(fout," %8.6f  %8.6f",merror[i],mobserved[i]);
+    fprintf(fout," %8.3f %8.3f",mDist[i],MDist[i]);
+    fprintf(fout," %8.6f  %8.6f",mDistError[i],mDistObserved[i]);
+    fprintf(fout," %8.6f",mSel[i]);
     fprintf(fout," %8.6f\n", colorsample[i]);
   }
   fclose(fout);
