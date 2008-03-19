@@ -1,8 +1,10 @@
 #include "modulos.h"
-/* dabreu */
+#include "gsl_hessian.h"
 #include <gsl/gsl_machine.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_deriv.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_multimin.h>
 
 #define ZMIN 0.00001
 #define FTOL  1e-12
@@ -56,6 +58,7 @@ double Amoe_Funk_STY_p_M_norm(int n, double *x, double *y, double *p);
 double Amoe_Funk_STY_p_M_prior(int n, double *x, double *y, double *p);
 double Amoe_Funk_STY_p_M_conf(int n, double *x, double *y, double *p);
 double Amoe_Funk_STY_p_M_main_gsl(double x, void *params);
+double Amoe_Funk_STY_p_M_main_gsl_multimin(const gsl_vector *x, void *params);
 double derivAmoe_Funk_STY_p_M_main_gsl(double x, void *params);
 double Funk2_int_STY_p_M(double x);
 double Funk1_norm_STY_p_M(double x);
@@ -168,8 +171,6 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   lf->phistar=exp(par[2]);
 
   /* Estimacion de los errores en los parametros */
-
-
 
   if(TRYEMPIRICAL) {
     if(DEBUG) printf(" llamantry \n");
@@ -472,8 +473,6 @@ void   ComputeNorma_STY_p_M(int n, double mlim, double strrad, double zlow, doub
   lf->errphistar=sqrt(n)/Ntot_mean;
   lf->errphistar=Ntot_sigma*n/Ntot_mean/Ntot_mean;
   if(VERBOSE) printf(" Error poissoniano: %g \n",sqrt(n)/Ntot_mean);
-
-
 }
 
 /* Errores utilizando derivadas numéricas con GSL */
@@ -481,6 +480,8 @@ void   ComputeNorma_STY_p_M(int n, double mlim, double strrad, double zlow, doub
 void NumericalDerivCovars_STY_p_M(int n,double *magn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
 {
   double **hessian;
+  gsl_matrix *gsl_hessian;
+  gsl_vector *param;
   double **covar;
   double **bb;
   size_t i,j;
@@ -490,6 +491,12 @@ void NumericalDerivCovars_STY_p_M(int n,double *magn,double *z,double *par, doub
   /* derivStep = 0.01; */
 
   hessian=matrix_d(3 ,3 );
+  gsl_hessian=gsl_matrix_alloc(3,3); 
+  param=gsl_vector_alloc(3);
+  gsl_vector_set(param, 0, par[0]);
+  gsl_vector_set(param, 1, par[1]);
+  gsl_vector_set(param, 2, par[2]);
+
   covar=matrix_d(3 ,3 );
   bb=matrix_d(3,1);
 
@@ -507,18 +514,32 @@ void NumericalDerivCovars_STY_p_M(int n,double *magn,double *z,double *par, doub
   gsl_function derivLogLFunction;
   derivLogLFunction.function = &derivAmoe_Funk_STY_p_M_main_gsl;
   derivLogLFunction.params = &deriv_param;
+
+  gsl_multimin_function LogLFunction;
+  LogLFunction.f = &Amoe_Funk_STY_p_M_main_gsl_multimin;
+  LogLFunction.params = &deriv_param;
   
   for(i = 0 ; i < 3 ; ++i)
     for(j = 0 ; j <= i ; ++j)
     {
       deriv_param.iCovar = i;
       deriv_param.jCovar  = j;
-      /* x_i = par[i]; */
       gsl_deriv_central(&derivLogLFunction, par[i], derivStep, &result, &abserr);
-/*      printf(" Con iCovar %d jCovar %d derivResult %g abserr %g\n",i,j,result,abserr); */
       hessian[i][j] = result;
       hessian[j][i] = result;
     }
+
+  printf("Vamos a por el gsl_hessian...\n");
+  /* MLA_STY_p_M.c:533: aviso: al pasar el argumento 4 de `gsl_hessian_central' de tipo de puntero incompatible */
+  gsl_hessian_central(&LogLFunction, param, derivStep, gsl_hessian);
+
+  for(i=0;i<3;i++)
+  {
+    for(j=0;j<3;j++)
+    {
+      printf("i %d j %d: hessian %g gsl_hessian %g\n",i,j,hessian[i][j],gsl_matrix_get(gsl_hessian,i,j));
+    }
+  }
 
   for(i=0;i<3;++i) 
   {
@@ -537,6 +558,7 @@ void NumericalDerivCovars_STY_p_M(int n,double *magn,double *z,double *par, doub
   lf->covaralfaphistar=covar[0][2]*lf->phistar;  /* Por la misma razon */
   lf->covarphistarMstar=covar[1][2]*lf->phistar;
 
+  gsl_matrix_free(gsl_hessian);
   free_matrix_d(bb,3,1);
   free(deriv_param.lf_param);
 }
@@ -584,6 +606,26 @@ double Amoe_Funk_STY_p_M_main_gsl(double x, void *params)
   lf_param[2] = p[2];
   
   lf_param[iDeriv] = x;
+
+  value=Amoe_Funk_STY_p_M_main(nData, magn, z, lf_param);
+  /*  value = probando_deriv(nData, magn, z, lf_param);  */
+  free(lf_param);
+  return value;
+}
+
+double Amoe_Funk_STY_p_M_main_gsl_multimin(const gsl_vector *x, void *params)
+{
+  int nData           = ((struct num_deriv_param_STY_p_M *)params)->nData;
+  double* magn        = ((struct num_deriv_param_STY_p_M *)params)->magn;
+  double* z           = ((struct num_deriv_param_STY_p_M *)params)->z;
+  double* p           = ((struct num_deriv_param_STY_p_M *)params)->lf_param;
+  double value;
+  
+  double* lf_param = vector_d(3);
+  lf_param[0] = p[0];
+  lf_param[1] = p[1];
+  lf_param[2] = p[2];
+  
 
   value=Amoe_Funk_STY_p_M_main(nData, magn, z, lf_param);
   /*  value = probando_deriv(nData, magn, z, lf_param);  */

@@ -174,7 +174,7 @@ double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct co
       Ngal=lf.phistar*(gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
     }
 
-    printf(" i %d Ngal %g z %g\n",i,Ngal,z);  
+    /* printf(" i %d Ngal %g z %g\n",i,Ngal,z); */ 
         
     N=N+Ngal;
   }

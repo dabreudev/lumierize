@@ -87,6 +87,7 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
     for(i=0;i<n;i++) printf(" Entrada x %g\n",magn[i]);
   }
 
+  /* VVmax computing as a first solution */
   lfvvmax.nbin=(int)(n/3);
   if(lfvvmax.nbin>30) lfvvmax.nbin=30;
 
@@ -225,13 +226,13 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gm_p_M);
     Mlow=Mag(y[i],_mlim_STY_gm_p_M,*_cosmo_STY_gm_p_M);
     xmin =pow(10.,-0.4*Mlow)/Lstar;
-    if(xmin>=100)
+    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN */
     {
       logL+=10; 
     }
     else 
     {
-      x1=lfamo.Mstar-5;
+      x1=lfamo.Mstar-5; /* de dónde sale este 5??? */
       x2=Mag(y[i],_mlim_STY_gm_p_M-6*_errmagn_i_STY_gm_p_M,*_cosmo_STY_gm_p_M);
       probabajo=gaussintleg_d(Funk1_intMag_STY_gm_p_M,x1,x2,npb);
       if(DEBUG2) printf(" Primer abajo %g con 1000 %g x1 %f x2 %f\n",probabajo,gaussintleg_d(Funk1_intMag_STY_gm_p_M,x1-10,x2,1000),x1,x2);
@@ -268,8 +269,8 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
       /* Una vez comprobado que Schechter_M funciona bien, lo hago con esa */
       /*       logL-= log(probarriba)  -log(probabajo);  */    /* Esta hay que decomentarla */
 /*       logLold-= Schechter_M(Lumi,lfamo)-log(intsch); */
-      if(probarriba==0 || probabajo==0) logL+=10;
-      logL-= log(probarriba)  -log(probabajo);   /* Perfectamente testado */
+      if(probarriba==0 || probabajo==0) logL+=10; /* 10 por poner un número */
+      logL-= log(probarriba) - log(probabajo);   /* Perfectamente testado */
       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g magn %g err %g\n",i,logL,logLold,Schechter_M(Mabs,lfamo),log(probarriba),log(probabajo),probabajo,xmin,x1,x2,_magn_i_STY_gm_p_M,_errmagn_i_STY_gm_p_M);
 /*       printf(" iobj %d logL %f loglold %f      sch %g int %g (%g)   pa %g pb %g (%g)  xmin %g x1 %f x2 %f\n",i,logL,logLold,Schechter_M(Lumi,lfamo),log(intsch),intsch,log(probarriba),log(probabajo),probabajo,xmin,x1,x2); */
     }
@@ -417,7 +418,6 @@ void   EmpiricalCovars_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,d
 
   printf("\n");
 }
-
 
 double Funk1_intMag_STY_gm_p_M(double Mabs) 
 {
