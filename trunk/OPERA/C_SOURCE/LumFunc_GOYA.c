@@ -653,10 +653,10 @@ void VVmax()
 
   /* Variables para el test V/Vmax */
   double *vvmaxtest;
-  int   *ngaltest;           /* numero de galaxias en cada bin del test */
-  double mmin_t=0,mmax_t=0;       /* magnitudes minimas y maximas desde las cuales se hara el test V/Vmax. */
-  double lmin_t=0,lmax_t=0;       /* luminosidades minimas y maximas desde las cuales se hara el test V/Vmax. */
-  int   n_t;                 /* numero de puntos para el test */
+  int   *ngaltest;           /* número de galaxias en cada bin del test */
+  double mmin_t=0,mmax_t=0;       /* magnitudes mínimas y máximas desde las cuales se hara el test V/Vmax. */
+  double lmin_t=0,lmax_t=0;       /* luminosidades mínimas y máximas desde las cuales se hara el test V/Vmax. */
+  int   n_t;                 /* número de puntos para el test */
   double *mhist=NULL;              /* array para las magnitudes del histograma */
   double *loglhist=NULL;           /* array para las luminosidades del histograma */
   double *mlim_t=NULL;
@@ -682,6 +682,10 @@ void VVmax()
   FILE *fout = NULL;
   static char schfitResultFileName[200]="";
   static char vvmaxResultFileName[200]="";
+
+  /* long results file (for test) */
+  static int allVVmax=0; /* do not want this file */
+  static char allVVmaxResultsFileName[200]="";
   
   /* Obtengo los datos y los parametros de la LF */
   get_sample_sel_cal(&sample);
@@ -911,7 +915,7 @@ void VVmax()
     PrintStepLF_M(lf_vvmax_M);
   }
 
-  /* Calculo del ajuste a Schechter */
+  /* Cálculo del ajuste a Schechter */
   if(vvmax_param.islum)
   {
     FitSch2StepLF_L(lf_vvmax_L, &lfschfit_L, &chisq);
@@ -983,6 +987,31 @@ void VVmax()
     fprintf(fout, "%g\t", lfschfit_M.errphistar);
     fprintf(fout, "%g\n", lfschfit_M.errphistar/lfschfit_M.phistar/log(10));
     fclose(fout);
+
+    /* to store values of LF in each bin */
+    printf("Do you want VVmax LF values for each bin? (1=yes, 0=no):\n");
+    allVVmax=readi(allVVmax);
+    if(allVVmax)
+    {
+      printf("Give a file name:\n");
+      reads(allVVmaxResultsFileName, allVVmaxResultsFileName);
+      if ((fout=fopen(allVVmaxResultsFileName, "w")) == NULL)
+      {
+         printf("Couldn't open %s for writing\n",allVVmaxResultsFileName);
+         return;
+      }
+      fprintf(fout, "# 1 MAG\n");
+      fprintf(fout, "# 2 LN_VVMAX\n");
+      fprintf(fout, "# 3 VVMAX\n");
+      fprintf(fout, "# 4 ERR_LN_VVMAX\n");
+      for(i=0;i<=lf_vvmax_M.nbin;i++)
+      {
+         fprintf(fout, "%g\t%g\t", lf_vvmax_M.magni[i], lf_vvmax_M.lnlf[i]);
+         fprintf(fout, "%g\t%g\n",exp(lf_vvmax_M.lnlf[i]), lf_vvmax_M.errlnlf[i]);
+      }
+      fclose(fout);
+    }
+
   }
 
   /* dabreu */
@@ -1765,7 +1794,7 @@ void get_sample_mag_err(struct sample_data_mag_err *sample)
     printf(" Input column with apparent magnitude data: ");
     colmag=readi(colmag);
     printf(" Input column with magnitude error data: ");
-    colmag=readi(colmagerr);
+    colmagerr=readi(colmagerr);
     
     ndat=FileNLin(datafile);
     z  =malloc(ndat*sizeof(double));
@@ -1785,7 +1814,6 @@ void get_sample_mag_err(struct sample_data_mag_err *sample)
 	sample->mag[j]=(double)mag[i];
 	sample->z[j]  =(double)z[i];
 	sample->mag_err[j]  =(double)magerr[i];
-	
 	j++;
       }
     }
@@ -1966,7 +1994,9 @@ void Generate_Cat_M()
 
   int i;
 /*   double xx[1000],yy[1000]; */
-  int nobj;
+  long long nobj;
+  double nobjAllSky;
+  double nobjMean;
 /*   char cnul; */
 /*   double kkk=1.1; */
 /*   double fnul; */
@@ -2011,10 +2041,10 @@ void Generate_Cat_M()
   plots=readf(plots);
 
   /*   printf(" aaaaaaaaaLIM mag %f %f\n",mlow,mup); */
-  nobj=1000;
-  nobj=(int)Int_sch_M(schlf_M, zlow, zup, mlow, cosmo); 
-  nobj=(int)((double)nobj/41252.*area);
-  nobj=Poidev(nobj);
+  nobjAllSky=Int_sch_M(schlf_M, zlow, zup, mlow, cosmo); 
+  printf("nobjAllSky %g\n", nobjAllSky);
+  nobjMean=(nobjAllSky/41252.*area);
+  nobj=(long long)Poidev(nobjMean);
   
   zsample=malloc(nobj*sizeof(double));
   Msample=malloc(nobj*sizeof(double));
@@ -2440,7 +2470,9 @@ void Generate_Cat_M_wC()
   /* color = mDist - mSel */
 
   int i;
-  int nobj;
+  long long nobj;
+  double nobjAllSky;
+  double nobjMean;
   char snul[1000];
   FILE *fout;
   static char filename[100]="";
@@ -2481,10 +2513,10 @@ void Generate_Cat_M_wC()
   plots=readf(plots);
 
   /*   printf(" aaaaaaaaaLIM mag %f %f\n",mlow,mup); */
-  nobj=1000;
-  nobj=(int)Int_sch_M_wC(schlf_M, zlow, zup, color_mean, color_stddev, mSelLow, cosmo); 
-  nobj=(int)((double)nobj/41252.*area);
-  nobj=Poidev(nobj);
+  nobjAllSky=Int_sch_M_wC(schlf_M, zlow, zup, color_mean, color_stddev, mSelLow, cosmo); 
+  printf("nobjAllSky %g\n", nobjAllSky);
+  nobjMean=(nobjAllSky/41252.*area);
+  nobj=(long long)Poidev(nobjMean);
   
   zsample=malloc(nobj*sizeof(double));
   Msample=malloc(nobj*sizeof(double));
@@ -2503,14 +2535,18 @@ void Generate_Cat_M_wC()
   printf(" Number of galaxies generated: %d\n",nobj);
 
   /* Setting the approx limiting magnitude in the originally distributed mag */
-  mDistLow = mSelLow + color_mean + 5 * color_stddev;
-  mDistUp  = mSelUp  + color_mean - 5 * color_stddev;
-  
+  /* mDistLow = mSelLow + color_mean + 5 * color_stddev;
+  mDistUp  = mSelUp  + color_mean - 5 * color_stddev; */
+  /* removed, now using specific color for each object */  
+
   printf("\n 000000000 / %9d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
   for(i=0;i<nobj;i++) {
     printf("%9d\b\b\b\b\b\b\b\b\b",i);
 /*     //printf(" %d\n",i); */
-    zsample[i]= zSchdev_M(schlf_M, zlow, zup, mDistLow, mDistUp, cosmo);  /* cambiar por zSchdev_M_wC */
+    colorsample[i] = color_mean + Gasdev() * color_stddev;
+    mDistLow = mSelLow + colorsample[i];
+    mDistUp = mSelUp + colorsample[i];
+    zsample[i]= zSchdev_M(schlf_M, zlow, zup, mDistLow, mDistUp, cosmo);
     MDistLow=Mag(zsample[i],mDistLow,cosmo);
     MDistUp =Mag(zsample[i],mDistUp,cosmo);
     MDist[i]= Schechterdev_M(schlf_M,MDistLow,MDistUp);
@@ -2519,10 +2555,12 @@ void Generate_Cat_M_wC()
     mDistObserved[i] = mDist[i] + Gasdev()*mDistError[i];
     while((zerror[i] = zerror_mean + Gasdev() * zerror_stddev) < 0);
     zobserved[i] = zsample[i] + Gasdev()*zerror[i];
-    colorsample[i] = color_mean + Gasdev() * color_stddev;
     mSel[i] = mDist[i] - colorsample[i]; /* color = dist - sel */
-    if(mSel[i] > mSelLow) /* This galaxy does not pass the selection function */
-      i--; //FIXME; Esto hay que ponerlo mejor, así no mola.
+    if(mSel[i] > mSelLow)  /* This galaxy does not pass the selection function */
+    { 
+      /* i--; */
+      printf("WARNING: something went bad. This galaxy doesn't pass the sel. func.\n");
+    }
   }
   MinMax_d(nobj,msample,&mh1,&mh2);
   MinMax_d(nobj,Msample,&Mh1,&Mh2);
