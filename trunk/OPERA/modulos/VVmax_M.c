@@ -50,7 +50,6 @@ int  VVmax_M(int n,double *mag_sel, double *mag_cal,double *z, double mlim_sel, 
 
     if(DEBUG) printf(" bin %d L %f - %f lf %g (%f) +/- %g (%f)  ngal %d\n",i,lf->magni[i],lf->magni[i+1],lf->lnlf[i],log10(lf->lnlf[i]),lf->errlnlf[i],lf->errlnlf[i]/lf->lnlf[i]/log(10),ngalbin[i]);
 
-
     /* Paso a logaritmos */
     lf->errlnlf[i]=lf->errlnlf[i]/lf->lnlf[i];
     lf->lnlf[i]=log(lf->lnlf[i]);
