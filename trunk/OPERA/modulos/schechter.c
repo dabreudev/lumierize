@@ -20,8 +20,8 @@
 #define DEBUG3 0
 
 
-
-double Schechter_M(double M, struct Schlf_M lf) {
+double Schechter_M(double M, struct Schlf_M lf) 
+{
   double tmp;
   double elev;
   
@@ -29,6 +29,18 @@ double Schechter_M(double M, struct Schlf_M lf) {
   tmp=0.92103404*lf.phistar*pow(elev,lf.alfa+1.);   /*  0.92103404= 0.4*ln(10) */
   tmp=tmp*exp(-elev);
   /* Lo devuelvo SIN logaritmos */
+  return(tmp);
+}
+
+double lnSchechter_M(double M, struct Schlf_M lf) 
+{
+  double tmp;
+  double elev;
+  
+  elev=pow(10.,0.4*(lf.Mstar-M));
+  tmp=0.92103404*lf.phistar*pow(elev,lf.alfa+1.);   /*  0.92103404= 0.4*ln(10) */
+  tmp=tmp*exp(-elev);
+  /* Este devuelve el logaritmo natural de la func de Schecter */
   return(tmp);
 }
 
@@ -558,14 +570,14 @@ double Int_sch_f_PO(struct Schlf_L lf, char photband[51], double gamma, double d
   int nz,nM,nmag_fs;
   int nEW;
   int i,j,k;
-  double Llow;
+  /* double Llow; */
   double Lup=1e60;
   double xmin;
   double N,Npar;
   double fluxlim,ew;
   double intsup;
   double normaewd;
-  double dLdm;
+  /* double dLdm; */
   double zlow,zup;
   double Mleft,Mright,Lleft,Lright,fluxleft,fluxright,mleft,mright;
   double intmag;

@@ -28,8 +28,6 @@
 double Amoe_Funk_ff_gg_d_main(int n, double *x, double *y, double *p);
 double Amoe_Funk_ff_gg_d_conf(int n, double *x, double *y, double *p);
 void   TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int kx,double *xk,double yff,double yinter,double *P,double **covar);
-void   EmpiricalCovars_ff_gg_d(int n,double *x,double *errx,int k,double *xk,double *Pk,double *sigPk, double **covar);
-/*void   EmpiricalCovars_hh_gg_d(int n,double *x,double *errx,double *y,double *erry,int kx,double *xk,int ky,double *yk,double *Pk,double *sigPk,double **covar);*/
 int  **StHisto2DFF_d(int n, double *x, double *y, int nbinx, double *xmin, double *xmax, double yff);
 
 
@@ -195,7 +193,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
        par[jx]=log(exp(par[jx])/norm);
   }
 
-  _MLmax_MLA_ff_gg_d=Amoe_Funk_hh_gg_d_main(n,x,y,par);
+  _MLmax_MLA_ff_gg_d=Amoe_Funk_ff_gg_d_main(n,x,y,par);
   
   /* Guardo la solución "par" en "Pk"*/
   for(j=0;j<_kpar_MLA_ff_gg_d;j++)
@@ -223,7 +221,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
   if(TRYEMPIRICAL) 
   {
     _conflim=exp(-.5/10.);
-    /*EmpiricalCovars_hh_gg_d(n,x,errx,y,erry,kx,xk,ky,yk,Pk,sigpar,covar);
+    EmpiricalCovars_hh_gg_d(n,x,errx,y,erry,kx,xk,ky,yk,Pk,sigpar,covar);
     if(DEBUG) printf(" Calculo empirico\n");
     for(i=0;i<_kpar;i++) {D.yff=(double)readf(HD.yff);
  
@@ -237,7 +235,6 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
   free_matrix_d(covar,_kpar,_kpar); 
   free(par);
   free(sigpar);
-  /* free(_pcut); 
 
   if(DEBUG) printf(" MLF %g\n",_MLmax); 
   */
@@ -250,7 +247,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
 double Amoe_Funk_ff_gg_d_main(int n, double *x, double *y, double *p) 
 {
 
-  int i,jx,jy,j;
+  int i,jx,j;
   double logL=0.;
   double ltmp;
   double tmp1,priori;
@@ -468,291 +465,3 @@ void TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
   free_matrix_d(b,_kpar_MLA_ff_gg_d+1,1);
 }
 
-
-
-void   EmpiricalCovars_ff_gg_d(int n,double *x,double *errx,int k,double *xk,double *Pk,double *sigPk, double **covar) 
-{
-
-  int i,j,l;
-  double *y;
-  double **bb;
-  double *parconf;
-  double *sigparconf;
-  double **invcovar;
-  double **parelip;
-
-  double **pareA;
-  double **pareB;
-  double **pareC;
-  
-  double **invcovA;
-  double **invcovB;
-  double **invcovC;
-  double **covA;
-  double **covB;
-  double **covC;
-  
-  int nconfl,nconflini;
-  double first, median, third, *distmax;
-
-/*   double a,b,c,d,f,e;  */
-/*   double xcelip,ycelip,elipa,elipb,elipt;  */
-
-/*   float xtmp,ytmp; */
-  
-  nconfl=NCONFL*_kpar_MLA_ff_gg_d;
-  nconflini=nconfl;
-
-
-  bb=matrix_d(_kpar_MLA_ff_gg_d-1,1);
-  y=vector_d(n);
-  parconf=vector_d(k);
-  sigparconf=vector_d(k);
-
-  parelip=matrix_d(_kpar_MLA_ff_gg_d  ,nconfl);
-  pareA  =matrix_d(_kpar_MLA_ff_gg_d-1,nconfl);
-  pareB  =matrix_d(_kpar_MLA_ff_gg_d-1,nconfl);
-  pareC  =matrix_d(_kpar_MLA_ff_gg_d-1,nconfl);
-
-  invcovar=matrix_d(_kpar_MLA_ff_gg_d  ,_kpar_MLA_ff_gg_d  );
-  invcovA =matrix_d(_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  invcovB =matrix_d(_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  invcovC =matrix_d(_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  covA    =matrix_d(_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  covB    =matrix_d(_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  covC    =matrix_d(_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  distmax=vector_d(2);
-
-
-
-/*   conflim=exp(-.5/100.);     */         //Los puntos corresponderan a 1 sigma entre 4 de desviacion para dist. normal en par
-/*   conflim=exp(-.5);   */           //Los puntos corresponderan a 1 sigma entre 4 de desviacion para dist. normal en par
-/*   conflim=exp(-.5/100.);    */
-
-
-  if(DEBUG3) printf(" log(conflim) %f \n",log(_conflim_MLA_ff_gg_d));
-  
-  for(i=0;i<nconfl;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d;j++) {
-      parconf[j]=Pk[j]+sigPk[j]*3.*Gasdev(); 
-      sigparconf[j]=sigPk[j]; 
-    }
-    if(DEBUG3) printf(" INIPARTEST %d %d\n",i,(int)(nconfl/2.));
-    if(i>(int)(nconfl/2.)) {
-      for(j=0;j<_kpar_MLA_ff_gg_d;j++) {
-	parconf[j]=Pk[j]-((parelip[j])[(int)(i-nconfl/2.)+1]-Pk[j]);
-	sigparconf[j]=((parelip[j])[(int)(i-nconfl/2.)+1]-Pk[j])/2.; 
-      }
-      if(DEBUG3) {
-	cpgsci(3);
-	cpgpt1((parconf[0]),(parconf[1]),5);
-	cpgsci(1);
-      }
-    }
-
-    if(DEBUG3) {
-      cpgsci(2);
-      cpgpt1((parconf[0]),(parconf[1]),4);
-      cpgsci(1);
-    }
-
-    _iter_c_MLA_ff_gg_d=0;
-    _iter_c_MLA_ff_gg_d=Amoeba_d(n,x,y,k,parconf,sigparconf,FTOL2,MAXITER2,Amoe_Funk_ff_gg_d_conf);
-
-    for(j=0;j<_kpar_MLA_ff_gg_d;j++) {
-      (parelip[j])[i]=parconf[j];
-/*       phi=M_PI*Gasdev(); */
-/*       teta=M_PI*Gasdev(); */
-/*       (parelip[i])[0]=Pk[0]+1*cos(phi)*sin(teta); */
-      /*       (parelip[i])[1]=Pk[1]+1*cos(phi)*cos(teta); */
-      /*       (parelip[i])[2]=Pk[2]+1*sin(phi); */
-    }
-    if(DEBUG3) {
-      printf(" PARCONFEL ");
-      for(j=0;j<i;j++)  {
-	printf(" ## ");
-	for(l=0;l<_kpar_MLA_ff_gg_d;l++)    printf(" %g ",(parelip[l])[j]);
-      }
-      printf("\n");
-    }
-      
-    if(_iter_c_MLA_ff_gg_d==0 && Amoe_Funk_hh_gg_d_conf(n,x,y,parconf)>FTOL2 ) i--;
-  }
-  
-  
-  /* Supongo que el centro de la elipse es el valor que maximiza ML */
-
-  for(i=0;i<nconfl;i++)    for(j=0;j<_kpar_MLA_ff_gg_d;j++)       (parelip[j])[i]-=Pk[j];
-
-
-  if(DEBUGPLOT) {
-    for(i=0;i<nconfl;i++) {
-      if(DEBUG3) printf(" PARCONFREAL %g %g\n",(parelip[0])[i],(parelip[1])[i]);
-      cpgsci(_nemp_MLA_ff_gg_d);
-      cpgpt1((parelip[0])[i]+Pk[0],(parelip[1])[i]+Pk[1],1);
-    }
-  }
-
-/*   kpar=readi(kpar); */
-
-  /* Detecto puntos que esten muy alejados de la supuesta elipse */
-  for(j=0;j<_kpar_MLA_ff_gg_d;j++) {
-    Quartil_d(nconfl,parelip[j],&first,&median,&third);
-    distmax[j]=maxf(fabs(first),fabs(third));
-  }  
-  for(i=0;i<nconfl;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d;j++) {
-      if(fabs((parelip[j])[i])>2*2*distmax[j]/1.35) {
-	for(j=0;j<_kpar_MLA_ff_gg_d;j++) {
-	  memcpy(parelip[j]+i,parelip[j]+i+1,(nconfl-i-1)*sizeof(double));
-	}
-	i--;
-	nconfl--;
-	break;
-      }
-    }
-  }
-
-
- 
-  /* Ajusto elipses en tres subespacios diferentes. De modo que al final obtengo 
-     la matriz entera. Hay que tener en cuenta que esta matriz del hessiano tiene 
-     determinante nulo y por lo tanto las superficies de sigma constante
-     son formas cuadraticas de dimension kpar-1 en un espacio de dim kpar. Esto 
-     es asi por la ligadura de que la normalizacion de las Pk*/
-
-  for(i=0;i<nconfl;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d-1;j++) {
-      pareA[j][i]=parelip[j][i];
-    }
-  }
-  MCElipN_d(nconfl,_kpar_MLA_ff_gg_d-1,pareA,invcovA);
-  for(i=0;i<nconfl;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d-1;j++) {
-      pareB[j][i]=parelip[j+1][i];
-    }
-  }
-  MCElipN_d(nconfl,_kpar_MLA_ff_gg_d-1,pareB,invcovB);
-  for(i=0;i<nconfl;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d-2;j++) {
-      pareC[j][i]=parelip[j][i];
-    }
-    pareC[_kpar_MLA_ff_gg_d-2][i]=parelip[_kpar_MLA_ff_gg_d-1][i];
-  }
-  MCElipN_d(nconfl,_kpar_MLA_ff_gg_d-1,pareC,invcovC);
-
-  if(DEBUG) {
-    printf(" ICOVA\n");
-    for(i=0;i<k-1;i++) {
-      for(j=0;j<k-1;j++) {
-	printf("  %g ",invcovA[i][j]);  
-      }
-      printf("\n");
-    }
-    printf(" ICOVB\n");
-    for(i=0;i<k-1;i++) {
-      for(j=0;j<k-1;j++) {
-	printf("  %g ",invcovB[i][j]);  
-      }
-      printf("\n");
-    }
-    printf(" ICOVC\n");
-    for(i=0;i<k-1;i++) {
-      for(j=0;j<k-1;j++) {
-	printf("  %g ",invcovC[i][j]);  
-      }
-      printf("\n");
-    }
-  }
-  for(i=0;i<_kpar_MLA_ff_gg_d-1;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d-1;j++) {
-      covA[i][j]=invcovA[i][j];
-      covB[i][j]=invcovB[i][j];
-      covC[i][j]=invcovC[i][j];
-    }
-  } 
-  gaussj_d(covA,_kpar_MLA_ff_gg_d-1,bb,1);
-  gaussj_d(covB,_kpar_MLA_ff_gg_d-1,bb,1);
-  gaussj_d(covC,_kpar_MLA_ff_gg_d-1,bb,1);
-  if(DEBUG2) {
-    printf(" COVA\n");
-
-    for(i=0;i<k-1;i++) {
-      for(j=0;j<k-1;j++) {
-	printf("   %g  ",covA[i][j]);  
-      }
-      printf("\n");
-    }
-    printf(" COVB\n");
-    for(i=0;i<k-1;i++) {
-      for(j=0;j<k-1;j++) {
-	printf("   %g  ",covB[i][j]);  
-      }
-      printf("\n");
-    }
-    printf(" COVC\n");
-    for(i=0;i<k-1;i++) {
-      for(j=0;j<k-1;j++) {
-	printf("   %g  ",covC[i][j]);  
-      }
-      printf("\n");
-    }
-  }
-
-  /* Relleno la matriz de covarianza con las tres auxiliares */
-  /* Uso covA para casi todo */
-  for(i=0;i<_kpar_MLA_ff_gg_d-1;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d-1;j++) {
-      covar[i][j]=covA[i][j];
-    }
-  } 
-
-  if(DEBUG3) printf(" primer paso \n");
-  /* Uso covB para la fila de abajo, la columna de la derecha y el extremo inferior derecha */
-
-  for(j=1;j<_kpar_MLA_ff_gg_d;j++)       covar[_kpar_MLA_ff_gg_d-1][j]=covB[_kpar_MLA_ff_gg_d-2][j-1];
-  for(i=1;i<_kpar_MLA_ff_gg_d;i++)       covar[i][_kpar_MLA_ff_gg_d-1]=covB[i-1][_kpar_MLA_ff_gg_d-2];
-  if(DEBUG3) printf(" segund paso \n");
-  /* Uso covC para el extremo superior derecha y el inferior izquierda  */
-  covar[0][_kpar_MLA_ff_gg_d-1]=covC[0][_kpar_MLA_ff_gg_d-2];
-  covar[_kpar_MLA_ff_gg_d-1][0]=covC[_kpar_MLA_ff_gg_d-2][0];
-  if(DEBUG3) printf(" tercer paso \n");
-
-  if(DEBUG) {
-    for(i=0;i<k;i++) {
-      for(j=0;j<k;j++) {
-	printf(" covar  %01d %01d = %-15.12g",i,j,covar[i][j]);
-      }
-      printf("\n");
-    }
-  }
-  
-
-
-
-  /* Deshago el cambio para el limite de confidencia */
-  for(i=0;i<_kpar_MLA_ff_gg_d;i++) {
-    for(j=0;j<_kpar_MLA_ff_gg_d;j++) {
-      covar[i][j]/=(-2*log(_conflim_MLA_ff_gg_d));
-    }
-  } 
-
-
- 
-
-  free_matrix_d(bb,_kpar_MLA_ff_gg_d-1,1);
-  free(y);
-  free(parconf);
-  free(sigparconf);
-
-  free_matrix_d(parelip,_kpar_MLA_ff_gg_d  ,nconflini);
-  free_matrix_d(pareA  ,_kpar_MLA_ff_gg_d-1,nconflini);
-  free_matrix_d(pareB  ,_kpar_MLA_ff_gg_d-1,nconflini);
-  free_matrix_d(pareC  ,_kpar_MLA_ff_gg_d-1,nconflini);
-
-  free_matrix_d(invcovar,_kpar_MLA_ff_gg_d  ,_kpar_MLA_ff_gg_d);
-  free_matrix_d(invcovA ,_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  free_matrix_d(invcovB ,_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-  free_matrix_d(invcovC ,_kpar_MLA_ff_gg_d-1,_kpar_MLA_ff_gg_d-1);
-
-}

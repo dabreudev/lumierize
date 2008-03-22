@@ -265,7 +265,7 @@ int  MLA_STY_e_s_p_f_PO  (int n,double *magn,double *ew,double *z,double *ebv,do
 
 double Amoe_Funk_STY_e_s_p_f_PO_main(int n, double *x, double *y, double *p) {
 
-  int i,j,k; 
+  int i; 
   double logL=0.;
   struct Schlf_L lfamo;
   struct Schlf_M lfamo_M;
@@ -282,9 +282,9 @@ double Amoe_Funk_STY_e_s_p_f_PO_main(int n, double *x, double *y, double *p) {
   double z,ew,magn,flux,flux_sin_corr;
   double logprobarriba;
   double probabajo;
-  double ewint,zint,Lint,magnint;
+  /* double ewint,zint,Lint,magnint; */
   int nEW=150;
-  int nz=300;
+  /* int nz=300; */
   double normaewd;
   double pd;
   int isurvey;

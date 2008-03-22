@@ -1,37 +1,37 @@
 #include "modulos.h"
+#include "gsl_hessian.h"
+#include <gsl/gsl_machine.h>
+#include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_deriv.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_multimin.h>
 #define FTOL  1e-10
 #define FTOL2 1e-6
 #define FTOL3 1e-7
 #define MAXITER  1000
 #define MAXITER2 120
-#define NBSNORMA  50
-#define MAXTRIES   5
 #define VERBOSE 0
 #define DEBUG  1
-#define DEBUG2 1
+#define DEBUG2 0
 #define DEBUG3 0
 #define DEBUGPLOT 0
-#define CONTOURPLOT 0
-#define NCONFL 20
 #define TOLERR 0.07 
 
-#ifdef TRYEMPIRICAL
-#else 
-#define TRYEMPIRICAL 0
-#endif
-
-
-
 /* #define TOLERR 0.0001 */
+/* Estructura para contener los parámetros de Amo..main_gsl_multimin */
+struct Amoe_Funk_gsl_param_STY_gm_p_M
+{
+  int nData;
+  double *magn;
+  double *z;
+};
 
-
+void   PrepareGlobalVars_STY_gm_p_M(double *z, double *magn);
 double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p);
-double Amoe_Funk_STY_gm_p_M_norm(int n, double *x, double *y, double *p);
-double Amoe_Funk_STY_gm_p_M_prior(int n, double *x, double *y, double *p);
-double Amoe_Funk_STY_gm_p_M_conf(int n, double *x, double *y, double *p);
+double Amoe_Funk_STY_gm_p_M_main_gsl_multimin(const gsl_vector *x, void *params);
 double Funk2_intmag_STY_gm_p_M(double fluxreal);
 double Funk1_intMag_STY_gm_p_M(double x);
-void   EmpiricalCovars_STY_gm_p_M(int n,double *magn,double *errmagn, double *z, double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf);
+void   NumericalHessianCovars_STY_gm_p_M(int n,double *magn,double *errmagn, double *z, double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf);
 
 
 struct Schlf_M *_lf_STY_gm_p_M;
@@ -45,10 +45,6 @@ double _errmagn_i_STY_gm_p_M;
 int _ndata_STY_gm_p_M;
 int _iter_m_STY_gm_p_M;
 int _iter_c_STY_gm_p_M;
-int _nconfl_STY_gm_p_M;
-double _conflim_STY_gm_p_M;
-/* double ML[5*MAXTRIES*MAXITER]; */
-double *_pp_STY_gm_p_M;
 double _MLmax_STY_gm_p_M;
 double _zlow_STY_gm_p_M;
 double _zup_STY_gm_p_M;
@@ -131,13 +127,8 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
   iter_amo=0;
   while(iter_amo==0) { 
     par[0]=lffit.alfa;  /* Alpha */
-/*     par[0]=-0.9; */
     par[1]=lffit.Mstar;
     par[2]=log(lffit.phistar);
-/*     par[0]=-0.7; */
-/*     par[1]=-21.5; */
-/*     par[2]=log(0.0033); */
-
 
     sigpar[0]=10.*lffit.erralfa;
     sigpar[1]=10.*lffit.errMstar;
@@ -153,8 +144,10 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
       printf(" E_log(Lstar):    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lf->errMstar,lf->erralfa,lf->errphistar,lf->errphistar/lf->phistar/log(10.));
     } 
   }
+  /* Info that will be output in mlinfo */
   _MLmax_STY_gm_p_M=Amoe_Funk_STY_gm_p_M_main(n,magn,z,par);
-
+  mlinfo->nIter = iter_amo;
+  mlinfo->MLmax = _MLmax_STY_gm_p_M;
 
   /* Meto la solucion en la salida */
  
@@ -164,19 +157,16 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
 
   /* Estimacion de los errores en los parametros */
 
+  printf(" Computing errors in LF parameters...\n");
 
+  NumericalHessianCovars_STY_gm_p_M(n,magn,errmagn,z,par,sigpar,mlim,cosmo,lf);
+  if(DEBUG) printf(" Solucion final: Mstar %.15g +/- %.15g alpha %.4g +/- %.4g\n",lf->Mstar,lf->errMstar,lf->alfa,lf->erralfa);
 
-  if(TRYEMPIRICAL) {
-    if(DEBUG) printf(" llamantry \n");
-    _conflim_STY_gm_p_M=exp(-.5/10.);
-    EmpiricalCovars_STY_gm_p_M(n,magn,errmagn,z,par,sigpar,mlim,cosmo,lf); 
-    if(DEBUG) printf(" sale \n");
+  if(DEBUG) printf(" MLF %g\n",_MLmax_STY_gm_p_M);
 
-    if(DEBUG) printf(" Solucion final: Mstar %.15g +/- %.15g alpha %.4g +/- %.4g\n",lf->Mstar,lf->errMstar,lf->alfa,lf->erralfa);
-
-  }
-
-  return(iter_amo);
+  /* Code exit status */
+  if(iter_amo>=MAXITER-1) return(2);
+  return(0);
 }
 
 
@@ -287,138 +277,6 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
   return(logL); 
 }
 
-
-double Amoe_Funk_STY_gm_p_M_conf(int n, double *x, double *y, double *p) {
-
-/*   printf(" MLM %g conf %f   %f %f\n",MLmax,conflim,fabs(Amoe_Funk_STY_gm_p_M_main(n,x,y,p)-(MLmax-log(conflim))),Amoe_Funk_STY_gm_p_M_main(n,x,y,p)); */
-   
-  return(fabs(Amoe_Funk_STY_gm_p_M_main(n,x,y,p)-(_MLmax_STY_gm_p_M-log(_conflim_STY_gm_p_M)))); 
-}
-
-
-
-void   EmpiricalCovars_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf) {
-
-  int i,j;  
-  double *parconf; 
-  double *sigparconf; 
-  double **invcovar;
-  double **covar;
-  double **parelip;
-  double *y;
-
-  double **bb;
-  int nconfl,nconflini;
-  double first, median, third, *distmax;
-
-  if(DEBUG) printf(" n vale %d \n",n);
-  nconfl=NCONFL;
-  nconflini=NCONFL;
-
-  bb=matrix_d(3,1);
-  y=vector_d(n);
-  parconf=vector_d(3);
-  sigparconf=vector_d(3);
-  parelip=matrix_d(3,nconflini);
-  invcovar=matrix_d(3 ,3 );
-  covar=matrix_d(3 ,3 );
-  distmax=vector_d(3);
-
-/*   printf(" antes for \n"); */
-
-  nconfl=NCONFL;
-  printf(" Error step  ");
-  for(i=0;i<nconfl;i++) printf(".");
-  for(i=0;i<nconfl;i++) printf("\b");
-  fflush(NULL);
-
-  for(i=0;i<nconfl;i++) {
-    printf("#");
-    fflush(NULL);
-    parconf[0]=par[0]+2*sigpar[0]*Gasdev();
-    parconf[1]=par[1]+2*sigpar[1]*Gasdev();
-    parconf[2]=par[2]+2*sigpar[2]*Gasdev();
-    sigparconf[0]=sigpar[0];
-    sigparconf[1]=sigpar[1];
-    sigparconf[2]=sigpar[2];
-    if(i>(int)(nconfl/2.)) {
-      parconf[0]=par[0]-((parelip[0])[(int)(i-nconfl/2.)+1]-par[0]);
-      parconf[1]=par[1]-((parelip[1])[(int)(i-nconfl/2.)+1]-par[1]);
-      parconf[2]=par[2]-((parelip[2])[(int)(i-nconfl/2.)+1]-par[2]);
-    }
-    _iter_c_STY_gm_p_M=0;
-    if(DEBUG) printf(" antes a nmo\n"); 
-    _iter_c_STY_gm_p_M=Amoeba_d(n,magn,z,3,parconf,sigparconf,FTOL2,MAXITER2,Amoe_Funk_STY_gm_p_M_conf);
-    if(DEBUG) printf(" %d SOL iter %d par0 %f    par1 %f\n", i,  _iter_c_STY_gm_p_M ,parconf[0],   parconf[1]);
-    (parelip[0])[i]=parconf[0];
-    (parelip[1])[i]=parconf[1];
-    (parelip[2])[i]=parconf[2];
-    if(_iter_c_STY_gm_p_M==0 && Amoe_Funk_STY_gm_p_M_conf(n,magn,z,parconf)>FTOL2 ) 
-    {
-      printf("\b.\b");
-      fflush(NULL);
-      i--;
-    }
-  }
-
-  /* Supongo que el centro de la elipse es el valor que maximiza ML */
-  for(i=0;i<nconfl;i++) {
-    (parelip[0])[i]-=par[0];
-    (parelip[1])[i]-=par[1];
-    (parelip[2])[i]-=par[2];
-  }
-
-  /* Detecto puntos que esten muy alejados de la supuesta elipse */
-  for(j=0;j<3;j++) {
-    Quartil_d(nconfl,parelip[j],&first,&median,&third);
-    distmax[j]=maxf(fabs(first),fabs(third));
-  }  
-  for(i=0;i<nconfl;i++) {
-    for(j=0;j<3;j++) {
-      if(fabs((parelip[j])[i])>2*2*distmax[j]/1.35) {
-	for(j=0;j<3;j++) {
-	  memcpy(parelip[j]+i,parelip[j]+i+1,(nconfl-i-1)*sizeof(double));
-	}
-	i--;
-	nconfl--;
-	break;
-      }
-    }
-  }
-
-  MCElipN_d(nconfl,3,parelip,invcovar);
-  for(i=0;i<3;i++) {
-    for(j=0;j<3;j++) {
-      covar[i][j]=invcovar[i][j];
-    }
-  }
-  gaussj_d(covar,3,bb,1);
-  /* Deshago el cambio para el limite de confidencia */
-  for(i=0;i<3;i++) {
-    for(j=0;j<3;j++) {
-      covar[i][j]/=(-2*log(_conflim_STY_gm_p_M));
-    }
-  }
-
-  lf->erralfa=sqrt(covar[0][0]);
-  lf->errMstar=sqrt(covar[1][1]);
-  lf->errphistar=sqrt(covar[2][2])*lf->phistar; /* Ya que p[2] esta en logaritmos */
-  lf->covaralfaMstar=covar[0][1];
-  lf->covaralfaphistar=covar[0][2]*lf->phistar;  /* Por la misma razon */
-  lf->covarphistarMstar=covar[1][2]*lf->phistar;
-
-  free_matrix_d(bb,3,1);
-  free(y);
-  free(parconf);
-  free(sigparconf);
-
-  free_matrix_d(parelip,3,nconflini);
-  free_matrix_d(invcovar,3  ,3);
-  free_matrix_d(   covar,3  ,3);
-
-  printf("\n");
-}
-
 double Funk1_intMag_STY_gm_p_M(double Mabs) 
 {
   /* Lo suyo es que sea en magnitudes absolutas, ya que 
@@ -452,7 +310,82 @@ double Funk2_intmag_STY_gm_p_M(double magnreal)
   {
     Mabs=Mag(_z_i_STY_gm_p_M,magnreal,*_cosmo_STY_gm_p_M);
     logfacLF = log(Schechter_M(Mabs,*_lf_STY_gm_p_M));
-    logfacerr= log(gaussian(magnreal,_magn_i_STY_gm_p_M,_errmagn_i_STY_gm_p_M));
+    logfacerr= lngaussian(magnreal,_magn_i_STY_gm_p_M,_errmagn_i_STY_gm_p_M);
     return(exp(logfacLF+logfacerr));
   }
 }
+
+/* Errores utilizando derivadas numéricas con GSL */
+
+void NumericalHessianCovars_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
+{
+  gsl_matrix *gsl_hessian;
+  gsl_vector *param;
+  double **covar;
+  double **bb;
+  size_t i,j;
+
+  double hessianStep = GSL_ROOT4_DBL_EPSILON;
+  /* derivStep = 0.01; */
+
+  gsl_hessian=gsl_matrix_alloc(3,3);
+  param=gsl_vector_alloc(3);
+  gsl_vector_set(param, 0, par[0]);
+  gsl_vector_set(param, 1, par[1]);
+  gsl_vector_set(param, 2, par[2]);
+
+  covar=matrix_d(3 ,3 );
+  bb=matrix_d(3,1);
+
+  struct Amoe_Funk_gsl_param_STY_gm_p_M deriv_param;
+
+  deriv_param.nData = _ndata_STY_gm_p_M;
+  deriv_param.magn = magn;
+  deriv_param.z = z;
+
+  gsl_multimin_function LogLFunction;
+  LogLFunction.f = &Amoe_Funk_STY_gm_p_M_main_gsl_multimin;
+  LogLFunction.params = &deriv_param;
+  LogLFunction.n = 3;
+
+  printf("Vamos a por el gsl_hessian...\n");
+  gsl_hessian_central(&LogLFunction, param, hessianStep, gsl_hessian);
+
+  for(i=0;i<3;++i)
+  {
+    for(j=0;j<3;++j)
+    {
+      covar[i][j]=gsl_matrix_get(gsl_hessian,i,j);
+    }
+  }
+  gaussj_d(covar,3,bb,1);
+
+  lf->erralfa=sqrt(covar[0][0]);
+  lf->errMstar=sqrt(covar[1][1]);
+  lf->errphistar=sqrt(covar[2][2])*lf->phistar; /* Ya que p[2] esta en logaritmos */
+  lf->covaralfaMstar=covar[0][1];
+  lf->covaralfaphistar=covar[0][2]*lf->phistar;  /* Por la misma razon */
+  lf->covarphistarMstar=covar[1][2]*lf->phistar;
+
+  gsl_matrix_free(gsl_hessian);
+  free_matrix_d(bb,3,1);
+}
+
+double Amoe_Funk_STY_gm_p_M_main_gsl_multimin(const gsl_vector *x, void *params)
+{
+  int nData           = ((struct Amoe_Funk_gsl_param_STY_gm_p_M *)params)->nData;
+  double* magn        = ((struct Amoe_Funk_gsl_param_STY_gm_p_M *)params)->magn;
+  double* z           = ((struct Amoe_Funk_gsl_param_STY_gm_p_M *)params)->z;
+  double value;
+  double* lf_param = vector_d(3);
+
+  lf_param[0] = gsl_vector_get(x,0);
+  lf_param[1] = gsl_vector_get(x,1);
+  lf_param[2] = gsl_vector_get(x,2);
+
+
+  value=Amoe_Funk_STY_gm_p_M_main(nData, magn, z, lf_param);
+  free(lf_param);
+  return value;
+}
+

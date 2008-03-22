@@ -178,7 +178,6 @@ void PlotImage(struct image *im) {
 
 void PlotImage_sec(struct image *im, int x1, int x2, int y1, int y2) {
 
-  float mean,sigma;
   float first,median,third;
   float tr[6];
   float *buffer;

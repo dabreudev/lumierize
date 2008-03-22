@@ -29,5 +29,5 @@ int main()
   
  NumericalDerivCovars_STY_p_M(n,magn,z,par,sigpar,mlim,cosmo,&lf);
  
- 
+ return 0; 
 }

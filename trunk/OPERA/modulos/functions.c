@@ -1,4 +1,5 @@
 #include "modulos.h"
+#include "gsl/gsl_math.h"
 #define ITMAX 400
 #define ITDERMAX 800
 #define EPS 3.0e-7
@@ -6,8 +7,12 @@
 
 double gaussian(double x,double xmean,double sigma) 
 {
-  double pi=4*atan(1.); 
-  return(exp(-(x-xmean)*(x-xmean)/2/sigma/sigma)/sqrt(2.*pi)/sigma);
+  return(exp(-(x-xmean)*(x-xmean)/2./sigma/sigma)/sqrt(2.*M_PI)/sigma);
+}
+
+double lngaussian(double x,double xmean,double sigma) 
+{
+  return(-(x-xmean)*(x-xmean)/2./sigma/sigma - M_LN2 / 2. - M_LNPI / 2. - log(sigma));
 }
 
 double poidist(double x, double mean)

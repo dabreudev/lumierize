@@ -612,7 +612,8 @@ int MagLim(void) {
   double *x_d,*y_d,*sigy_d;
   int i;
   float mmin,mmax;
-  int nhistmax,maxhist;
+  int nhistmax = 0;
+  int maxhist;
   float mhalfmaxd;
   int nhalfmaxd,halfmaxd;
   float mhalfmaxi;
