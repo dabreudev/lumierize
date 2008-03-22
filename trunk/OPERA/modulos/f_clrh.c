@@ -17,7 +17,7 @@ void f_clrh(struct headfits *h)
   h->datamin =0.0;
   h->cdelt1  =0.0;
   h->cdelt2  =0.0;
-  sprintf(h->date,"??/??/??");
+  sprintf(h->date,"\?\?\/\?\?\/\?\?");
   sprintf(h->instrume,"UNKNOWN");
   sprintf(h->bunit,"UNKNOWN");
   sprintf(h->object,"UNKNOWN");

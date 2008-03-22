@@ -68,7 +68,7 @@ double mag_ew_flux(double ew, double flux, char photband[51], float gamma, float
 
   double fluxband;
   double fluxcont;
-  double fluxline;
+  /* double fluxline; */
   double zeropoint;
   double magap;
   

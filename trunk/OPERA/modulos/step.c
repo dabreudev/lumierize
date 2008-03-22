@@ -913,10 +913,10 @@ int  FitSch2StepLF_M
 
 /*   printf(" Despue s\n"); */
 
-  lfsch->alfa=par[1];
-  lfsch->erralfa=sqrt(covarpar[1][1]);
   lfsch->Mstar=par[0];
   lfsch->errMstar=sqrt(covarpar[0][0]);
+  lfsch->alfa=par[1];
+  lfsch->erralfa=sqrt(covarpar[1][1]);
   lfsch->phistar=par[2];
   lfsch->errphistar=sqrt(covarpar[2][2]);
   lfsch->covaralfaphistar=covarpar[1][2];

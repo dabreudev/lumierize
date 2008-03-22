@@ -103,13 +103,16 @@ double mag(double z, double M, struct cosmo_param cosmo) {
 }
 
 double Mag(double z, double m, struct cosmo_param cosmo) {
-  double c=299792.46; /*  En km/s */
+  static double c=299792.46; /*  En km/s */
   double dlum;
-  double deltaM;
-  dlum=c/cosmo.H0*2*(1+z)*(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(4*cosmo.q0*cosmo.q0*(1+z));
+  /* double deltaM; */
+  /* dlum=c/cosmo.H0*2*(1+z)*(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(4*cosmo.q0*cosmo.q0*(1+z)); */
+  dlum=c/cosmo.H0*2*(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(4*cosmo.q0*cosmo.q0);
   /*   Esto es la distancia de luminosidad según Hogg. */
-  deltaM=-5*log10(dlum/10e-6);  /* 10e6 son 10pc en megaparsecs.Segun Hogg astroph9905116 */
-  return(deltaM+m);
+  /* deltaM=-5*log10(dlum/10e-6); */  /* 10e6 son 10pc en megaparsecs.Segun Hogg astroph9905116 */
+  /* deltaM=-5*log10(dlum)-25.; */  /* solución más simple, pero no aumenta significativamente la vel. */
+  /* return(deltaM+m); */
+  return(-5.*log10(dlum)-25.+m);
 }
 
 void Mag_err(double z, double errz, double m, double errm, struct cosmo_param cosmo, double *Mag, double *errMag) {
