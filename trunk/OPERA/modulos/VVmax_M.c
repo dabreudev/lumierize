@@ -24,7 +24,7 @@ int  VVmax_M(int n,double *mag_sel, double *mag_cal,double *z, double mlim_sel, 
 
   for(i=0;i<lf->nbin;i++) 
   {
-    lf->lnlf[i]=0.;
+    lf->lf[i]=0.;
     ngalbin[i]=0;
     
     for(j=0;j<n;j++)
@@ -39,20 +39,20 @@ int  VVmax_M(int n,double *mag_sel, double *mag_cal,double *z, double mlim_sel, 
 	if(DEBUG) printf(" zmax %f \n",zmax);
 	if(zmax>zup && zup!=0) zmax=zup;
 	if(zmax>zlow) {
-	  lf->lnlf[i]+=1./(Vol(zmax,cosmo)-Vol(zlow,cosmo));
+	  lf->lf[i]+=1./(Vol(zmax,cosmo)-Vol(zlow,cosmo));
 	  ngalbin[i]++;
 	}
       }
     }
     
-    lf->lnlf[i]=lf->lnlf[i]/strrad*4*M_PI/(lf->magni[i+1]-lf->magni[i])*1.e18; /* El 1.e18 es para pasar de parsecs3 a megaparsecs3. El dl/vvmax.lum[i] es diferencial de L ( ya que dl es en realidad d(logL)) */
-    lf->errlnlf[i]=lf->lnlf[i]/sqrt(ngalbin[i]); /* Esto es como suponer que la funcion de lum es proporcional a una variable poissonian que es el numero de de galaxias en ese bin*/
+    lf->lf[i]=lf->lf[i]/strrad*4*M_PI/(lf->magni[i+1]-lf->magni[i])*1.e18; /* El 1.e18 es para pasar de parsecs3 a megaparsecs3. El dl/vvmax.lum[i] es diferencial de L ( ya que dl es en realidad d(logL)) */
+    lf->errlf[i]=lf->lf[i]/sqrt(ngalbin[i]); /* Esto es como suponer que la funcion de lum es proporcional a una variable poissonian que es el numero de de galaxias en ese bin*/
 
-    if(DEBUG) printf(" bin %d L %f - %f lf %g (%f) +/- %g (%f)  ngal %d\n",i,lf->magni[i],lf->magni[i+1],lf->lnlf[i],log10(lf->lnlf[i]),lf->errlnlf[i],lf->errlnlf[i]/lf->lnlf[i]/log(10),ngalbin[i]);
 
     /* Paso a logaritmos */
-    lf->errlnlf[i]=lf->errlnlf[i]/lf->lnlf[i];
-    lf->lnlf[i]=log(lf->lnlf[i]);
+    lf->errlnlf[i]=lf->errlf[i]/lf->lf[i];
+    lf->lnlf[i]=log(lf->lf[i]);
+
 
     if(ngalbin[i]==0) 
     {
@@ -60,6 +60,8 @@ int  VVmax_M(int n,double *mag_sel, double *mag_cal,double *z, double mlim_sel, 
       lf->errlnlf[i]=-1/0.;
     }
     
+    if(DEBUG) printf(" bin %d M %g - %g lf %g (%g) +/- %g (%g)  ngal %d\n",i,lf->magni[i],lf->magni[i+1],lf->lf[i],lf->lnlf[i],lf->errlf[i],lf->errlnlf[i],ngalbin[i]);
+
   }
   return(0);
 }

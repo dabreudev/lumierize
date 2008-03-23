@@ -101,6 +101,8 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   lfvvmax.errmagni  =vector_d(lfvvmax.nbin+1);
   lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.lf        =vector_d(lfvvmax.nbin);
+  lfvvmax.errlf     =vector_d(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   prepareGlobalVars_STY_p_M_wC(z,magDistn); /* inicializa _Mabsn_STY_p_M_wC */
@@ -117,6 +119,8 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   free(lfvvmax.errmagni);
   free(lfvvmax.lnlf);
   free(lfvvmax.errlnlf);
+  free(lfvvmax.lf);
+  free(lfvvmax.errlf);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
   /* Feed the initial solution*/
@@ -139,6 +143,8 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   lf->alfa=par[0];
   lf->Mstar=par[1];
   lf->phistar=exp(par[2]);
+
+  if(DEBUG) printf(" Solucion sin errores: Mstar %.15g alpha %.4g ",lf->Mstar,lf->alfa);  
 
   /* Estimacion de los errores en los parametros */
 
@@ -173,6 +179,7 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
   double Ntot;
 
   double colori;
+  /* double gcolor; */
   double logColor;
 
   lfamo.alfa=p[0];
@@ -207,9 +214,12 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
     /* log(lfamo.phistar) + log_gamma_int -> integral de la función de Schecter
     entre Llow e inf */
     colori=_magDistn_STY_p_M_wC[i] - _magSeln_STY_p_M_wC[i];
-    logColor=log(gaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC));
+    /* gcolor=gaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC); */
+    logColor=lngaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC);
+    if (DEBUG) printf("logColor: %g  colori: %g\n",logColor,colori);
+    if (DEBUG) printf("_color_mean: %g _color_stddev: %g\n",_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC);
     logL-= log(Schechter_M(Mabs,lfamo)) - log(lfamo.phistar) - log_gamma_int - logColor;
-    
+    if (DEBUG) printf("BUCLE logL: %g\n",logL);
   }
 
   if(DEBUG) printf(" logL %g\n",logL);

@@ -126,7 +126,7 @@ int main()
     printf(" H Generate a random catalogue for a given LF by Montecarlo simulations in luminosities\n");
     printf(" I Generate a random catalogue for a given LF by Montecarlo simulations in magnitudes using color distribution.\n");
     printf(" E Exit\n");
-    opt=readc(opt);  
+    opt=readc(opt);
     switch (opt) { 
     case 'C':
     case 'c':
@@ -152,6 +152,7 @@ int main()
     case 'n':
        set_cosmology();
        STY_MAG_ERR();
+       break;
     case 'O':
     case 'o':
        set_cosmology();
@@ -609,6 +610,8 @@ void STY_MAG_ERR()
 
   static int poissonflag=0;
   static int plots=0;
+  FILE *fout;
+  static char resultFileName[200]="";
 
   /* Information about ML process */
   struct MLProcessInfo mlprocess;
@@ -630,7 +633,8 @@ void STY_MAG_ERR()
     printf(" This method is not available: ");
     return;
   }
-  else { 
+  else
+  { 
     printf(" Input the limiting magnitude: ");
     mlim=readd(mlim);
     if(poissonflag) iter=MLA_STY_gm_p_M(sample_mag_err.ngalax,sample_mag_err.mag,sample_mag_err.mag_err,sample_mag_err.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
@@ -651,6 +655,31 @@ void STY_MAG_ERR()
     printf("#FL_HEAD E_Mstar E_alpha E_Phistar log\n");
     printf("#FL_DATA %g %g %g %g\n",lfsch_M.Mstar,lfsch_M.alfa,lfsch_M.phistar,log10(lfsch_M.phistar));
     printf("#FL_ERR %g %g %g %g\n",lfsch_M.errMstar,lfsch_M.erralfa,lfsch_M.errphistar,lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+
+    /* fichero para los resultados */
+    printf(" Input file name to write results: ");
+    reads(resultFileName,resultFileName);
+    if((fout=fopen(resultFileName,"w")) ==NULL) {
+      printf(" Couldn't open %s for writing\n",resultFileName);
+      return;
+    }
+    fprintf(fout, "# 1 M_STAR\n");
+    fprintf(fout, "# 2 ALPHA\n");
+    fprintf(fout, "# 3 PHISTAR\n");
+    fprintf(fout, "# 4 LOG_PHISTAR\n");
+    fprintf(fout, "# 5 ERR_M_STAR\n");
+    fprintf(fout, "# 6 ERR_ALPHA\n");
+    fprintf(fout, "# 7 ERR_PHISTAR\n");
+    fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
+    fprintf(fout, "%g\t", lfsch_M.Mstar);
+    fprintf(fout, "%g\t", lfsch_M.alfa);
+    fprintf(fout, "%g\t", lfsch_M.phistar);
+    fprintf(fout, "%g\t", log10(lfsch_M.phistar));
+    fprintf(fout, "%g\t", lfsch_M.errMstar);
+    fprintf(fout, "%g\t", lfsch_M.erralfa);
+    fprintf(fout, "%g\t", lfsch_M.errphistar);
+    fprintf(fout, "%g\n", lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+    fclose(fout);
   }
 
   /* dabreu */
@@ -853,6 +882,8 @@ void VVmax()
   lf_vvmax_M.errmagni  =vector_d(lf_vvmax_M.nbin+1);
   lf_vvmax_M.lnlf      =vector_d(lf_vvmax_M.nbin);
   lf_vvmax_M.errlnlf   =vector_d(lf_vvmax_M.nbin);
+  lf_vvmax_M.lf        =vector_d(lf_vvmax_M.nbin);
+  lf_vvmax_M.errlf     =vector_d(lf_vvmax_M.nbin);
   lf_vvmax_M.covarlnlf =matrix_d(lf_vvmax_M.nbin,lf_vvmax_M.nbin);
   lf_vvmax_L.nbin      =vvmax_param.npoint;
   lf_vvmax_L.lumi      =vector_d(lf_vvmax_L.nbin+1);
@@ -1160,7 +1191,7 @@ void VVmax()
       fprintf(fout, "# 2 LN_VVMAX\n");
       fprintf(fout, "# 3 VVMAX\n");
       fprintf(fout, "# 4 ERR_LN_VVMAX\n");
-      for(i=0;i<=lf_vvmax_M.nbin;i++)
+      for(i=0;i<lf_vvmax_M.nbin;i++)
       {
          fprintf(fout, "%g\t%g\t", lf_vvmax_M.magni[i], lf_vvmax_M.lnlf[i]);
          fprintf(fout, "%g\t%g\n",exp(lf_vvmax_M.lnlf[i]), lf_vvmax_M.errlnlf[i]);
@@ -1283,6 +1314,8 @@ void VVmax()
   free(lf_vvmax_M.errmagni);
   free(lf_vvmax_M.lnlf);
   free(lf_vvmax_M.errlnlf);
+  free(lf_vvmax_M.lf);
+  free(lf_vvmax_M.errlf);
   free_matrix_d(lf_vvmax_M.covarlnlf, lf_vvmax_M.nbin,lf_vvmax_M.nbin);
   free(lf_vvmax_L.lumi);
   free(lf_vvmax_L.errlumi);
@@ -2675,7 +2708,15 @@ void Generate_Cat_M_wC()
   plots=readf(plots);
 
   /*   printf(" aaaaaaaaaLIM mag %f %f\n",mlow,mup); */
-  nobjAllSky=Int_sch_M_wC(schlf_M, zlow, zup, color_mean, color_stddev, mSelLow, cosmo); 
+  if (color_stddev==0.) /* to avoid problems in Int_sch_M_wC */
+  {
+    printf("color_stddev=0 -> calling Int_sch_M instead of Int_sch_M_wC\n");
+    nobjAllSky=Int_sch_M(schlf_M, zlow, zup, mSelLow, cosmo);
+  }
+  else
+  {
+    nobjAllSky=Int_sch_M_wC(schlf_M, zlow, zup, color_mean, color_stddev, mSelLow, cosmo);
+  }
   printf("nobjAllSky %g\n", nobjAllSky);
   nobjMean=(nobjAllSky/41252.*area);
   nobj=(long long)Poidev(nobjMean);

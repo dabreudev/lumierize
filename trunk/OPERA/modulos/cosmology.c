@@ -107,7 +107,8 @@ double Mag(double z, double m, struct cosmo_param cosmo) {
   double dlum;
   /* double deltaM; */
   /* dlum=c/cosmo.H0*2*(1+z)*(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(4*cosmo.q0*cosmo.q0*(1+z)); */
-  dlum=c/cosmo.H0*2*(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(4*cosmo.q0*cosmo.q0);
+  /* dlum=c/cosmo.H0*2*(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(4*cosmo.q0*cosmo.q0); */
+  dlum=c/cosmo.H0*(1-cosmo.q0*(1-z)-(1-cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(cosmo.q0*cosmo.q0);
   /*   Esto es la distancia de luminosidad según Hogg. */
   /* deltaM=-5*log10(dlum/10e-6); */  /* 10e6 son 10pc en megaparsecs.Segun Hogg astroph9905116 */
   /* deltaM=-5*log10(dlum)-25.; */  /* solución más simple, pero no aumenta significativamente la vel. */
