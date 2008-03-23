@@ -494,8 +494,8 @@ void PrintStepLF_M(struct Steplf_M lf)
   unsigned int i;
   for(i=0;i<lf.nbin;i++) 
   {
-    printf(" Mag %11g    LF %11g (log=%9g) Err_LF %11g (log=%9g)\n",
-           lf.magni[i],exp(lf.lnlf[i]),lf.lnlf[i]/log(10),
+    printf(" Mag %11g - %11g    LF %11g (log=%9g) Err_LF %11g (log=%9g)\n",
+           lf.magni[i],lf.magni[i+1],exp(lf.lnlf[i]),lf.lnlf[i]/log(10),
            exp(lf.lnlf[i])*lf.errlnlf[i],lf.errlnlf[i]);
   }
 }
@@ -886,7 +886,7 @@ int  FitSch2StepLF_M
   nfit=0;
   for(i=0;i<lfstep.nbin;i++) 
   {
-    if(!(lfstep.lnlf[i]==-1/0.)) 
+    if(!(lfstep.lnlf[i]==-1/0.) && !(lfstep.errlnlf[i]==1.)) 
     {
       lfx[nfit]=(lfstep.magni[i+1]+lfstep.magni[i])/2.;
       lfy[nfit]=lfstep.lnlf[i]/log(10);

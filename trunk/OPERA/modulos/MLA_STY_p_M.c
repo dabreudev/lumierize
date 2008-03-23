@@ -95,6 +95,8 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   lfvvmax.errmagni  =vector_d(lfvvmax.nbin+1);
   lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.lf        =vector_d(lfvvmax.nbin);
+  lfvvmax.errlf     =vector_d(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   prepareGlobalVars_STY_p_M(z,magn); /* inicializa _Mabsn_STY_p_M */
@@ -111,6 +113,8 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   free(lfvvmax.errmagni);
   free(lfvvmax.lnlf);
   free(lfvvmax.errlnlf);
+  free(lfvvmax.lf);
+  free(lfvvmax.errlf);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
   /* Feed the initial solution*/

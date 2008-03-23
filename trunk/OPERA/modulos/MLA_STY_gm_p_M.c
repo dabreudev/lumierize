@@ -91,6 +91,8 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
   lfvvmax.errmagni  =vector_d(lfvvmax.nbin+1);
   lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.lf        =vector_d(lfvvmax.nbin);
+  lfvvmax.errlf     =vector_d(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   for(i=0;i<n;i++)   Mabs[i]=Mag(z[i],magn[i],cosmo);
@@ -116,11 +118,19 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
   free(lfvvmax.errmagni);
   free(lfvvmax.lnlf);
   free(lfvvmax.errlnlf);
+  free(lfvvmax.lf);
+  free(lfvvmax.errlf);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
 /*   PlotStepSchLF_M(lfvvmax,lffit); */
 
 /*   cpgclos(); */
+
+  /* dabreu */
+  /* struct MLProcessInfo mlinfo2;
+  i=MLA_STY_p_M(n,magn,z,mlim,strrad,zlow,zup,cosmo,&lffit, &mlinfo2);
+  printf(" STY as a first solution.\n");
+  printf(" STY -> Mstar: %g alpha: %g phistar: %g\n",lffit.Mstar,lffit.alfa,lffit.phistar); */
 
   printf(" Computing LF...\n");
 
