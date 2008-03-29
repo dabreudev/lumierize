@@ -130,13 +130,19 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   sigpar[0]=10.*lffit.erralfa;
   sigpar[1]=10.*lffit.errMstar;
   sigpar[2]=10.*lffit.errphistar/lffit.phistar;
+  
+  /* Initial solution */
+  printf("par0 %g par1 %g par2 %g\n",par[0],par[1],par[2]);
 
   printf(" Computing LF...\n");
 
   iter_amo=Amoeba_d(n,magDistn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_p_M_wC_main);
 /*   printf(" FINAL par0 %.15g par1 %.15g \n",par[0],par[1]); */
 
+  /* Info that will be output in mlinfo */
   _MLmax_STY_p_M_wC=Amoe_Funk_STY_p_M_wC_main(n,magDistn,z,par);
+  mlinfo->nIter = iter_amo;
+  mlinfo->MLmax = _MLmax_STY_p_M_wC;
 
   /* Meto la solucion en la salida */
  
@@ -215,7 +221,14 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
     entre Llow e inf */
     colori=_magDistn_STY_p_M_wC[i] - _magSeln_STY_p_M_wC[i];
     /* gcolor=gaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC); */
-    logColor=lngaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC);
+    if (_color_stddev_STY_p_M_wC==0)
+    {
+      logColor=1.0;
+    }
+    else
+    {
+      logColor=lngaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC);
+    }
     if (DEBUG) printf("logColor: %g  colori: %g\n",logColor,colori);
     if (DEBUG) printf("_color_mean: %g _color_stddev: %g\n",_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC);
     logL-= log(Schechter_M(Mabs,lfamo)) - log(lfamo.phistar) - log_gamma_int - logColor;
@@ -225,7 +238,16 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
   if(DEBUG) printf(" logL %g\n",logL);
 
   /* Aqui viene la parte de la poissoniana de npob */
-  Ntot=Int_sch_M_wC(lfamo,_zlow_STY_p_M_wC,_zup_STY_p_M_wC,_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC,_mlim_STY_p_M_wC,*_cosmo_STY_p_M_wC)*_strrad_STY_p_M_wC/4./M_PI;
+  if (_color_stddev_STY_p_M_wC==0) /* to avoid problem in Int_sch_M_wC */
+  {
+    /* printf("Using Int_sch_M instead of Int_sch_M_wC because color_stddev = 0\n"); */
+    Ntot=Int_sch_M(lfamo,_zlow_STY_p_M_wC,_zup_STY_p_M_wC,_mlim_STY_p_M_wC,*_cosmo_STY_p_M_wC)*_strrad_STY_p_M_wC/4./M_PI;
+  }
+  else
+  {
+    Ntot=Int_sch_M_wC(lfamo,_zlow_STY_p_M_wC,_zup_STY_p_M_wC,_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC,_mlim_STY_p_M_wC,*_cosmo_STY_p_M_wC)*_strrad_STY_p_M_wC/4./M_PI;
+  }
+
   logL-= (_ndata_STY_p_M_wC*log(Ntot) - Ntot - gammln((double)_ndata_STY_p_M_wC+1.));
 
   _iter_m_STY_p_M_wC++;

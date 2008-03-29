@@ -886,7 +886,7 @@ int  FitSch2StepLF_M
   nfit=0;
   for(i=0;i<lfstep.nbin;i++) 
   {
-    if(!(lfstep.lnlf[i]==-1/0.) && !(lfstep.errlnlf[i]==1.)) 
+    if(!(lfstep.lnlf[i]==-1/0.) && !(lfstep.errlnlf[i]==1.)) /* to avoid problems in fit */
     {
       lfx[nfit]=(lfstep.magni[i+1]+lfstep.magni[i])/2.;
       lfy[nfit]=lfstep.lnlf[i]/log(10);

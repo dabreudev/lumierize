@@ -102,8 +102,11 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   prepareGlobalVars_STY_p_M(z,magn); /* inicializa _Mabsn_STY_p_M */
 
   MinMax_d(n,_Mabsn_STY_p_M,&minMabs,&maxMabs);
+  /* printf("minMabs %g maxMags %g\n",minMabs,maxMabs); */
   for(i=0;i<=lfvvmax.nbin;i++) lfvvmax.magni[i]=minMabs+i*(maxMabs-minMabs)/lfvvmax.nbin;
   VVmax_M(n,magn,magn,z,mlim,strrad,zlow,zup,cosmo,&lfvvmax);
+
+  /* printf("lfvvmax.magni %g lfvvmax.lnlf %g\n",lfvvmax.magni, lfvvmax.lnlf); */ 
 
   /* Fit of the VVmax solution to a Schechter function */
   FitSch2StepLF_M(lfvvmax,&lffit, &chisq);
@@ -159,8 +162,12 @@ void prepareGlobalVars_STY_p_M(double *z, double *magn)
 {
   size_t i;
 
-   _Mabsn_STY_p_M = vector_d(_ndata_STY_p_M);
+  _Mabsn_STY_p_M = vector_d(_ndata_STY_p_M);
   for(i=0;i<_ndata_STY_p_M;i++) _Mabsn_STY_p_M[i]=Mag(z[i],magn[i],*_cosmo_STY_p_M);
+  /* for(i=0;i<_ndata_STY_p_M;i++)
+  {
+     printf("Mabs %g magni %g zi %g\n",_Mabsn_STY_p_M[i],magn[i],z[i]);
+  } */
 }
 
 double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
