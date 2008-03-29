@@ -204,7 +204,7 @@ void STY()
   /* dabreu */
   static int plots=0; /* para no hacer las gráficas */
   FILE *fout;
-  static char resultFileName[200]="";
+  static char resultFileName[300]="";
   
   /* Information about the ML process */
   struct MLProcessInfo mlprocess;
@@ -611,7 +611,7 @@ void STY_MAG_ERR()
   static int poissonflag=0;
   static int plots=0;
   FILE *fout;
-  static char resultFileName[200]="";
+  static char resultFileName[300]="";
 
   /* Information about ML process */
   struct MLProcessInfo mlprocess;
@@ -865,12 +865,12 @@ void VVmax()
 
   /* Variables para escribir los resultados en un fichero */
   FILE *fout = NULL;
-  static char schfitResultFileName[200]="";
-  static char vvmaxResultFileName[200]="";
+  static char schfitResultFileName[300]="";
+  static char vvmaxResultFileName[300]="";
 
   /* long results file (for test) */
   static int allVVmax=0; /* do not want this file */
-  static char allVVmaxResultsFileName[200]="";
+  static char allVVmaxResultsFileName[300]="";
   
   /* Obtengo los datos y los parametros de la LF */
   get_sample_sel_cal(&sample);
@@ -1774,7 +1774,7 @@ void get_sample(struct sample_data *sample)
 {
 
   char opt;
-  static char datafile[200]="";
+  static char datafile[300]="";
   static int colz=2,collum=3,colmag=4;
   double *z,*mag,*lum;
   int *log1,*log2,*log3;
@@ -1856,7 +1856,7 @@ void get_sample(struct sample_data *sample)
 void get_sample_sel_cal(struct sample_data_sel_cal *sample) 
 {
   char opt;
-  static char datafile[200]="";
+  static char datafile[300]="";
   static int colz=3,collum_sel=1,collum_cal=2,colmag_sel=1,colmag_cal=2;
   double *z,*mag_sel,*mag_cal,*lum_sel,*lum_cal;
   int *log1,*log2,*log3,*log4,*log5;
@@ -1963,7 +1963,7 @@ void get_sample_mag_err(struct sample_data_mag_err *sample)
 /* dabreu */
 /* para leer catálogo con magnitud y error en la magnitud */
   char opt;
-  static char datafile[100]="";
+  static char datafile[300]="";
   static int colz=2,colmag=3,colmagerr=4;
   double *z,*mag,*magerr;
   int *log1,*log2,*log3;
@@ -2302,8 +2302,8 @@ void Generate_Cat_M()
   /*fprintf(fout,"# Redshift   m_app   Mabs     merror   mobserved\n"); dabreu */
   fprintf(fout,"#\n"
           "# 1 Z (redshift without observational errors)\n"
-          "# 2 Z_ERR (error in redshift)\n"
-	  "# 3 Z_OBS (observed redshift taking into account observational errors\n"
+	  "# 2 Z_OBS (observed redshift taking into account observational errors\n"
+          "# 3 Z_ERR (error in redshift)\n"
           "# 4 M_APP (apparent magnitude without observational errors)\n"
           "# 5 M_ABS (absolute magnitude)\n"
 	  "# 6 M_ERR (error in apparent magnitude)\n"
@@ -2311,7 +2311,7 @@ void Generate_Cat_M()
   for(i=0;i<nobj;i++) {
    /* fprintf(fout," %8.6f  %8.3f %8.3f",zsample[i],msample[i],Msample[i]); */
     /* dabreu */
-    fprintf(fout," %8.6f  %8.6f %8.6f",zsample[i],zerror[i],zobserved[i]);
+    fprintf(fout," %8.6f  %8.6f %8.6f",zsample[i],zobserved[i],zerror[i]);
     fprintf(fout," %8.3f %8.3f",msample[i],Msample[i]);
     fprintf(fout," %8.6f  %8.6f\n",merror[i],mobserved[i]);
   }
