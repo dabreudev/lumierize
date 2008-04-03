@@ -136,9 +136,12 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
 
   iter_amo=0;
   while(iter_amo==0) { 
-    par[0]=lffit.alfa;  /* Alpha */
+    par[0]=lffit.alfa;
     par[1]=lffit.Mstar;
     par[2]=log(lffit.phistar);
+  /*  par[0]=-1.3;
+    par[1]=-24.5;
+    par[2]=log(0.0063); */
 
     sigpar[0]=10.*lffit.erralfa;
     sigpar[1]=10.*lffit.errMstar;
@@ -303,8 +306,14 @@ double Funk1_intMag_STY_gm_p_M(double Mabs)
   if(_mlim_STY_gm_p_M>_magn_i_STY_gm_p_M+6*_errmagn_i_STY_gm_p_M) x2=_magn_i_STY_gm_p_M+6*_errmagn_i_STY_gm_p_M; 
   x1=_magn_i_STY_gm_p_M-6*_errmagn_i_STY_gm_p_M; 
   if(_mlim_STY_gm_p_M<_magn_i_STY_gm_p_M-5*_errmagn_i_STY_gm_p_M) x1=x2-6*_errmagn_i_STY_gm_p_M;
-  firstint=gaussintleg_d(Funk2_intmag_STY_gm_p_M,x1,x2,npa);
-  if(_errmagn_i_STY_gm_p_M==0) firstint=Schechter_M(Mabs,*_lf_STY_gm_p_M);
+  if(_errmagn_i_STY_gm_p_M==0)
+  {
+    firstint=Schechter_M(Mabs,*_lf_STY_gm_p_M);
+  }
+  else
+  {
+    firstint=gaussintleg_d(Funk2_intmag_STY_gm_p_M,x1,x2,npa);
+  }
 /*   printf(" Segunda integral %g\n",firstint); */
 /*   printf(" El bueno %g y el sch %g lum %g\n",log(firstint),Schechter_M(Lumi,*lf_STY_gm_p_M),lumlog);  */
 /*   printf(" Sale con %g\n",firstint*Lumi); */

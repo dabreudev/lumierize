@@ -11,22 +11,11 @@
 #define FTOL2 1e-6
 #define FTOL3 1e-7
 #define MAXITER  1000
-#define MAXITER2 120
-#define NBSNORMA  10
-#define MAXTRIES   5
 #define VERBOSE 0
 #define DEBUG  0
 #define DEBUG2 0
 #define DEBUG3 0
 #define DEBUGPLOT 0
-#define CONTOURPLOT 0
-#define NCONFL 20
-#define TOLERR 0.07 
-
-/* #define TOLERR 0.0001 */
-
-/* Ahora mismo esta con el pcut definido, de modo que se aleja de valores 
-   cercanos a 0. Puede afectar al calculo de las covarianzas!! */
 
 /* Estructura para contener los parámetros */
 struct Amoe_Funk_gsl_param_STY_p_M
