@@ -11,17 +11,11 @@
 #define FTOL2 1e-6
 #define FTOL3 1e-7
 #define MAXITER  1000
-#define MAXITER2 120
-#define NBSNORMA  10
-#define MAXTRIES   5
 #define VERBOSE 0
 #define DEBUG  0
 #define DEBUG2 0
 #define DEBUG3 0
 #define DEBUGPLOT 0
-#define CONTOURPLOT 0
-#define NCONFL 20
-#define TOLERR 0.07 
 
 /* Estructura para contener los parámetros */
 struct Amoe_Funk_gsl_param_STY_p_M_wC
@@ -30,8 +24,6 @@ struct Amoe_Funk_gsl_param_STY_p_M_wC
   double *magn;
   double *z;
 };
-
-double probando_deriv_wC(int n, double *x, double *y, double *p);
 
 void prepareGlobalVars_STY_p_M_wC(double *z, double *magn);
 double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p);
@@ -198,7 +190,8 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
 
   for(i=0;i<_ndata_STY_p_M_wC;i++)
   {
-    Mabs=Mag(y[i],x[i],*_cosmo_STY_p_M_wC);
+    /* Mabs=Mag(y[i],x[i],*_cosmo_STY_p_M_wC); */
+    Mabs=_Mabsn_STY_p_M_wC[i];
     Mlow=Mag(y[i],_mlim_STY_p_M_wC,*_cosmo_STY_p_M_wC);
     Llow=pow(10.,-0.4*Mlow);
 
@@ -223,16 +216,16 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
     /* gcolor=gaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC); */
     if (_color_stddev_STY_p_M_wC==0)
     {
-      logColor=1.0;
+      logColor=0.0;
     }
     else
     {
       logColor=lngaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC);
     }
-    if (DEBUG) printf("logColor: %g  colori: %g\n",logColor,colori);
-    if (DEBUG) printf("_color_mean: %g _color_stddev: %g\n",_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC);
-    logL-= log(Schechter_M(Mabs,lfamo)) - log(lfamo.phistar) - log_gamma_int - logColor;
-    if (DEBUG) printf("BUCLE logL: %g\n",logL);
+    if (DEBUG2) printf("logColor: %g  colori: %g\n",logColor,colori);
+    if (DEBUG2) printf("_color_mean: %g _color_stddev: %g\n",_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC);
+    logL-= log(Schechter_M(Mabs,lfamo)) + logColor - log(lfamo.phistar) - log_gamma_int;
+    if (DEBUG2) printf("BUCLE logL: %g\n",logL);
   }
 
   if(DEBUG) printf(" logL %g\n",logL);
