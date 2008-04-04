@@ -364,14 +364,14 @@ double Funk2_intmag_STY_gc_p_M_wC(double colornreal)
     logfacLF = log(Schechter_M(Mabs,*_lf_STY_gc_p_M_wC));
     if (_color_stddev_STY_gc_p_M_wC==0.)
     {
-      logColor=1.0; /* o será mejor ponerlo igual a 0? */
+      logColor=0.0;
     }
     else
     {
       logColor = lngaussian(colornreal, _color_mean_STY_gc_p_M_wC, _color_stddev_STY_gc_p_M_wC);
     }
     logfacerr= lngaussian(colornreal,_colorn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC);
-    return(exp(logfacLF+logfacerr+logColor));
+    return(exp(logfacLF+logfacerr+logColor)); /* aquí va +logColor ? */
   }
 }
 

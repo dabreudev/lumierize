@@ -190,9 +190,19 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
 
   for(i=0;i<_ndata_STY_p_M_wC;i++)
   {
+    colori=_magDistn_STY_p_M_wC[i] - _magSeln_STY_p_M_wC[i];
+    /* gcolor=gaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC); */
+    if (_color_stddev_STY_p_M_wC==0)
+    {
+      logColor=0.0;
+    }
+    else
+    {
+      logColor=lngaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC);
+    }
     /* Mabs=Mag(y[i],x[i],*_cosmo_STY_p_M_wC); */
     Mabs=_Mabsn_STY_p_M_wC[i];
-    Mlow=Mag(y[i],_mlim_STY_p_M_wC,*_cosmo_STY_p_M_wC);
+    Mlow=Mag(y[i],_mlim_STY_p_M_wC+colori,*_cosmo_STY_p_M_wC);
     Llow=pow(10.,-0.4*Mlow);
 
     /* debido a un underflow, tuvimos que poner este if
@@ -212,16 +222,6 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
     }
     /* log(lfamo.phistar) + log_gamma_int -> integral de la función de Schecter
     entre Llow e inf */
-    colori=_magDistn_STY_p_M_wC[i] - _magSeln_STY_p_M_wC[i];
-    /* gcolor=gaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC); */
-    if (_color_stddev_STY_p_M_wC==0)
-    {
-      logColor=0.0;
-    }
-    else
-    {
-      logColor=lngaussian(colori, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC);
-    }
     if (DEBUG2) printf("logColor: %g  colori: %g\n",logColor,colori);
     if (DEBUG2) printf("_color_mean: %g _color_stddev: %g\n",_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC);
     logL-= log(Schechter_M(Mabs,lfamo)) + logColor - log(lfamo.phistar) - log_gamma_int;
