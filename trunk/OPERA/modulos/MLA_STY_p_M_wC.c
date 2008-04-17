@@ -12,9 +12,9 @@
 #define FTOL3 1e-7
 #define MAXITER  1000
 #define VERBOSE 0
-#define DEBUG  0
-#define DEBUG2 0
-#define DEBUG3 0
+#define DEBUG  1
+#define DEBUG2 1
+#define DEBUG3 1
 #define DEBUGPLOT 0
 
 /* Estructura para contener los parámetros */

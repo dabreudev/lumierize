@@ -253,14 +253,19 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
 
       offset=_magn_i_STY_gm_p_M;
       scale=_errmagn_i_STY_gm_p_M*sqrt(2.);
-      x2=_mlim_STY_gm_p_M; 
-      if(_mlim_STY_gm_p_M>(_magn_i_STY_gm_p_M+6*_errmagn_i_STY_gm_p_M)) x2=_magn_i_STY_gm_p_M+6*_errmagn_i_STY_gm_p_M; 
-      x1=_magn_i_STY_gm_p_M-6*_errmagn_i_STY_gm_p_M; 
-      if(_mlim_STY_gm_p_M<(_magn_i_STY_gm_p_M-5*_errmagn_i_STY_gm_p_M)) x1=x2-6*_errmagn_i_STY_gm_p_M;
-      probarriba=gaussintleg_d(Funk2_intmag_STY_gm_p_M,x1,x2,npa);
+      if(_errmagn_i_STY_gm_p_M==0)
+      {
+        probarriba=Schechter_M(Mabs,*_lf_STY_gm_p_M);
+      }
+      else
+      {
+        x2=_mlim_STY_gm_p_M; 
+        if(_mlim_STY_gm_p_M>(_magn_i_STY_gm_p_M+6*_errmagn_i_STY_gm_p_M)) x2=_magn_i_STY_gm_p_M+6*_errmagn_i_STY_gm_p_M; 
+        x1=_magn_i_STY_gm_p_M-6*_errmagn_i_STY_gm_p_M; 
+        if(_mlim_STY_gm_p_M<(_magn_i_STY_gm_p_M-5*_errmagn_i_STY_gm_p_M)) x1=x2-6*_errmagn_i_STY_gm_p_M;
+        probarriba=gaussintleg_d(Funk2_intmag_STY_gm_p_M,x1,x2,npa);
+      }
       if(DEBUG2) printf(" parriba %g  con 1000 %g con her %g\n",probarriba,gaussintleg_d(Funk2_intmag_STY_gm_p_M,x1,x2,1000),gaussinther_d(Funk2_intmag_STY_gm_p_M,offset,scale,100));
-      if(_errmagn_i_STY_gm_p_M==0) probarriba=Schechter_M(Mabs,*_lf_STY_gm_p_M);
-
       if(DEBUG2) printf(" Calculo arriba %g old %g x1 %g  x2 % g magn %g err %g magnl %g\n",probarriba,Schechter_M(Mabs,*_lf_STY_gm_p_M),x1,x2,_magn_i_STY_gm_p_M,_errmagn_i_STY_gm_p_M,_mlim_STY_gm_p_M);
 
 
