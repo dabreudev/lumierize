@@ -2911,7 +2911,7 @@ void Generate_Cat_M_wC()
   double *Msample,*zsample,*msample,*merror,*mobserved;
   double *zerror,*zobserved;
   double *colorsample;
-  double *MDist, *mDist, *mSelError, *mSelObserved, *mSel;
+  double *MDist, *mDist, *mDistObserved, *mSelError, *mSelObserved, *mSel;
   double *colorError, *colorObserved;
   static int plots=0; /* not to do graphs */
 
@@ -2988,6 +2988,7 @@ void Generate_Cat_M_wC()
   colorsample=malloc(nobj*sizeof(double));
   MDist=malloc(nobj*sizeof(double));
   mDist=malloc(nobj*sizeof(double));
+  mDistObserved=malloc(nobj*sizeof(double));
   mSelError=malloc(nobj*sizeof(double));
   mSelObserved=malloc(nobj*sizeof(double));
   mSel=malloc(nobj*sizeof(double));
@@ -3020,6 +3021,7 @@ void Generate_Cat_M_wC()
     colorObserved[i] = colorsample[i] + Gasdev()*colorError[i];
     while((zerror[i] = zerror_mean + Gasdev() * zerror_stddev) < 0);
     zobserved[i] = zsample[i] + Gasdev()*zerror[i];
+    mDistObserved[i] = mSelObserved[i] + colorObserved[i];
     if(mSel[i] > mSelLow)  /* This galaxy does not pass the selection function */
     { 
       /* i--; */
@@ -3074,7 +3076,8 @@ void Generate_Cat_M_wC()
 	  "# 8 M_SEL_ERR (observational error in apparent selection magnitude)\n"
           "# 9 COLOR (color for the object = mDist - mSel)\n"
           "# 10 COLOR_OBS (observed color for the object taking into account obs. errors)\n"
-          "# 11 COLOR_ERR (error in the observed color for the object = mDist - mSel\n");
+          "# 11 COLOR_ERR (error in the observed color for the object = mDist - mSel\n"
+          "# 12 M_DIST_APP_OBS (M_SEL_APP_OBS + COLOR_OBS)\n");
   for(i=0;i<nobj;i++) {
    /* fprintf(fout," %8.6f  %8.3f %8.3f",zsample[i],msample[i],Msample[i]); */
     fprintf(fout," %8.6f  %8.6f %8.6f",zsample[i],zobserved[i],zerror[i]);
@@ -3083,7 +3086,9 @@ void Generate_Cat_M_wC()
     fprintf(fout," %8.6f",mSelError[i]);
     fprintf(fout," %8.6f", colorsample[i]);
     fprintf(fout," %8.6f", colorObserved[i]);
-    fprintf(fout," %8.6f\n", colorError[i]);
+    fprintf(fout," %8.6f", colorError[i]);
+    fprintf(fout," %8.6f\n", mDistObserved[i]);
+    
   }
   fclose(fout);
 
