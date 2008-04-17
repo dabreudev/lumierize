@@ -35,7 +35,6 @@ double Funk2_intmag_STY_gc_p_M_wC(double fluxreal);
 double Funk1_intMag_STY_gc_p_M_wC(double x);
 void   NumericalHessianCovars_STY_gc_p_M_wC(int n,double *magDistn,double *errColorn, double *z, double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf);
 
-
 struct Schlf_M *_lf_STY_gc_p_M_wC;
 struct cosmo_param *_cosmo_STY_gc_p_M_wC;
 double _mlim_STY_gc_p_M_wC;
@@ -51,14 +50,13 @@ double _strrad_STY_gc_p_M_wC;
 double *_magSeln_STY_gc_p_M_wC;
 double *_magDistn_STY_gc_p_M_wC;
 double _magDistn_i_STY_gc_p_M_wC;
+double _magSeln_i_STY_gc_p_M_wC;
 double _color_mean_STY_gc_p_M_wC;
 double _color_stddev_STY_gc_p_M_wC;
 double *_Mabsn_STY_gc_p_M_wC;
 double *_errColorn_STY_gc_p_M_wC;
 double _errColorn_i_STY_gc_p_M_wC;
 double _colorn_i_STY_gc_p_M_wC;
-
-/* FIXME: hay que reescribir muchas cosas, porque el error en color no entra dentro de los límites en la integral de la magnitud */
 
 int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, double color_stddev, double *errColorn,double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo)
 {
@@ -142,10 +140,6 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
   free(lfvvmax.errlf);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
-/*   PlotStepSchLF_M(lfvvmax,lffit); */
-
-/*   cpgclos(); */
-
   /* dabreu */
   /* struct MLProcessInfo mlinfo2;
   i=MLA_STY_p_M(n,magn,z,mlim,strrad,zlow,zup,cosmo,&lffit, &mlinfo2);
@@ -217,7 +211,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
   double x1,x2;
   int npa=21;
   int npb=21;
-  int npc=31;
+  /* int npc=31; */
   double probarriba;
   double probabajo;
 
@@ -241,56 +235,60 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
   {
     _z_i_STY_gc_p_M_wC=y[i];
     _magDistn_i_STY_gc_p_M_wC=x[i];
+    _magSeln_i_STY_gc_p_M_wC=_magSeln_STY_gc_p_M_wC[i];
+    _colorn_i_STY_gc_p_M_wC=_magDistn_i_STY_gc_p_M_wC-_magSeln_i_STY_gc_p_M_wC;
     _errColorn_i_STY_gc_p_M_wC=_errColorn_STY_gc_p_M_wC[i];
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gc_p_M_wC);
-    Mlow=Mag(y[i],_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
+    Mlow=Mag(y[i],_mlim_STY_gc_p_M_wC+_colorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
     xmin =pow(10.,-0.4*Mlow)/Lstar;
-    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN */
+    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN ? */
     {
       logL+=10; 
     }
     else 
     {
-      /* tengo en cuenta el errColor para la mlim_ ? */
-      x1=lfamo.Mstar-5; /* de dónde sale este 5??? */
-      x2=Mag(y[i],_mlim_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
+      x1=lfamo.Mstar-5; /* 5 por poner un número (debería ser -inf) */
+      x2=Mag(y[i],_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       probabajo=gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npb);
       if(DEBUG2) printf(" Primer abajo %g con 1000 %g x1 %f x2 %f\n",probabajo,gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1-10,x2,1000),x1,x2);
-      x2=Mag(y[i],_mlim_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
+/*      x2=Mag(y[i],_mlim_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       x1=Mag(y[i],_mlim_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       probabajo+=gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npc);
-      if(DEBUG2) printf(" Segundo abajo %g con 1000 %g x1 %f x2 %f\n",gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npc),gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,Mag(y[i],_mlim_STY_gc_p_M_wC+12*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC),1000),x1,x2);
+      if(DEBUG2) printf(" Segundo abajo %g con 1000 %g x1 %f x2 %f\n",gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npc),gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,Mag(y[i],_mlim_STY_gc_p_M_wC+12*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC),1000),x1,x2); */
+      /* La integral de abajo se hacía en dos intervalos, ahora vamos a probar de un tirón */
 
       if(DEBUG2) printf(" Calculo abajo %g old %g \n",probabajo,lfamo.phistar*(incom(1+lfamo.alfa,200.)-incom(1+lfamo.alfa,pow(10.,-0.4*Mlow)/Lstar)));
 
       /* We have to compute them again because Funk? may have overriden them */
       _z_i_STY_gc_p_M_wC=y[i];
       _magDistn_i_STY_gc_p_M_wC=x[i];
+      _magSeln_i_STY_gc_p_M_wC=_magSeln_STY_gc_p_M_wC[i];
+      _colorn_i_STY_gc_p_M_wC=_magDistn_i_STY_gc_p_M_wC-_magSeln_i_STY_gc_p_M_wC;
       _errColorn_i_STY_gc_p_M_wC=_errColorn_STY_gc_p_M_wC[i];
 
-      offset=_magDistn_i_STY_gc_p_M_wC;
-      scale=_errColorn_i_STY_gc_p_M_wC*sqrt(2.);
-      x2=_mlim_STY_gc_p_M_wC;
-      if(_mlim_STY_gc_p_M_wC>(_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC)) x2=_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC; 
-      x1=_magDistn_i_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC; 
-      if(_mlim_STY_gc_p_M_wC<(_magDistn_i_STY_gc_p_M_wC-5*_errColorn_i_STY_gc_p_M_wC)) x1=x2-6*_errColorn_i_STY_gc_p_M_wC;
-      probarriba=gaussintleg_d(Funk2_intmag_STY_gc_p_M_wC,x1,x2,npa);
-      if(DEBUG2) printf(" parriba %g  con 1000 %g con her %g\n",probarriba,gaussintleg_d(Funk2_intmag_STY_gc_p_M_wC,x1,x2,1000),gaussinther_d(Funk2_intmag_STY_gc_p_M_wC,offset,scale,100));
-      if(_errColorn_i_STY_gc_p_M_wC==0) probarriba=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: esto seguro que no es así. Como poco poner el if antes y así no hay que llamar a gaussintleg */
+      if(_errColorn_i_STY_gc_p_M_wC==0)
+      {
+        probarriba=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: esto seguro que es así? */
+      }
+      else
+      {
+        offset=_magDistn_i_STY_gc_p_M_wC;
+        scale=_errColorn_i_STY_gc_p_M_wC*sqrt(2.);
+        /* x2=_mlim_STY_gc_p_M_wC;
+        if(_mlim_STY_gc_p_M_wC>(_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC)) x2=_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC; 
+        x1=_magDistn_i_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC; 
+        if(_mlim_STY_gc_p_M_wC<(_magDistn_i_STY_gc_p_M_wC-5*_errColorn_i_STY_gc_p_M_wC)) x1=x2-6*_errColorn_i_STY_gc_p_M_wC; */
+        x1=_colorn_i_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC; 
+        x2=_colorn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC;
+        probarriba=gaussintleg_d(Funk2_intmag_STY_gc_p_M_wC,x1,x2,npa);
+        if(DEBUG2) printf(" parriba %g  con 1000 %g con her %g\n",probarriba,gaussintleg_d(Funk2_intmag_STY_gc_p_M_wC,x1,x2,1000),gaussinther_d(Funk2_intmag_STY_gc_p_M_wC,offset,scale,100));
+      }
 
       if(DEBUG2) printf(" Calculo arriba %g old %g x1 %g  x2 % g magn %g err %g magnl %g\n",probarriba,Schechter_M(Mabs,*_lf_STY_gc_p_M_wC),x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC,_mlim_STY_gc_p_M_wC);
 
 
-/*       intsch=lfamo.phistar*(intsup-incom(1+lfamo.alfa,xmin)); */
-/*       printf(" El de sche %g y el nuevo %g    con flux %g err %g  tanto %f\n",Schechter_M(Lumi,lfamo)+ log(dLumdflux(y[i],*co_STY_gc_p_M_wC)),log(probarriba),flux_STY_gc_p_M_wC,errflux_STY_gc_p_M_wC,errflux_STY_gc_p_M_wC/flux_STY_gc_p_M_wC);  */
-/*       printf(" La incom %g y el probabajo %g\n",log(intsch),log(probabajo)); */
-/*       printf("   El de incom %g  y el nuevo %g\n",lfamo.phistar*(intsup-incom(1+lfamo.alfa,xmin)),probabajo); */
-
-      /* Una vez comprobado que Schechter_M funciona bien, lo hago con esa */
-      /*       logL-= log(probarriba)  -log(probabajo);  */    /* Esta hay que decomentarla */
-/*       logLold-= Schechter_M(Lumi,lfamo)-log(intsch); */
       if(probarriba==0 || probabajo==0) logL+=10; /* 10 por poner un número */
-      logL-= log(probarriba) - log(probabajo);   /* Perfectamente testado */
+      logL-= log(probarriba) - log(probabajo);
       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g magn %g err %g\n",i,logL,logLold,Schechter_M(Mabs,lfamo),log(probarriba),log(probabajo),probabajo,xmin,x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC);
 /*       printf(" iobj %d logL %f loglold %f      sch %g int %g (%g)   pa %g pb %g (%g)  xmin %g x1 %f x2 %f\n",i,logL,logLold,Schechter_M(Lumi,lfamo),log(intsch),intsch,log(probarriba),log(probabajo),probabajo,xmin,x1,x2); */
     }
@@ -326,9 +324,8 @@ double Funk1_intMag_STY_gc_p_M_wC(double Mabs)
   double firstint;
 
   _magDistn_i_STY_gc_p_M_wC=mag(_z_i_STY_gc_p_M_wC,Mabs,*_cosmo_STY_gc_p_M_wC);
-  x2=_mlim_STY_gc_p_M_wC; 
-  if(_mlim_STY_gc_p_M_wC>_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC) x2=_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC; 
-
+  /* x2=_mlim_STY_gc_p_M_wC; 
+  if(_mlim_STY_gc_p_M_wC>_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC) x2=_magDistn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC; */
 
   x1=_colorn_i_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC; 
   x2=_colorn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC;
@@ -336,7 +333,7 @@ double Funk1_intMag_STY_gc_p_M_wC(double Mabs)
   /* la integral será entre color-6*errcolor y color+6*errcolor */
   /* los límites se chequean para que la magSel de aplicar este color a la magDist no se salga de mlim */
  
-  if(_mlim_STY_gc_p_M_wC<_magDistn_i_STY_gc_p_M_wC-5*_errColorn_i_STY_gc_p_M_wC) x1=x2-6*_errColorn_i_STY_gc_p_M_wC;
+  /* if(_mlim_STY_gc_p_M_wC<_magDistn_i_STY_gc_p_M_wC-5*_errColorn_i_STY_gc_p_M_wC) x1=x2-6*_errColorn_i_STY_gc_p_M_wC; */
   if(_errColorn_i_STY_gc_p_M_wC==0)
   {
     firstint=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: seguro que así no */
@@ -356,7 +353,7 @@ double Funk2_intmag_STY_gc_p_M_wC(double colornreal)
   double Mabs;
   double logfacLF,logfacerr, logColor;
   double magDistnreal;
-  magDistnreal=colornreal-_magDistn_i_STY_gc_p_M_wC;
+  magDistnreal=colornreal+_magSeln_i_STY_gc_p_M_wC;
   if((_magDistn_i_STY_gc_p_M_wC-colornreal)>_mlim_STY_gc_p_M_wC) return(0); /* mirar si esto está bien */
   else 
   {
@@ -370,7 +367,15 @@ double Funk2_intmag_STY_gc_p_M_wC(double colornreal)
     {
       logColor = lngaussian(colornreal, _color_mean_STY_gc_p_M_wC, _color_stddev_STY_gc_p_M_wC);
     }
+    /* if (_errColorn_i_STY_gc_p_M_wC==0.) este if ya se hace en Funk1
+    {
+      logfacerr=0.0;
+    }
+    else
+    { */
     logfacerr= lngaussian(colornreal,_colorn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC);
+      /* no estoy seguro de si va primero colornreal, pero la función es simétrica respecto a los dos primeros parámetros */
+    /* } */
     return(exp(logfacLF+logfacerr+logColor)); /* aquí va +logColor ? */
   }
 }
