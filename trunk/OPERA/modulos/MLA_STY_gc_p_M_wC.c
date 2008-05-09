@@ -5,6 +5,11 @@
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multimin.h>
+
+/* VEGAS */
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_monte_vegas.h>
+
 #define FTOL  1e-10
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -16,6 +21,8 @@
 #define DEBUG3 1
 #define DEBUGPLOT 0
 #define TOLERR 0.07 
+
+#define VEGAS 1
 
 /* Este contiene STY con colores y errores en los colores */
 
@@ -34,6 +41,11 @@ double Amoe_Funk_STY_gc_p_M_wC_main_gsl_multimin(const gsl_vector *x, void *para
 double Funk2_intmag_STY_gc_p_M_wC(double fluxreal);
 double Funk1_intMag_STY_gc_p_M_wC(double x);
 void   NumericalHessianCovars_STY_gc_p_M_wC(int n,double *magDistn,double *errColorn, double *z, double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf);
+
+/* VEGAS */
+double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p);
+double f1 (double *k1, size_t dim1, void *params1);
+double f2 (double *k2, size_t dim2, void *params2);
 
 struct Schlf_M *_lf_STY_gc_p_M_wC;
 struct cosmo_param *_cosmo_STY_gc_p_M_wC;
@@ -65,6 +77,7 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
   double sigpar[3];
   int i;
   int iter_amo;
+  int iter_amo_VEGAS;
 
   /* Variables to use for vvmax fitting */
   struct Steplf_M  lfvvmax;
@@ -149,6 +162,7 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
   printf(" Computing LF...\n");
 
   iter_amo=0;
+  iter_amo_VEGAS=0;
   while(iter_amo==0) { 
     par[0]=lffit.alfa;  /* Alpha */
     par[1]=lffit.Mstar;
@@ -162,11 +176,19 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
     lf->alfa=par[0];
     lf->Mstar=par[1];
     lf->phistar=exp(par[2]);
-    if(DEBUG) {
+    if(DEBUG)
+    {
       printf(" Solucion MALA\n");
       printf(" Mstar :  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",lf->Mstar,lf->alfa,lf->phistar,log10(lf->phistar));
       printf(" E_log(Lstar):    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lf->errMstar,lf->erralfa,lf->errphistar,lf->errphistar/lf->phistar/log(10.));
-    } 
+    }
+
+    if(VEGAS)
+    {
+      printf("Entering VEGAS\n");
+      iter_amo_VEGAS=Amoeba_d(n,magDistn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_gc_p_M_wC_main_VEGAS);
+    }
+
   }
   /* Info that will be output in mlinfo */
   _MLmax_STY_gc_p_M_wC=Amoe_Funk_STY_gc_p_M_wC_main(n,magDistn,z,par);
@@ -247,7 +269,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
     }
     else 
     {
-      x1=lfamo.Mstar-5; /* 5 por poner un número (debería ser -inf) */
+      x1=lfamo.Mstar-10.0; /* 5 por poner un número (debería ser -inf) */
       x2=Mag(y[i],_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       probabajo=gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npb);
       if(DEBUG2) printf(" Primer abajo %g con 1000 %g x1 %f x2 %f\n",probabajo,gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1-10,x2,1000),x1,x2);
@@ -452,5 +474,165 @@ double Amoe_Funk_STY_gc_p_M_wC_main_gsl_multimin(const gsl_vector *x, void *para
   value=Amoe_Funk_STY_gc_p_M_wC_main(nData, magn, z, lf_param);
   free(lf_param);
   return value;
+}
+
+/* with VEGAS integration */
+double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p)
+{
+  int i; 
+  double logL=0.;
+  double logLold=0.;
+  struct Schlf_M lfamo;
+  double Lstar;
+  double Mabs;
+  double Mlow;
+  double xmin;
+  double Ntot;
+  double offset;
+  double scale;
+  double x1,x2;
+  /* int npa=21;
+  int npb=21; */
+  double probarriba;
+  double probabajo;
+
+  /* VEGAS */
+  const gsl_rng_type *T;
+  gsl_rng *r1;
+  gsl_rng *r2;
+  gsl_rng_env_setup();
+  T = gsl_rng_default;
+  r1 = gsl_rng_alloc(T);
+  r2 = gsl_rng_alloc(T);
+  double res, err;
+  double xl1[2];
+  double xu1[2];
+  double xl2[1];
+  double xu2[1];
+  size_t calls=100;
+  gsl_monte_function F1 = {&f1, 2, p};
+  gsl_monte_function F2 = {&f2, 1, p};
+  /* falta definir la f1 y la f2 -> parecidas a Funk1 y Funk2 */
+
+
+  lfamo.alfa=p[0];
+  lfamo.Mstar=p[1];
+  lfamo.phistar=exp(p[2]);
+
+  _lf_STY_gc_p_M_wC=&lfamo;
+
+  logL=0.;
+  logLold=0.;
+
+  Lstar=pow(10.,-0.4*lfamo.Mstar);
+
+  printf("Inside VEGAS\n");  
+  if(DEBUG3) printf(" Entra con  par0 %g par1 %g par2 %g\n",p[0],p[1],p[2]);
+
+  for(i=0;i<_ndata_STY_gc_p_M_wC;i++) 
+  {
+    _z_i_STY_gc_p_M_wC=y[i];
+    _magDistn_i_STY_gc_p_M_wC=x[i];
+    _magSeln_i_STY_gc_p_M_wC=_magSeln_STY_gc_p_M_wC[i];
+    _colorn_i_STY_gc_p_M_wC=_magDistn_i_STY_gc_p_M_wC-_magSeln_i_STY_gc_p_M_wC;
+    _errColorn_i_STY_gc_p_M_wC=_errColorn_STY_gc_p_M_wC[i];
+    Mabs=Mag(y[i],x[i],*_cosmo_STY_gc_p_M_wC);
+    Mlow=Mag(y[i],_mlim_STY_gc_p_M_wC+_colorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
+    xmin =pow(10.,-0.4*Mlow)/Lstar;
+    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN ? */
+    {
+      logL+=10; 
+    }
+    else 
+    {
+      x1=lfamo.Mstar-10.0; /* 5 por poner un número (debería ser -inf) */
+      x2=Mag(y[i],_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
+      xl1[0]=x1;
+      xu1[0]=x2;
+      /* falta xl1[1] y xu1[1] */
+      gsl_monte_vegas_state *s1 = gsl_monte_vegas_alloc(2);
+      gsl_monte_vegas_integrate (&F1, xl1, xu1, 2, calls/10., r1, s1, &res, &err); /* warm up */
+      if(DEBUG2) printf("Warm up in VEGAS %g %g",res,err);
+      gsl_monte_vegas_integrate (&F1, xl1, xu1, 2, calls, r1, s1, &res, &err);
+      probabajo=res;
+
+      gsl_monte_vegas_free(s1);
+      gsl_rng_free(r1);
+
+      if(DEBUG2) printf(" Primer abajo %g con 1000 %g x1 %f x2 %f\n",probabajo,gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1-10,x2,1000),x1,x2);
+
+      if(DEBUG2) printf(" Calculo abajo %g old %g \n",probabajo,lfamo.phistar*(incom(1+lfamo.alfa,200.)-incom(1+lfamo.alfa,pow(10.,-0.4*Mlow)/Lstar)));
+
+      /* We have to compute them again because Funk? may have overriden them */
+      _z_i_STY_gc_p_M_wC=y[i];
+      _magDistn_i_STY_gc_p_M_wC=x[i];
+      _magSeln_i_STY_gc_p_M_wC=_magSeln_STY_gc_p_M_wC[i];
+      _colorn_i_STY_gc_p_M_wC=_magDistn_i_STY_gc_p_M_wC-_magSeln_i_STY_gc_p_M_wC;
+      _errColorn_i_STY_gc_p_M_wC=_errColorn_STY_gc_p_M_wC[i];
+
+      if(_errColorn_i_STY_gc_p_M_wC==0)
+      {
+        probarriba=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: esto seguro que es así? */
+      }
+      else
+      {
+        offset=_magDistn_i_STY_gc_p_M_wC;
+        scale=_errColorn_i_STY_gc_p_M_wC*sqrt(2.);
+        x1=_colorn_i_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC; 
+        x2=_colorn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC;
+
+        xl2[0]=x1;
+        xu2[0]=x2;
+
+        gsl_monte_vegas_state *s2 = gsl_monte_vegas_alloc(1);
+        gsl_monte_vegas_integrate (&F2, xl2, xu2, 1, calls/10., r2, s2, &res, &err); /* warm up */
+        if(DEBUG2) printf("Warm up in VEGAS %g %g",res,err);
+        gsl_monte_vegas_integrate (&F2, xl2, xu2, 1, calls, r2, s2, &res, &err);
+
+        probarriba=res;
+
+        gsl_monte_vegas_free(s2);
+        gsl_rng_free(r2);
+
+        if(DEBUG2) printf(" parriba %g  con 1000 %g con her %g\n",probarriba,gaussintleg_d(Funk2_intmag_STY_gc_p_M_wC,x1,x2,1000),gaussinther_d(Funk2_intmag_STY_gc_p_M_wC,offset,scale,100));
+      }
+
+      if(DEBUG2) printf(" Calculo arriba %g old %g x1 %g  x2 % g magn %g err %g magnl %g\n",probarriba,Schechter_M(Mabs,*_lf_STY_gc_p_M_wC),x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC,_mlim_STY_gc_p_M_wC);
+
+
+      if(probarriba==0 || probabajo==0) logL+=10; /* 10 por poner un número */
+      logL-= log(probarriba) - log(probabajo);
+      if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g magn %g err %g\n",i,logL,logLold,Schechter_M(Mabs,lfamo),log(probarriba),log(probabajo),probabajo,xmin,x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC);
+    }
+  }
+  /* Aqui viene la parte de la poissoniana de npob */
+  if (_color_stddev_STY_gc_p_M_wC==0.)
+  {
+    Ntot=Int_sch_M(lfamo,_zlow_STY_gc_p_M_wC,_zup_STY_gc_p_M_wC,_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC)*_strrad_STY_gc_p_M_wC/4./M_PI; 
+  }
+  else
+  {
+    Ntot=Int_sch_M_wC(lfamo,_zlow_STY_gc_p_M_wC,_zup_STY_gc_p_M_wC,_color_mean_STY_gc_p_M_wC,_color_stddev_STY_gc_p_M_wC,_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC)*_strrad_STY_gc_p_M_wC/4./M_PI; 
+  }
+  logL-=    (_ndata_STY_gc_p_M_wC*log(Ntot) - Ntot - gammln((double)_ndata_STY_gc_p_M_wC+1.)); 
+  
+  if(DEBUG2) printf(" NTOT %f ndata*log(Ntot) %f gamm %f\n",Ntot,_ndata_STY_gc_p_M_wC*log(Ntot),gammln((double)_ndata_STY_gc_p_M_wC)+1.);
+
+  _iter_m_STY_gc_p_M_wC++;
+  if(DEBUG) printf(" Iter %d  logL %f logLold %f par0 %g par1 %g par2 %g\n",_iter_m_STY_gc_p_M_wC,logL,logLold,p[0],p[1],p[2]);
+  return(logL); 
+}
+
+double f1 (double *k1, size_t dim1, void *params1)
+{
+  double firstint=0.;
+  firstint=Funk1_intMag_STY_gc_p_M_wC(k1[0]);
+  return firstint;
+}
+double f2 (double *k2, size_t dim2, void *params2)
+{
+  double firstint=0.;
+  Funk2_intmag_STY_gc_p_M_wC(k2[0]);
+  return firstint;
 }
 
