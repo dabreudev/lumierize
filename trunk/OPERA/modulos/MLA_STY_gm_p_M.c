@@ -225,7 +225,8 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
   {
     _z_i_STY_gm_p_M=y[i];
     _magn_i_STY_gm_p_M=x[i];
-    _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i];
+    /* _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i]+0.001; */
+    _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i]+GSL_SQRT_DBL_MIN;
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gm_p_M);
     Mlow=Mag(y[i],_mlim_STY_gm_p_M,*_cosmo_STY_gm_p_M);
     xmin =pow(10.,-0.4*Mlow)/Lstar;
@@ -249,7 +250,8 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
       /* We have to compute them again because Funk? may have overriden them */
       _z_i_STY_gm_p_M=y[i];
       _magn_i_STY_gm_p_M=x[i];
-      _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i];
+      /* _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i]+0.001; */
+      _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i]+GSL_SQRT_DBL_MIN;
 
       offset=_magn_i_STY_gm_p_M;
       scale=_errmagn_i_STY_gm_p_M*sqrt(2.);

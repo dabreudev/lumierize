@@ -12,9 +12,9 @@
 #define FTOL3 1e-7
 #define MAXITER  1000
 #define VERBOSE 0
-#define DEBUG  1
-#define DEBUG2 1
-#define DEBUG3 1
+#define DEBUG  0
+#define DEBUG2 0
+#define DEBUG3 0
 #define DEBUGPLOT 0
 
 /* Estructura para contener los parámetros */
@@ -73,7 +73,8 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   _magSeln_STY_p_M_wC=magSeln;
   _magDistn_STY_p_M_wC=magDistn;
   _color_mean_STY_p_M_wC=color_mean;
-  _color_stddev_STY_p_M_wC=color_stddev;
+  /* _color_stddev_STY_p_M_wC=color_stddev+0.001; */
+  _color_stddev_STY_p_M_wC=color_stddev+GSL_SQRT_DBL_MIN;
 
   y=vector_d(n);
   _iter_m_STY_p_M_wC=0;
