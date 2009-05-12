@@ -1,0 +1,22 @@
+COMMENT  Fichero de datos para BuhoFits                                        
+COMMENT  1         2         3         4         5         6         7         
+COMMENT  0123456789012345678901234567890123456789012345678901234567890123456789
+COMMENT                                                                        
+COMMENT =======================================================================
+IMAGE   = '503.1.4.51.fits'    / Nombre de la imagen FITS de entrada           
+SKY     = 'sky503.1.4.51.fits' / Nombre de la imagen FITS con el fondo de cielo
+SIG     = 'sig503.1.4.51.fits' / Nombre de la imagen FITS con la sigma de cielo
+ERRIMAGE= '503.1.4.51.e.fits'  / Nombre de la imagen de errores                
+ERRSKY  = 'ersk503.1.4.51.fits'/ Nombre de la imagen de errores del cielo      
+VY      =                  300 / Tamanyo Y de la ventana                       
+DEVICE  = '?'                  / Dispositivo grafico de salida                 
+NSIG    =                  1.2 / No. de sigmas de deteccion                    
+SNWHOLE =                 50.0 / Minimum object signal to noise ratio          
+RFIXAP  =                    3 / Radius for fixed aperture calculation         
+MINPIX  =                   20 / No. minimo de pixels                          
+OUTCAT  = '503.1.4.51.buho'    / Nombre del fichero de salida                  
+GRAPHMOD=                    N / Modo Grafico Full, Compress, None             
+PGBEGX  =                   20 / No. graficos en X (solo para el modo Compress)
+PGBEGY  =                   20 / No. graficos en Y (solo para el modo Compress)
+PGASK   =                    1 / PGASK                                         
+COMMENT =======================================================================

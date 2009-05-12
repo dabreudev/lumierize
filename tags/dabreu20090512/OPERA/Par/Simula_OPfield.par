@@ -1,0 +1,56 @@
+COMMENT  Parameter file for SimulaOP                                           
+COMMENT  Please do not insert any extra character in this file. Just overwrite 
+COMMENT  Instrumentation parameters                                            
+DIAMETER=             8.115000 / Telescope diameter ( in meters)               
+FOCAL   =            25.156500 / Telescope focal    ( in meters)               
+PRISMANG=             1.440000 / Prism angle        ( in degrees)              
+EXPTIME =           1800.00000 / Exposure time      ( in seconds)              
+SKYFILE = 'cielo.sillaem.dat'  / Sky spectrum file                             
+PIXSIZE =            24.000000 / Pixel size of the CCD (in microns)            
+GAIN    =             1.420000 / Gain of the CCD    ( in e/ADU  )              
+NOISE_E =             5.050000 / Electron noise     ( in e/s    )              
+BIAS    =             190.0000 / Bias of the CCD    ( in   ADU  )              
+DARK    =             0.000000 / Darkness current of the CCD ( in ADU/s)       
+TOTEFF  =             0.280000 / Total efficiency of the system                
+NAXIS1  =                  500 / number of CCD pixels in X direction           
+NAXIS2  =                  500 / number of CCD pixels in X direction           
+FILTERFI= 'z_special.dat'      / File with filter response                     
+QEFFFILE= 'qeFors1.dat'        / Quantum efficiency file                       
+NFILE   = 'prism_cte.dat'      / Prism refraction index                        
+SEEING  =             0.800000 / Seeing of the observations ( arcseconds)      
+PHOTBAND= 'I'                  / Quantum efficiency file                       
+COMMENT  Galaxy parameters                                                     
+MAGMIN  =            20.250000 / Apparent I magnitude ( integrated)  Min       
+MAGMAX  =            26.000000 / Apparent I magnitude ( integrated)  Max       
+EWMIN   =             0.000000 / EW of Halpha (Angstroms)            Min       
+EWMAX   =           100.000000 / EW of Halpha (Angstroms)            Max       
+REFFMIN =            00.100000 / Efective radius of the galaxy (arcsec)  Min   
+REFFMAX =             0.100000 / Efective radius of the galaxy (arcsec)  Max   
+FWHMMIN =            10.000000 / FWHM of the Halpha line (Angstroms)   Min     
+FWHMMAX =            10.000000 / FWHM of the Halpha line (Angstroms)   Max     
+ZMIN    =             0.390000 / Redshift of the galaxy                 Min    
+ZMAX    =             0.400000 / Redshift of the galaxy                 Max    
+ECCMIN  =             0.000000 / Eccentricity of the galaxy             Min    
+ECCMAX  =             0.000000 / Eccentricity of the galaxy             Max    
+PAMAX   =             0.000000 / Position angle (degrees)               Max    
+PAMIN   =             0.000000 / Position angle (degrees)               Min    
+COMMENT  Algorithm parameters. Do not change if you are not sure what you do   
+LDOMIN  =          8800.000000 / Beginning wavelenght of the algorithm         
+LDOMAX  =          9500.000000 / End wavelentgh of the algorithm               
+NLDO    =                   80 / Number of steps in wavelentgh calculation     
+NEW     =                  003 / Number of steps in EW grid                    
+NMAG    =                   12 / Number of steps in apparente magnitude grid   
+NZ      =                   02 / Number of steps in redshift grid              
+NFWHM   =                   01 / Number of steps in FWHM grid                  
+NREFF   =                    1 / Number of steps in effective radius grid      
+NECCEN  =                    1 / Number of steps in eccentrity grid            
+NPA     =                    1 / Number of steps in position angle grid        
+NGRID   =                   01 / Number of galaxies in every dot of the grid   
+SATURA  =                  000 / Saturation counts                             
+SPADIST =                    0 / Spatial Distribution (0=random, -1=net)       
+PROFILE =                    3 / Spatial Profile (0=Step 1=Exp 2=r1/4 3=Gauss) 
+COMMENT  Output parameters                                                     
+FITSFILE= 'sim_FORS_zs.fits'   / Output FITS image  file                       
+CATFILE = 'sim_FORS_zs.cat'    / Cat file with information about each galaxy   
+INPUTCAT= 'inp_FORS.cat'       / Paaat                                         
+END                                                           
