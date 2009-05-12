@@ -5,14 +5,19 @@
 #define EPS 3.0e-7
 #define FPMIN 1.0e-30
 
+#define M_LN2_2_M_LNPI_2 0.918938533205 /* M_LN2 / 2. + M_LNPI / 2. */
+#define M_SQRT_2PI 2.50662827463 /* sqrt(2.*M_PI) */
+
 double gaussian(double x,double xmean,double sigma) 
 {
-  return(exp(-(x-xmean)*(x-xmean)/2./sigma/sigma)/sqrt(2.*M_PI)/sigma);
+  //return(exp(-(x-xmean)*(x-xmean)/2./sigma/sigma)/sqrt(2.*M_PI)/sigma);
+  return(exp(-(x-xmean)*(x-xmean)/2./sigma/sigma)/M_SQRT_2PI/sigma);
 }
 
 double lngaussian(double x,double xmean,double sigma) 
 {
-  return(-(x-xmean)*(x-xmean)/2./sigma/sigma - M_LN2 / 2. - M_LNPI / 2. - log(sigma));
+  //return(-(x-xmean)*(x-xmean)/2./sigma/sigma - M_LN2 / 2. - M_LNPI / 2. - log(sigma));
+  return(-(x-xmean)*(x-xmean)/2./sigma/sigma - M_LN2_2_M_LNPI_2 - log(sigma));
 }
 
 double poidist(double x, double mean)
