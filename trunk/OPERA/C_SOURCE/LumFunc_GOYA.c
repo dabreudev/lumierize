@@ -1,4 +1,4 @@
-#include "modulos.h"  
+#include "modulos.h"
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 
@@ -56,6 +56,16 @@ struct sample_data_wC_errColor
   double *errColor;
 };
 
+struct sample_data_gmz_wC
+{
+  int ngalax;
+  double *z;
+  double *errz;
+  double *magSel;
+  double *magDist;
+  double *errMagDist;
+};
+
 struct lf_param
 {
   double mag_min;
@@ -85,6 +95,7 @@ void get_sample(struct sample_data *sample);
 void get_sample_sel_cal(struct sample_data_sel_cal *sample);
 void get_sample_mag_err(struct sample_data_mag_err *sample);
 void get_sample_wC_errColor(struct sample_data_wC_errColor *sample);
+void get_sample_gmz_wC(struct sample_data_gmz_wC *sample);
 void get_sample_ceg(struct sample_data *sample);
 void set_lf_parameters(struct lf_param *lf);
 void set_lf_ceg(struct lum_func_ceg *lf);
@@ -94,6 +105,7 @@ void STY();
 void STY_MAG_ERR();
 void STY_wC();
 void STY_wC_errColor();
+void STY_gmz_M_wC();
 void SWML();
 void CEG();
 void Calc_Num();
@@ -132,6 +144,7 @@ int main()
     printf(" N Calculate luminosity function by STY method with gaussian errors in magnitude\n");
     printf(" O Calculate luminosity function by STY_wC method\n");
     printf(" P Calculate luminosity function by STY_wC with gaussian errors in color\n");
+    printf(" R Calculate luminosity function by STY_wC with gaussian errors in mag and z\n");
     printf(" W Calculate luminosity function by SWML maximum likelihood method\n"); 
 /*    printf(" O Calculate luminosity function by C- method\n");  */
     printf(" G Generate a random catalogue for a given LF by Montecarlo simulations in magnitudes\n");
@@ -175,6 +188,11 @@ int main()
        set_cosmology();
        STY_wC_errColor();
        break;
+    case 'R':
+    case 'r':
+       set_cosmology();
+       STY_gmz_M_wC();
+       break;
     case 'W':
     case 'w':
       set_cosmology();
@@ -184,6 +202,7 @@ int main()
     case 'l':
       set_cosmology();
       CEG();
+      break;
     case 'G':
     case 'g':
       Generate_Cat_M();
@@ -287,7 +306,7 @@ void STY()
     fprintf(fout, "%g\t", lfsch_L.errphistar);
     fprintf(fout, "%g\t", lfsch_L.errphistar/lfsch_L.phistar/log(10.));
     fprintf(fout, "%g\t", mlprocess.MLmax);
-    fprintf(fout, "%g\n", mlprocess.nIter);
+    fprintf(fout, "%i\n", mlprocess.nIter);
     fclose(fout);
   }
   else 
@@ -366,7 +385,7 @@ void STY_wC()
   double color_mean=0.;
   double color_stddev=0.;
 
-  int status;
+  int status=0;
   
   struct Schlf_M lfsch_M;
 
@@ -602,6 +621,163 @@ void STY_wC_errColor()
     mlim=readd(mlim);
     /* printf("ngalax %i\n", sample.ngalax); */
     if(poissonflag) status=MLA_STY_gc_p_M_wC(sample.ngalax,sample.magSel,sample.magDist,color_mean,color_stddev,sample.errColor,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
+    /* else            status=  MLA_STY_M(sample.ngalax,sample.mag,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess); */
+    else printf("This method is not (yet) available (only poisson)\n");
+    printf("\n Solutioner exited with error status %d\n",status);
+    printf("\n   Solution found at iteration %d\n",mlprocess.nIter);
+    printf("\n   Likelihood function: %g\n",mlprocess.MLmax);
+    printf(" Mstar:  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",lfsch_M.Mstar,lfsch_M.alfa,lfsch_M.phistar,log10(lfsch_M.phistar));
+    printf(" E_Mstar:    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lfsch_M.errMstar,lfsch_M.erralfa,lfsch_M.errphistar,lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+    printf(" Covar(Lstar,alpha): %g\n",lfsch_M.covaralfaMstar);
+    printf(" Covar(Lstar,Phistar): %g Covar(Lstar,log(Phistar)): %g\n",lfsch_M.covarphistarMstar,lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
+    printf(" Covar(alpha,Phistar): %g Covar(alpha,log(Phistar)): %g\n",lfsch_M.covaralfaphistar,lfsch_M.covaralfaphistar/lfsch_M.phistar/log(10.));
+    /* dabreu */
+    printf("##################################################\n");
+    printf("#FL_HEAD Mstar alpha Phistar log\n");
+    printf("#FL_HEAD E_Mstar E_alpha E_Phistar log\n");
+    printf("#FL_DATA %g %g %g %g\n",lfsch_M.Mstar,lfsch_M.alfa,lfsch_M.phistar,log10(lfsch_M.phistar));
+    printf("#FL_ERR %g %g %g %g\n",lfsch_M.errMstar,lfsch_M.erralfa,lfsch_M.errphistar,lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+/*    printf(" Covar(Lstar,alpha): %g\n",lfsch_M.covaralfaMstar);
+    printf(" Covar(Lstar,Phistar): %g Covar(Lstar,log(Phistar)): %g\n",lfsch_M.covarphistarMstar,lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
+    printf(" Covar(alpha,Phistar): %g Covar(alpha,log(Phistar)): %g\n",lfsch_M.covaralfaphistar,lfsch_M.covaralfaphistar/lfsch_M.phistar/log(10.));
+    */
+
+    /* fichero para los resultados */
+    printf(" Input file name to write results: ");
+    reads(resultFileName,resultFileName);
+    if((fout=fopen(resultFileName,"w")) ==NULL) {
+      printf(" Couldn't open %s for writing\n",resultFileName);
+      return;
+    }
+    fprintf(fout, "# 1 M_STAR\n");
+    fprintf(fout, "# 2 ALPHA\n");
+    fprintf(fout, "# 3 PHISTAR\n");
+    fprintf(fout, "# 4 LOG_PHISTAR\n");
+    fprintf(fout, "# 5 ERR_M_STAR\n");
+    fprintf(fout, "# 6 ERR_ALPHA\n");
+    fprintf(fout, "# 7 ERR_PHISTAR\n");
+    fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
+    fprintf(fout, "# 9 ML_MAX\n");
+    fprintf(fout, "# 10 N_ITER\n");
+    fprintf(fout, "%g\t", lfsch_M.Mstar);
+    fprintf(fout, "%g\t", lfsch_M.alfa);
+    fprintf(fout, "%g\t", lfsch_M.phistar);
+    fprintf(fout, "%g\t", log10(lfsch_M.phistar));
+    fprintf(fout, "%g\t", lfsch_M.errMstar);
+    fprintf(fout, "%g\t", lfsch_M.erralfa);
+    fprintf(fout, "%g\t", lfsch_M.errphistar);
+    fprintf(fout, "%g\t", lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", mlprocess.MLmax);
+    fprintf(fout, "%i\n", mlprocess.nIter);
+    fclose(fout);
+  }
+
+  printf(" Do you want plots of the LF (1=yes, 0=no)?\n");
+  plots=readf(plots);
+  if(plots) {
+     cpgopen("?");
+     cpgask(0);
+     cpgclos();
+  }
+}
+
+/* Ya tenemos un nuevo miembro en la casa */
+void STY_gmz_M_wC() 
+{
+  static struct lf_param sty;
+  struct sample_data_gmz_wC sample;
+  static double mlim=0;
+  struct fermifsel_M fsel;
+  double zlow;
+
+  double color_mean=0.;
+  double color_stddev=0.;
+
+  int status=0;
+  
+  struct Schlf_M lfsch_M;
+
+  static int poissonflag=0;
+
+  static int plots=0; /* para no hacer las gráficas */
+  FILE *fout;
+  static char resultFileName[200]="";
+  
+  /* Information about the ML process */
+  struct MLProcessInfo mlprocess;
+  
+  get_sample_gmz_wC(&sample);
+  printf("Input the color mean:\n");
+  color_mean=readd(color_mean);
+  printf("Input the color stddev:\n");
+  color_stddev=readd(color_stddev);
+  set_lf_parameters(&sty);
+  zlow=sty.zlow;
+  zlow = (zlow < ZMIN ? ZMIN : zlow);
+  
+  printf(" The following question allows to use an improvement of STY that allows to \ncompute");
+  printf(" normalization using Maximum Likelihood. It assumes that number of \ndetected sources");
+  printf(" follows a Poisson event. It takes into account Poisson \nerrors both in Mstar, alfa");
+  printf(" and Phi_star. These errors are used to be \nlarger than for traditional method, wich");
+  printf(" does not take into account the \ninfluence of Poisson detections in Mstar, alfa and Phi_star\n");
+  printf(" Use modified method to compute normalization at ML time (0=no/1=yes)? \n");
+  poissonflag=readi(poissonflag);
+ 
+  if(sty.islum) 
+  {
+    printf(" This method is not (yet) available for luminosities (only for magnitudes).\n");
+    /* printf(" Input the limiting flux: ");
+    flim=readd(flim);
+    if(poissonflag) status=MLA_STY_p_L(sample.ngalax,sample.lum,sample.z,flim,sty.area,zlow,sty.zup,cosmo,&lfsch_L,&mlprocess);
+    else            status=  MLA_STY_L(sample.ngalax,sample.lum,sample.z,flim,sty.area,zlow,sty.zup,cosmo,&lfsch_L,&mlprocess);
+    printf("\n Solutioner exited with error status %d\n",status);
+    printf("\n   Solution found at iteration %d\n",mlprocess.nIter);
+    printf("\n   Likelihood function: %g\n",mlprocess.MLmax);
+    printf(" log(Lstar (W)):  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",log10(lfsch_L.Lstar),lfsch_L.alfa,lfsch_L.phistar,log10(lfsch_L.phistar));
+    printf(" E_log(Lstar):    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lfsch_L.errLstar/lfsch_L.Lstar/log(10.),lfsch_L.erralfa,lfsch_L.errphistar,lfsch_L.errphistar/lfsch_L.phistar/log(10.));
+    printf(" Covar(Lstar,alpha): %g Covar(log(Lstar),alpha): %g\n",lfsch_L.covaralfaLstar,lfsch_L.covaralfaLstar/lfsch_L.Lstar/log(10.));
+    printf(" Covar(Lstar,Phistar): %g Covar(log(Lstar),log(Phistar)): %g\n",lfsch_L.covarphistarLstar,lfsch_L.covarphistarLstar/lfsch_L.Lstar/log(10.)/lfsch_L.phistar/log(10.));
+    printf(" Covar(alpha,Phistar): %g Covar(alpha,log(Phistar)): %g\n",lfsch_L.covaralfaphistar,lfsch_L.covaralfaphistar/lfsch_L.phistar/log(10.));
+    printf("##################################################\n");
+    printf("#FL_HEAD logLstar alpha Phistar log\n");
+    printf("#FL_HEAD E_logLstar E_alpha E_Phistar log\n");
+    printf("#FL_DATA %g %g %g %g\n",log10(lfsch_L.Lstar),lfsch_L.alfa,lfsch_L.phistar,log10(lfsch_L.phistar));
+    printf("#FL_ERR %g %g %g %g\n",lfsch_L.errLstar/lfsch_L.Lstar/log(10.),lfsch_L.erralfa,lfsch_L.errphistar,lfsch_L.errphistar/lfsch_L.phistar/log(10.)); */
+
+    /* dabreu */
+    /* fichero para los resultados */
+    /* printf(" Input file name to write results: ");
+    reads(resultFileName,resultFileName);
+    if((fout=fopen(resultFileName,"w")) ==NULL) {
+      printf(" Couldn't open %s for writing\n",resultFileName);
+      return;
+    }
+    fprintf(fout, "# 1 LOG_L_STAR\n");
+    fprintf(fout, "# 2 ALPHA\n");
+    fprintf(fout, "# 3 PHISTAR\n");
+    fprintf(fout, "# 4 LOG_PHISTAR\n");
+    fprintf(fout, "# 5 ERR_LOG_L_STAR\n");
+    fprintf(fout, "# 6 ERR_ALPHA\n");
+    fprintf(fout, "# 7 ERR_PHISTAR\n");
+    fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
+    fprintf(fout, "%g\t", log10(lfsch_L.Lstar));
+    fprintf(fout, "%g\t", lfsch_L.alfa);
+    fprintf(fout, "%g\t", lfsch_L.phistar);
+    fprintf(fout, "%g\t", log10(lfsch_L.phistar));
+    fprintf(fout, "%g\t", lfsch_L.errLstar/lfsch_L.Lstar/log(10.));
+    fprintf(fout, "%g\t", lfsch_L.erralfa);
+    fprintf(fout, "%g\t", lfsch_L.errphistar);
+    fprintf(fout, "%g\n", lfsch_L.errphistar/lfsch_L.phistar/log(10.));
+    fclose(fout); */
+  }
+  else 
+  {
+    printf(" Input the limiting magnitude: ");
+    mlim=readd(mlim);
+    fsel.magcut=mlim;
+    //fsel.deltamag=0.001; /* for now we are not using the Fermi selection function, but it is implemented for testing */
+    fsel.deltamag=0.;
+    if(poissonflag) status=MLA_STY_gmz_p_f_M_wC(sample.ngalax,sample.magSel,sample.magDist, sample.errMagDist,color_mean,color_stddev,sample.z,sample.errz,fsel,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
     /* else            status=  MLA_STY_M(sample.ngalax,sample.mag,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess); */
     else printf("This method is not (yet) available (only poisson)\n");
     printf("\n Solutioner exited with error status %d\n",status);
@@ -1019,7 +1195,7 @@ void VVmax()
   double L=0;
 /*   int vol; */
   double zmax;
-  double *x,*y,*sigy,*yfit;
+  //double *x,*y,*sigy,*yfit;
   double dm=0;
   double dl=0;
 
@@ -1041,12 +1217,12 @@ void VVmax()
 
   /* Variables para el ajuste a Schechter */
   double chisq;
-  double dum1,dum2,dum3;
-  int nfit;
+  //double dum1,dum2,dum3;
+  //int nfit;
 
   /* Variables para los plots */
-  int pg1,pg2;
-  double ymin,ymax;
+  int pg1=0,pg2;
+  //double ymin,ymax;
   /* dabreu */
   static int plots=0; /* para no hacer gráficas */
 
@@ -1434,11 +1610,14 @@ void VVmax()
     {
       fprintf(fout, "# 1 MAG\n");
       fprintf(fout, "# 2 LN_VVMAX\n");
+      fprintf(fout, "# 3 VVMAX\n");
+      fprintf(fout, "# 4 ERR_LN_VVMAX\n");
     
       for(i=0;i<lf_vvmax_M.nbin;i++)
       {
         fprintf(fout, "%g\t", lf_vvmax_M.magni[i]);
         fprintf(fout, "%g\t", lf_vvmax_M.lnlf[i]);
+        fprintf(fout, "%g\t%g",exp(lf_vvmax_M.lnlf[i]), lf_vvmax_M.errlnlf[i]);
         fprintf(fout, "\n");
       }
       fclose(fout);
@@ -2294,6 +2473,102 @@ void get_sample_mag_err(struct sample_data_mag_err *sample)
 
 }
 
+void get_sample_gmz_wC (struct sample_data_gmz_wC *sample)
+{
+  /* to read catalog with magsel, magdist, errmagdist, z, errz */
+  char opt;
+  static char datafile[300]="";
+  static int colz=2, colerrz=3,colmagSel=4,colmagDist=5,colerrMagDist=6;
+  double *z,*errz,*magSel,*magDist,*errMagDist;
+  int *log1,*log2,*log3,*log4,*log5;
+  int ndat;
+  int i,j=0;
+
+  printf("\n F Get sample data by file\n"); 
+  printf(" K Get sample data by keyboard\n");
+  opt=readc('F');  
+  switch (opt)
+  { 
+  case 'F':
+  case 'f':
+    printf(" Input file name with data: ");
+    reads(datafile,datafile);
+    printf(" Input column with z data: ");
+    colz=readi(colz);
+    printf(" Input column with errz data: ");
+    colerrz=readi(colerrz);
+    printf(" Input column with selection magnitude data: ");
+    colmagSel=readi(colmagSel);
+    printf(" Input column with distribution magnitude data: ");
+    colmagDist=readi(colmagDist);
+    printf(" Input column with distribution magnitude error data: ");
+    colerrMagDist=readi(colerrMagDist);
+    
+    ndat=FileNLin(datafile);
+    z          =malloc(ndat*sizeof(double));
+    errz       =malloc(ndat*sizeof(double));
+    magSel     =malloc(ndat*sizeof(double));
+    magDist    =malloc(ndat*sizeof(double));
+    errMagDist =malloc(ndat*sizeof(double));
+    log1=malloc(ndat*sizeof(int));
+    log2=malloc(ndat*sizeof(int));
+    log3=malloc(ndat*sizeof(int));
+    log4=malloc(ndat*sizeof(int));
+    log5=malloc(ndat*sizeof(int));
+    sample->magSel=malloc(ndat*sizeof(double));
+    sample->magDist=malloc(ndat*sizeof(double));
+    sample->z  =malloc(ndat*sizeof(double));
+    sample->errz  =malloc(ndat*sizeof(double));
+    sample->errMagDist=malloc(ndat*sizeof(double));
+    ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
+    ReadDoublecol(datafile,colerrz,errz,log2,&ndat);
+    ReadDoublecol(datafile,colmagSel,magSel,log3,&ndat);
+    ReadDoublecol(datafile,colmagDist,magDist,log4,&ndat);
+    ReadDoublecol(datafile,colerrMagDist,errMagDist,log5,&ndat);
+    for(i=0;i<ndat;i++)
+    {
+      if(log1[i] && log2[i] && log3[i] && log4[i] && log5[i])
+      {
+        sample->z[j]=(double)z[i];
+        sample->errz[j]=(double)errz[i];
+	sample->magSel[j]=(double)magSel[i];
+	sample->magDist[j]  =(double)magDist[i];
+	sample->errMagDist[j]  =(double)errMagDist[i];
+	j++;
+      }
+    }
+    sample->ngalax=j;
+    break;
+  case 'K':
+  case 'k':
+    //j=0;
+    printf("You are really crazy...\n");
+    printf("...try with other method with less numbers.\n");
+    /*sample->z  =malloc(sizeof(double));
+    sample->mag=malloc(sizeof(double));
+    sample->mag_err=malloc(sizeof(double));
+    opt='y';
+    while(opt=='y' ){
+      printf(" Input redshift  : ");
+      sample->z[j]=(double)readf(0.);
+      printf(" Input magnitude : ");
+      sample->mag[j]=(double)readf(0.);
+      printf(" Input magnitude error : ");
+      sample->mag_err[j]=(double)readf(0.);
+      j++;
+      sample->z  =realloc(sample->z  ,(j+1)*sizeof(double));
+      sample->mag=realloc(sample->mag,(j+1)*sizeof(double));
+      sample->mag_err=realloc(sample->mag_err,(j+1)*sizeof(double));
+      
+      printf(" Other?: ");
+      opt=readc('y');
+	
+    }
+    sample->ngalax=j+1; */
+    break;
+  }
+}
+
 void get_sample_ceg(struct sample_data *sample)
 {
 
@@ -2501,11 +2776,11 @@ void Generate_Cat_M()
   merror=malloc(nobj*sizeof(double));
   mobserved=malloc(nobj*sizeof(double));
 
-  printf(" Number of galaxies generated: %d\n",nobj);
+  printf(" Number of galaxies generated: %lld\n",nobj);
 
 /*   Teordist(schlf.Mstar,schlf.alfa,zlow,zup,mlow,mup) */
 
-  printf("\n 000000000 / %9d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
+  printf("\n 000000000 / %9lld\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
   for(i=0;i<nobj;i++) {
     printf("%9d\b\b\b\b\b\b\b\b\b",i);
 /*     //printf(" %d\n",i); */
@@ -2551,7 +2826,7 @@ void Generate_Cat_M()
     printf(" Couldn't open %s for writing\n",filename);
     return;
   }
-  fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
+  fprintf(fout,"# Simulated catalog generated by Lumfunc with %lld objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent magnitude limits: %f-%f\n",zlow,zup,mlow,mup);
   fprintf(fout,"# Schechter function: Mstar %f Phistar %f Alfa %f\n",schlf_M.Mstar,schlf_M.phistar,schlf_M.alfa);
   fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
@@ -2904,7 +3179,7 @@ void Generate_Cat_M_wC()
   static double mDistLow=0, mDistUp=0, MDistLow=0, MDistUp=0;
   static double color_mean=0, color_stddev=0;
   static double colorError_mean=0, colorError_stddev=0;
-  double Mlow,Mup;
+  //double Mlow,Mup;
   static double zlow=0,zup=0.5;
   static double area=41252.;
   double zerror_mean=0, zerror_stddev=0;
@@ -2995,14 +3270,14 @@ void Generate_Cat_M_wC()
   colorError=malloc(nobj*sizeof(double));
   colorObserved=malloc(nobj*sizeof(double));
 
-  printf(" Number of galaxies generated: %d\n",nobj);
+  printf(" Number of galaxies generated: %lld\n",nobj);
 
   /* Setting the approx limiting magnitude in the originally distributed mag */
   /* mDistLow = mSelLow + color_mean + 5 * color_stddev;
   mDistUp  = mSelUp  + color_mean - 5 * color_stddev; */
   /* removed, now using specific color for each object */  
 
-  printf("\n 000000000 / %9d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
+  printf("\n 000000000 / %9lld\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
   for(i=0;i<nobj;i++) {
     printf("%9d\b\b\b\b\b\b\b\b\b",i);
 /*     //printf(" %d\n",i); */
@@ -3022,6 +3297,7 @@ void Generate_Cat_M_wC()
     while((zerror[i] = zerror_mean + Gasdev() * zerror_stddev) < 0);
     zobserved[i] = zsample[i] + Gasdev()*zerror[i];
     mDistObserved[i] = mSelObserved[i] + colorObserved[i];
+    if(DEBUG2) printf("z = %g\n", zsample[i]);
     if(mSel[i] > mSelLow)  /* This galaxy does not pass the selection function */
     { 
       /* i--; */
@@ -3059,7 +3335,7 @@ void Generate_Cat_M_wC()
     printf(" Couldn't open %s for writing\n",filename);
     return;
   }
-  fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
+  fprintf(fout,"# Simulated catalog generated by Lumfunc with %lld objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent mag limits: %f-%f\n",zlow,zup,mDistLow,mDistUp);
   fprintf(fout,"# Schechter function: Mstar %f Phistar %f Alfa %f\n",schlf_M.Mstar,schlf_M.phistar,schlf_M.alfa);
   fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
