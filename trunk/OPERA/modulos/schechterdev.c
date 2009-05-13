@@ -1,7 +1,9 @@
 #include "modulos.h"
+#include <gsl/gsl_sf_gamma.h>
 
 #define NSTEP_LF 200
-#define NSTEP_Z  500
+//#define NSTEP_Z  500
+#define NSTEP_Z  5000
 #define NSTEP_MAG 500
 #define NSTEP_MAG_FSEL 500
 #define NSTEP_MAGAP_FSEL 200
@@ -10,8 +12,6 @@
 #define ZMIN 0.00001
 #define DEBUG 0
 #define DEBUG2 0
-
-
 
 double Schechterdev_M(struct Schlf_M lf, double Mlow,double Mup) {
   double xmin,xmax; /* Corresponden a los valores limites de x=L/L* */
@@ -46,23 +46,26 @@ double Schechterdev_M(struct Schlf_M lf, double Mlow,double Mup) {
   else return(0);
 }
 
-double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mup, struct cosmo_param cosmo) {
+double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mup, struct cosmo_param cosmo)
+{
   
   int nstep_lf=1000;
   int nstep_z=1000;
-  int i,j;
+  int i; //,j;
   double ri;
-  double z,logz,M;
+  double z,logz; //,M;
   double rr;
   double Mlow,Mup;
   double sch_int=0;
+  //double sch_int2=0;
+  double Llow,Lup,Lstar;
   double Dang_DH;  /* Distancia angular segun  Hogg astroph/9905116 */
   double E;        /* Funcion E. */
   double dVdz;      /* Los factores anteriores , para calcular dVdz */
   static double fz[NSTEP_Z],fz_sum[NSTEP_Z],flogz[NSTEP_Z]; /* //fz es la funcion distribucion en z, y fz_sum es la integral */
   static double fz_int;
   double dz;
-  double elev,tmp;
+  //double elev,tmp; /* integración "a pelo" */
   static double zplot[NSTEP_Z],logzplot[NSTEP_Z];
   static double Mstarold,alfaold,zupold,zlowold,mlowold,mupold;
   int oldflag=0;
@@ -96,14 +99,21 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
       /*       Aqui integro la funcion de Schechter por enesima vez */
       sch_int=0;
       if(lf.Mstar-Mup> 5 && Mlow-lf.Mstar>0 ) Mup=lf.Mstar-5.; /*  Para que irse tan lejos!, si es cero */
-      for(j=0;j<nstep_lf;j++) {
+      /* for(j=0;j<nstep_lf;j++) {
         M=Mlow+j*(Mup-Mlow)/(nstep_lf-1.);      
         elev=pow(10.,0.4*(lf.Mstar-M));
         tmp=pow(elev,lf.alfa+1.);  
         tmp=tmp*exp(-elev);
         sch_int+=tmp;
-      }
-      sch_int*=(Mlow-Mup)/nstep_lf;
+      } sabemos la forma analítica */
+      //sch_int*=(Mlow-Mup)/nstep_lf;
+      Llow=pow(10.,-0.4*Mlow);
+      Lup=pow(10.,-0.4*Mup);
+      Lstar=pow(10.,-0.4*lf.Mstar);
+      sch_int = gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar);
+      //if(DEBUG) printf("zplot = %g sch_int = %g sch_int2 = %g\n",z,sch_int,sch_int2);
+      //sch_int = sch_int2;
+
       /*       Ahora calculamos dVdz, pero sin los factores, que no influyen */
       Dang_DH=(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(1+z); /* La distancia angular * (1+z) */
       E=sqrt(2*cosmo.q0*(1+z)*(1+z)*(1+z)+(1-2*cosmo.q0)*(1+z)*(1+z));
@@ -117,17 +127,32 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
     }
   }
 
+  if(DEBUG2)
+  {
+    printf("flogz:\n");
+    for(i=0;i<nstep_z;i++)
+    {
+      printf("i = %d flogz[i] = %g\n",i,flogz[i]);
+    }
+  }
+
+  if(DEBUG) printf("fz_int before ran2 = %g\n",fz_int);
   rr=fz_int*ran2(&idum);
-  fz_sum[0]=0.;
+  if(DEBUG) printf("rr (fz_int*ran2) = %g\n",rr);
+  //fz_sum[0]=0.;
+  fz_sum[0]=flogz[0];
   i=0;
   do {
     i++;
     fz_sum[i]=fz_sum[i-1]+flogz[i];
   } while (rr>fz_sum[i] && i < nstep_z-1);
   /*   Interpolamos linealmente la i: */
+  if(DEBUG) printf("before ri: i = %d fz_sum[i] = %g fz_sum[i-1] = %g rr = %g\n",i,fz_sum[i],fz_sum[i-1],rr); 
   ri=((i-1.)*(fz_sum[i]-rr)+i*(rr-fz_sum[i-1]))/(fz_sum[i]-fz_sum[i-1]);
+  if(DEBUG) printf("before logz: zlow = %g zup = %g nstep_z = %d ri = %g\n",zlow,zup,nstep_z,ri);
   logz=log(zlow)+(log(zup)-log(zlow))/(nstep_z-1)*ri;
   z=exp(logz);
+  if(DEBUG) printf("returning z = %g logz = %g\n",z,logz);
   return(z);
 }
 
