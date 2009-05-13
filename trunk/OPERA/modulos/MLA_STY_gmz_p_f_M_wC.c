@@ -44,6 +44,10 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main_gsl_multimin(const gsl_vector *x, void *p
 double vegas_funk_numerator_STY_gmz_p_f_M_wC(double *x, size_t dim, void *params);
 double vegas_funk_denominator_STY_gmz_p_f_M_wC(double *x, size_t dim, void *params);
 double compute_rho_STY_gmz_p_f_M_wC();
+double vegas_integrate_STY_gmz_p_f_M_wC(gsl_monte_function * f,
+                                        double xl[], double xu[],
+                                        size_t dim, size_t calls,
+                                        double *error);
 void   NumericalHessianCovars_STY_gmz_p_f_M_wC(int n,double *magn,double *errmagn, double *z, double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf);
 
 
@@ -82,6 +86,7 @@ gsl_interp * _rho_interp_STY_gmz_p_f_M_wC;
 gsl_interp_accel * _rho_interp_accel_STY_gmz_p_f_M_wC;
 gsl_interp * _dVdz_interp_STY_gmz_p_f_M_wC;
 gsl_interp_accel * _dVdz_interp_accel_STY_gmz_p_f_M_wC;
+gsl_rng * _random_gen_STY_gmz_p_f_M_wC;
 
 int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errmagDistn, double color_mean, double color_stddev, double *z, double *errz, struct fermifsel_M fsel, double strrad, double zlow, double zup, struct cosmo_param cosmo, struct Schlf_M *lf, struct MLProcessInfo *mlinfo)
   {
@@ -90,6 +95,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   double sigpar[3];
   int i;
   int iter_amo;
+  const gsl_rng_type *T_rng;
 
   /* Variables to use for vvmax fitting */
   struct Steplf_M  lfvvmax;
@@ -115,6 +121,12 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   _strrad_STY_gmz_p_f_M_wC=strrad;
   _zlow_STY_gmz_p_f_M_wC=zlow;
   _zup_STY_gmz_p_f_M_wC=zup;
+
+  /* Init random number generator */
+  gsl_rng_env_setup ();
+  T_rng = gsl_rng_default;
+  _random_gen_STY_gmz_p_f_M_wC = gsl_rng_alloc (T_rng);
+  
 
   if(_zup_STY_gmz_p_f_M_wC==0) _zup_STY_gmz_p_f_M_wC=ZMAX;
 
@@ -222,6 +234,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   if(DEBUG) printf(" MLF %g\n",_MLmax_STY_gmz_p_f_M_wC);
 
   /* Code exit status */
+  gsl_rng_free(_random_gen_STY_gmz_p_f_M_wC);
   if(iter_amo>=MAXITER-1) return(2);
   return(0);
 }
@@ -246,8 +259,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   double probarriba, errprobarriba;
   double probabajo, errprobabajo;
 
-  int itervegas=0;
-
   double colori;
   double logColor=0.0;
 
@@ -257,10 +268,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   double xl_den[4], xu_den[4];
   double xl_num[2], xu_num[2];
 
-  const gsl_rng_type *T_den;
-  const gsl_rng_type *T_num;
-  gsl_rng *r_den;
-  gsl_rng *r_num;
 
   gsl_monte_function G_den = { &vegas_funk_denominator_STY_gmz_p_f_M_wC, dim_den, 0 };
   gsl_monte_function G_num = { &vegas_funk_numerator_STY_gmz_p_f_M_wC, dim_num, 0 };
@@ -277,16 +284,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
 //  very fast (test)
 //  size_t calls_den = 500;
 //  size_t calls_num = 500;
-
-  gsl_rng_env_setup ();
-
-  T_den = gsl_rng_default;
-  r_den = gsl_rng_alloc (T_den);
-
-  gsl_rng_env_setup ();
-
-  T_num = gsl_rng_default;
-  r_num = gsl_rng_alloc (T_num);
 
 
   lfamo.alfa=p[0];
@@ -315,6 +312,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   intsup=incom(1+lfamo.alfa,100.);
   for(i=0;i<_ndata_STY_gmz_p_f_M_wC;i++) 
   {
+    /* Contribucion del color en el numerador */
     colori=_magDistn_STY_gmz_p_f_M_wC[i] - _magSeln_STY_gmz_p_f_M_wC[i];
     _color_i_STY_gmz_p_f_M_wC = colori;
     if (_color_stddev_STY_gmz_p_f_M_wC==0)
@@ -369,26 +367,9 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       if(DEBUG3) printf(" Limits xl: %g %g %g %g\n",xl_den[0],xl_den[1],xl_den[2],xl_den[3]);
       if(DEBUG3) printf(" Limits xu: %g %g %g %g\n",xu_den[0],xu_den[1],xu_den[2],xu_den[3]);
       /* integration */
-      {
-        gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim_den);
-        gsl_monte_vegas_integrate (&G_den, xl_den, xu_den, dim_den, calls_den/50, r_den, s, &probabajo, &errprobabajo);
-        if(DEBUG2) printf (" first iter: %g +- %g",probabajo,errprobabajo);
-        if(DEBUG2) printf (" converging...\n");
-
-        itervegas=0;
-        do
-        {
-          itervegas+=1;
-          gsl_monte_vegas_integrate (&G_den, xl_den, xu_den, dim_den, calls_den/10, r_den, s, &probabajo, &errprobabajo);
-          if(DEBUG3) printf (" result = % .9f sigma = % .9f "
-                "chisq/dof = %.1f\n", probabajo, errprobabajo, s->chisq);
-          if(DEBUG3) printf(" itervegas: %d\n",itervegas);
-        }
-        while (fabs (s->chisq - 1.0) > 0.5 && itervegas < MAXITERVEGAS);
-
-        gsl_monte_vegas_free (s);
-      }
-      // gsl_monte_vegas_free (r_den); -> why incompatible? */
+      probabajo = vegas_integrate_STY_gmz_p_f_M_wC
+            (&G_den, xl_den, xu_den, dim_den, calls_den,
+             &errprobabajo);
 
       if(DEBUG2) printf(" Abajo %g +- %g\n",probabajo,errprobabajo);
 
@@ -400,7 +381,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
 
       if(_errmagDistn_i_STY_gmz_p_f_M_wC==0) _errmagDistn_i_STY_gmz_p_f_M_wC=0.0001;
       if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.0001;
-      
+    
 
       if(_errmagDistn_i_STY_gmz_p_f_M_wC==0)
       {
@@ -425,26 +406,9 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
         if(DEBUG3) printf(" Limits xl: %g %g\n",xl_num[0],xl_num[1]);
         if(DEBUG3) printf(" Limits xu: %g %g\n",xu_num[0],xu_num[1]);
         /* integration */
-        {
-          gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim_num);
-          gsl_monte_vegas_integrate (&G_num, xl_num, xu_num, dim_num, calls_num/50, r_num, s, &probarriba, &errprobarriba);
-          if(DEBUG2) printf (" first iter: %g +- %g\n",probarriba,errprobarriba);
-          if(DEBUG2) printf (" converging...\n");
-
-          itervegas=0;
-          do
-          {
-            itervegas+=1;
-            gsl_monte_vegas_integrate (&G_num, xl_num, xu_num, dim_num, calls_num/10, r_num, s, &probarriba, &errprobarriba);
-            if(DEBUG3) printf (" result = % .9f sigma = % .9f "
-                "chisq/dof = %.1f\n", probarriba, errprobarriba, s->chisq);
-            if(DEBUG3) printf (" itervegas: %d\n",itervegas);
-          }
-          while (fabs (s->chisq - 1.0) > 0.5 && itervegas < MAXITERVEGAS);
-
-          gsl_monte_vegas_free (s);
-        }
-        // gsl_monte_vegas_free (r_num); -> why incompatible? */
+        probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+            (&G_num, xl_num, xu_num, dim_num, calls_num,
+             &errprobarriba);
       }
       if(DEBUG2) printf(" Calculo arriba %g +- %g magn %g err %g magnl %g\n",probarriba,errprobarriba,_magDistn_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut);
 
@@ -698,3 +662,37 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main_gsl_multimin(const gsl_vector *x, void *p
   free(lf_param);
   return value;
 }
+
+double vegas_integrate_STY_gmz_p_M_wC(gsl_monte_function * f,
+                              double xl[], double xu[],
+                              size_t dim, size_t calls,
+                              double *error)
+
+{
+  int itervegas = 0;
+  double result, abserr;
+  gsl_monte_vegas_state *state = gsl_monte_vegas_alloc (dim);
+  /* Warm-up */
+  gsl_monte_vegas_integrate (f, xl, xu, dim, calls/MAXITERVEGAS/5, 
+                             _random_gen_STY_gmz_p_f_M_wC, 
+                             state, &result, &abserr);
+  if(DEBUG2) printf (" first iter: %g +- %g",result,abserr);
+  if(DEBUG2) printf (" converging...\n");
+
+  do
+  {
+    itervegas+=1;
+    gsl_monte_vegas_integrate (f, xl, xu, dim, calls/MAXITERVEGAS, 
+                               _random_gen_STY_gmz_p_f_M_wC,
+                               state, &result, &abserr);
+    if(DEBUG3) printf (" result = % .9f sigma = % .9f "
+                       "chisq/dof = %.1f\n", result, abserr, state->chisq);
+    if(DEBUG3) printf(" itervegas: %d\n",itervegas);
+  }
+  while (fabs (state->chisq - 1.0) > 0.5 && itervegas < MAXITERVEGAS);
+
+  gsl_monte_vegas_free (state);
+   
+  return result;
+}
+
