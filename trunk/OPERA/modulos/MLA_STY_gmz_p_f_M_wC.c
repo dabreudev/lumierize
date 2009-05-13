@@ -663,10 +663,10 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main_gsl_multimin(const gsl_vector *x, void *p
   return value;
 }
 
-double vegas_integrate_STY_gmz_p_M_wC(gsl_monte_function * f,
-                              double xl[], double xu[],
-                              size_t dim, size_t calls,
-                              double *error)
+double vegas_integrate_STY_gmz_p_f_M_wC(gsl_monte_function * f,
+                                        double xl[], double xu[],
+                                        size_t dim, size_t calls,
+                                        double *error)
 
 {
   int itervegas = 0;
