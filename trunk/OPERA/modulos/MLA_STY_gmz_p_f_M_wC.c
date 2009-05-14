@@ -185,7 +185,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   printf(" STY as a first solution.\n");
   printf(" STY -> Mstar: %g alpha: %g phistar: %g\n",lffit.Mstar,lffit.alfa,lffit.phistar); */
 
-  printf(" Computing LF...\n");
+  printf(" Computing LF (method STY_gmz_p_f_m_wC)...\n");
 
   iter_amo=0;
   while(iter_amo==0)
@@ -292,16 +292,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
 
   _lf_STY_gmz_p_f_M_wC=&lfamo;
 
-  /* compute_rho_STY_gmz_p_f_M_wC(); test without rhoz */
-
-  /* init of gsl interpolation */
-  _rho_interp_STY_gmz_p_f_M_wC = gsl_interp_alloc(gsl_interp_linear,NRHO);
-  _rho_interp_accel_STY_gmz_p_f_M_wC = gsl_interp_accel_alloc();
-  _dVdz_interp_STY_gmz_p_f_M_wC = gsl_interp_alloc(gsl_interp_linear,NRHO);
-  _dVdz_interp_accel_STY_gmz_p_f_M_wC = gsl_interp_accel_alloc();
-  gsl_interp_init(_rho_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,NRHO);  
-  gsl_interp_init(_dVdz_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_dVdz_STY_gmz_p_f_M_wC,NRHO);  
-
   logL=0.;
   logLold=0.;
 
@@ -334,7 +324,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       _errmagDistn_i_STY_gmz_p_f_M_wC=0.0001;
       /* printf("Using GSL_SQRT_DBL_MIN instead of 0 for errmag.\n"); */
     }
-    if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.0001;
+    if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.00001;
 
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gmz_p_f_M_wC);
     Mlow=Mag(y[i],_fsel_STY_gmz_p_f_M_wC.magcut+colori,*_cosmo_STY_gmz_p_f_M_wC);
@@ -379,8 +369,8 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       _magDistn_i_STY_gmz_p_f_M_wC=x[i];
       _errmagDistn_i_STY_gmz_p_f_M_wC=_errmagDistn_STY_gmz_p_f_M_wC[i];//+GSL_SQRT_DBL_MIN;
 
-      if(_errmagDistn_i_STY_gmz_p_f_M_wC==0) _errmagDistn_i_STY_gmz_p_f_M_wC=0.0001;
-      if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.0001;
+      if(_errmagDistn_i_STY_gmz_p_f_M_wC==0) _errmagDistn_i_STY_gmz_p_f_M_wC=0.00001;
+      if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.00001;
     
 
       if(_errmagDistn_i_STY_gmz_p_f_M_wC==0)
@@ -389,26 +379,103 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       }
       else
       {
-        x2=_fsel_STY_gmz_p_f_M_wC.magcut+3*_fsel_STY_gmz_p_f_M_wC.deltamag; 
-        if(_fsel_STY_gmz_p_f_M_wC.magcut>(_magDistn_i_STY_gmz_p_f_M_wC+6*_errmagDistn_i_STY_gmz_p_f_M_wC)) x2=_magDistn_i_STY_gmz_p_f_M_wC+6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-        x1=_magDistn_i_STY_gmz_p_f_M_wC-6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-        if(_fsel_STY_gmz_p_f_M_wC.magcut < (_magDistn_i_STY_gmz_p_f_M_wC-5*_errmagDistn_i_STY_gmz_p_f_M_wC)) x1=x2-6*_errmagDistn_i_STY_gmz_p_f_M_wC;
         /* NUMERATOR*/
         if(DEBUG4) printf(" errors: %g %g\n",_errz_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC);
         if(DEBUG3) printf(" Computing numerator.\n");
-        /* compute limits */
-        /* xl_num={_z_i_STY_gmz_p_f_M_wC-6*_errz_i_STY_gmz_p_f_M_wC,x1}; 
-        xu_num={_z_i_STY_gmz_p_f_M_wC+6*_errz_i_STY_gmz_p_f_M_wC,x2}; */
+        /* x[0] are zreal integral limits */
         xl_num[0]=_z_i_STY_gmz_p_f_M_wC-6*_errz_i_STY_gmz_p_f_M_wC;
-        xl_num[1]=x1;
         xu_num[0]=_z_i_STY_gmz_p_f_M_wC+6*_errz_i_STY_gmz_p_f_M_wC;
-        xu_num[1]=x2;
-        if(DEBUG3) printf(" Limits xl: %g %g\n",xl_num[0],xl_num[1]);
-        if(DEBUG3) printf(" Limits xu: %g %g\n",xu_num[0],xu_num[1]);
-        /* integration */
-        probarriba = vegas_integrate_STY_gmz_p_f_M_wC
-            (&G_num, xl_num, xu_num, dim_num, calls_num,
-             &errprobarriba);
+        /* x[1] are mreal-mobs integral limits */
+        if(_fsel_STY_gmz_p_f_M_wC.deltamag > _errmagDistn_i_STY_gmz_p_f_M_wC)
+        {
+             /* The Fermi factor has smooth gradients along the gaussian */
+             xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+             xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+             if(DEBUG3) printf(" Caso 1Limits xl_num: %g %g\n",xl_num[0],xl_num[1]);
+             if(DEBUG3) printf(" Caso 1Limits xu_num: %g %g\n",xu_num[0],xu_num[1]);
+             /* integration */
+             probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+                 (&G_num, xl_num, xu_num, dim_num, calls_num,
+                  &errprobarriba);
+        }
+        else
+        {
+             /* The Fermi factor changes abrouptly within the gaussian */
+             double magcut_sigma =
+                   (_fsel_STY_gmz_p_f_M_wC.magcut -
+                    _magDistn_i_STY_gmz_p_f_M_wC) /
+		     _errmagDistn_i_STY_gmz_p_f_M_wC;
+             if(DEBUG3) printf(" magcut_sigma %g\n", magcut_sigma);
+             if(magcut_sigma < -6)
+             {
+                 /* The integral will be almost 0. Since the gaussian
+                    is ~0 when Fermi = 1 and Fermi~0 when gaussian 
+                    is relevant. However we still integrate in -6,+6 but
+                    with less points */
+                 xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+                 xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+                 if(DEBUG3) printf(" Caso 2Limits xl_num: %g %g\n",
+                                   xl_num[0],xl_num[1]);
+                 if(DEBUG3) printf(" Caso 2Limits xu_num: %g %g\n",
+                                   xu_num[0],xu_num[1]);
+                 /* integration */
+                 probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+                     (&G_num, xl_num, xu_num, dim_num, calls_num/10,
+                      &errprobarriba);
+
+             }
+             else if(magcut_sigma > 6)
+             {
+                 /* The gaussian is all in the Fermi ~=1 regime */
+                 xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+                 xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+                 if(DEBUG3) printf(" Caso 3Limits xl_num: %g %g\n",
+                                   xl_num[0],xl_num[1]);
+                 if(DEBUG3) printf(" Caso 3Limits xu_num: %g %g\n",
+                                   xu_num[0],xu_num[1]);
+                 /* integration */
+                 probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+                     (&G_num, xl_num, xu_num, dim_num, calls_num,
+                      &errprobarriba);
+             }
+             else
+             {
+                 /* The Fermi cut is in the middle of the gaussian.
+                    There will be two integration intervals */
+                 probarriba = 0;
+                 /* First interval */
+                 xl_num[1] = -6 * _errmagDistn_i_STY_gmz_p_f_M_wC; 
+                 xu_num[1] = magcut_sigma *
+                     _errmagDistn_i_STY_gmz_p_f_M_wC -
+                     6 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+                 if(DEBUG3) printf(" Caso 4.1Limits xl_num: %g %g\n",
+                                   xl_num[0],xl_num[1]);
+                 if(DEBUG3) printf(" Caso 4.1Limits xu_num: %g %g\n",
+                                   xu_num[0],xu_num[1]);
+                 /* integration of first half */
+                 probarriba += vegas_integrate_STY_gmz_p_f_M_wC
+                     (&G_num, xl_num, xu_num, dim_num, calls_num,
+                      &errprobarriba);
+                 /* Second interval */
+                 if(_fsel_STY_gmz_p_f_M_wC.deltamag != 0)
+                 {
+                     xl_num[1] = magcut_sigma *
+                          _errmagDistn_i_STY_gmz_p_f_M_wC -
+                   	  6 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+                     xu_num[1] = magcut_sigma * 
+                          _errmagDistn_i_STY_gmz_p_f_M_wC +
+                          6 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+                     if(DEBUG3) printf("Caso 4.2Limits xl_num: %g %g\n",
+                                       xl_num[0],xl_num[1]);
+                     if(DEBUG3) printf("Caso 4.2Limits xu_num: %g %g\n",
+                                       xu_num[0],xu_num[1]);
+                     /* integration of second half */
+                     probarriba += vegas_integrate_STY_gmz_p_f_M_wC
+                         (&G_num, xl_num, xu_num, dim_num, calls_num,
+                          &errprobarriba);
+                 }
+             }
+        }
       }
       if(DEBUG2) printf(" Calculo arriba %g +- %g magn %g err %g magnl %g\n",probarriba,errprobarriba,_magDistn_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut);
 
@@ -423,10 +490,10 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   } /* end of objects loop */
 
   /* free gsl interp */
-  gsl_interp_free(_rho_interp_STY_gmz_p_f_M_wC);
-  gsl_interp_accel_free(_rho_interp_accel_STY_gmz_p_f_M_wC);
-  gsl_interp_free(_dVdz_interp_STY_gmz_p_f_M_wC);
-  gsl_interp_accel_free(_dVdz_interp_accel_STY_gmz_p_f_M_wC);
+  //gsl_interp_free(_rho_interp_STY_gmz_p_f_M_wC);
+  //gsl_interp_accel_free(_rho_interp_accel_STY_gmz_p_f_M_wC);
+  //gsl_interp_free(_dVdz_interp_STY_gmz_p_f_M_wC);
+  //gsl_interp_accel_free(_dVdz_interp_accel_STY_gmz_p_f_M_wC);
 
   /* Aqui viene la parte de la poissoniana de npob */
   /* TODO: Change to Int_sch_f_M_wC (when done) */
@@ -447,8 +514,8 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   double res;
   double zreal;
   double zobs;
-  double mreal;
-  double mobs;
+  double mDistReal;
+  double mDistObs;
   double Mabs;
   double logfacerrz;
   double logfacerrm;
@@ -457,18 +524,16 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   double dVdzreal, rhoz;
 
   if(DEBUG4) printf(" inside vegas_funk_numerator.\n");
+  /* x[0] -> zreal
+     x[1] -> mreal - mobs */
 
-  /* zobs = x[0];
-  zreal = _z_i_STY_gmz_p_f_M_wC; */
   zreal = x[0];
   zobs  = _z_i_STY_gmz_p_f_M_wC;
-  /* mobs = x[1]; //mag(zreal, x[1], *_cosmo_STY_gmz_p_f_M_wC);
-  mreal = _magDistn_i_STY_gmz_p_f_M_wC; */
-  mreal = x[1];
-  mobs  = _magDistn_i_STY_gmz_p_f_M_wC;
-  Mabs = Mag(zreal,mreal,*_cosmo_STY_gmz_p_f_M_wC);
+  mDistObs  = _magDistn_i_STY_gmz_p_f_M_wC;
+  mDistReal = x[1] + mDistObs;
+  Mabs = Mag(zreal,mDistReal,*_cosmo_STY_gmz_p_f_M_wC);
 
-  if ( zreal < 0)
+  if ( zreal < _zlow_STY_gmz_p_f_M_wC || zreal > _zup_STY_gmz_p_f_M_wC)
   {
     if(DEBUG4) printf(" out petando zreal: zreal<0\n");
     return(0);
@@ -481,23 +546,27 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   } Pertenece a los límites */
 
   logfacLF = log(Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC));
-  logfacerrz = lngaussian(zobs, zreal, _errz_i_STY_gmz_p_f_M_wC);
-  logfacerrm = lngaussian(mobs, mreal, _errmagDistn_i_STY_gmz_p_f_M_wC);
+  logfacerrz = lngaussian(zobs, zreal, 
+                          _errz_i_STY_gmz_p_f_M_wC);
+  logfacerrm = lngaussian(mDistObs, mDistReal, 
+                          _errmagDistn_i_STY_gmz_p_f_M_wC);
 //  dVdz=Lagr2_d(_zRho_STY_gmz_p_f_M_wC,_dVdz_STY_gmz_p_f_M_wC,NRHO,zreal);
 //  rhoz=Lagr2_d(_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,NRHO,zreal);
   //dVdz=gsl_interp_eval(_dVdz_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_dVdz_STY_gmz_p_f_M_wC,zreal,_dVdz_interp_accel_STY_gmz_p_f_M_wC);
   dVdzreal = dVdz(zreal,*_cosmo_STY_gmz_p_f_M_wC);
-  rhoz=gsl_interp_eval(_rho_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,zreal,_rho_interp_accel_STY_gmz_p_f_M_wC);
+  //rhoz=gsl_interp_eval(_rho_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,zreal,_rho_interp_accel_STY_gmz_p_f_M_wC);
   /* facsel = Fermi(mreal,_fsel_STY_gmz_p_f_M_wC.magcut+_color_i_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.deltamag); */
-  facsel = Fermi(mreal-_color_i_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut,_fsel_STY_gmz_p_f_M_wC.deltamag);
+  facsel = Fermi(mDistReal-_color_i_STY_gmz_p_f_M_wC,
+                 _fsel_STY_gmz_p_f_M_wC.magcut,
+                 _fsel_STY_gmz_p_f_M_wC.deltamag);
   res=exp(logfacerrm+logfacerrz+logfacLF);
   /* test without rhoz */
   rhoz=1.0;
   res=res*dVdzreal*rhoz*facsel;
 
-  if(DEBUG4) printf(" todopati: zreal %10g zobs %10g mreal %10g mobs %10g Mabs %10g\n",zreal,zobs,mreal,mobs,Mabs);
-  if(DEBUG4) printf(" morralla: logfacLF %g logfacerrz %g logfacerrm %g dVdzreal %g rhoz %g  facsel %g\n",logfacLF,logfacerrz,logfacerrm,dVdzreal,rhoz,facsel);
-  if(DEBUG4) printf(" result: %g\n",res);
+  if(DEBUG4) printf("Num todopati: zreal %10g zobs %10g mreal %10g mobs %10g Mabs %10g\n",zreal,zobs,mDistReal,mDistObs,Mabs);
+  if(DEBUG4) printf("Num morralla: logfacLF %g logfacerrz %g logfacerrm %g dVdzreal %g rhoz %g  facsel %g\n",logfacLF,logfacerrz,logfacerrm,dVdzreal,rhoz,facsel);
+  if(DEBUG4) printf("Num result: %g\n",res);
   return(res);
 }
 
@@ -542,16 +611,16 @@ double vegas_funk_denominator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *par
   //rhoz=Lagr2_d(_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,NRHO,zreal);
   //dVdz=gsl_interp_eval(_dVdz_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_dVdz_STY_gmz_p_f_M_wC,zreal,_dVdz_interp_accel_STY_gmz_p_f_M_wC);
   dVdzreal = dVdz(zreal,*_cosmo_STY_gmz_p_f_M_wC);
-  rhoz=gsl_interp_eval(_rho_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,zreal,_rho_interp_accel_STY_gmz_p_f_M_wC);
+  //rhoz=gsl_interp_eval(_rho_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,zreal,_rho_interp_accel_STY_gmz_p_f_M_wC);
   facsel = Fermi(mreal,_fsel_STY_gmz_p_f_M_wC.magcut,_fsel_STY_gmz_p_f_M_wC.deltamag); /* TODO: seguro que no va colori? */
   res=exp(logfacerrm+logfacerrz+logfacLF);
   /* test without rhoz */
   rhoz=1.0;
   res=res*dVdzreal*rhoz*facsel;
   if(DEBUG4) printf(" lasx: x[0] %g x[1] %g x[2] %g x[3] %g\n",x[0],x[1],x[2],x[3]);
-  if(DEBUG4) printf(" todopati: zreal %10g zobs %10g mreal %10g mobs %10g Mabs %10g\n",zreal,zobs,mreal,mobs,Mabs);
-  if(DEBUG4) printf(" morralla: logfacLF %g logfacerrz %g logfacerrm %g dVdzreal %g rhoz %g  facsel %g\n",logfacLF,logfacerrz,logfacerrm,dVdzreal,rhoz,facsel);
-  if(DEBUG4) printf(" result: %g\n",res);
+  if(DEBUG4) printf("Den todopati: zreal %10g zobs %10g mreal %10g mobs %10g Mabs %10g\n",zreal,zobs,mreal,mobs,Mabs);
+  if(DEBUG4) printf("Den morralla: logfacLF %g logfacerrz %g logfacerrm %g dVdzreal %g rhoz %g  facsel %g\n",logfacLF,logfacerrz,logfacerrm,dVdzreal,rhoz,facsel);
+  if(DEBUG4) printf("Den result: %g\n",res);
   return(res); 
 }
 
