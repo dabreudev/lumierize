@@ -7,7 +7,7 @@
 #define NSTEP_COLOR  200
 //#define NSTEP_Z  80
 #define NSTEP_MAG 500
-#define NSTEP_MAG_FSEL 500
+#define NSTEP_MAG_FSEL 1000
 //#define NSTEP_MAGAP_FSEL 300
 #define NSTEP_MAGAP_FSEL 50
 #define NSTEP_LUM_FSEL 500
@@ -38,8 +38,9 @@ double lnSchechter_M(double M, struct Schlf_M lf)
   double elev;
   
   elev=pow(10.,0.4*(lf.Mstar-M));
-  tmp=0.92103404*lf.phistar*pow(elev,lf.alfa+1.);   /*  0.92103404= 0.4*ln(10) */
-  tmp=tmp*exp(-elev);
+  tmp=-0.08225828358 + log(lf.phistar) + (lf.alfa + 1) *
+    (lf.Mstar-M) * 0.92103404 - elev;
+  /* -0.08225828358 = ln(0.4*ln(10)) */
   /* Este devuelve el logaritmo natural de la func de Schecter */
   return(tmp);
 }
@@ -125,7 +126,7 @@ double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct co
 {
   double z;
   int nz,nM;
-  int i;
+  int iz;
   double Mlow;
   double Llow,Lstar;
   double N,Ngal;
@@ -153,29 +154,15 @@ double Int_sch_M(struct Schlf_M lf, double zlow,double zup,double mlim,struct co
   printf(" nM %i\n",nM);
   printf("===================\n\n");  */
 
-  for(i=0;i<nz;i++) 
+  for(iz=0;iz<nz;iz++) 
   {
-    z=zlow_l+i*(zup_l-zlow_l)/(nz-1.);
+    z=zlow_l+iz*(zup_l-zlow_l)/(nz-1.);
     Mlow=Mag(z,mlim,cosmo);
-
-    /* Esto que viene es haciendo la integral a pelo: */
-    /*     Npar=0; */
-    /*     for(j=0;j<nM;j++) { */
-    /*       M=Mup+j*(Mlow-Mup)/(nM-1.); */
-    /*       Npar=Npar+Schechter_M(M)*Vol(z)*3./z/1.e18;  Vol(z)*3/z es dV/dz */ 
-    /*       Npar=Npar+Schechter_M(M,schlf.Mstar,schlf.alfa,schlf.phistar);  */
-    /*     }  */
-    /*     Npar=Npar/nM*(Mlow-Mup)*dVdz(z)/1.e18;   */
 
     Llow=pow(10.,-0.4*Mlow);
 
     /* Y esto es con la funcion gamma incompleta incom */
-
-    /* parece que había un error con las gamma incompleta*/
-    /* Npar=lf.phistar*(gsl_sf_gamma(lf.alfa+1.)-incom(1+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18; */
-
     /* estamos haciendo la integral desde Llow/Lstar hasta infinito */
-    
     /* debido a un underflow, tuvimos que poner este if */
     if(Llow/Lstar > 0.25 && (lf.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
     {
@@ -222,16 +209,19 @@ double Int_sch_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean
 
   N=0;
 
-/*  printf("\n===================\n");
-  printf("Antes del bucle de la integral\n");
-  printf("------------------------------\n");
-  printf(" N %i\n",N);
-  printf(" zlow %g\n",zlow_l);
-  printf(" zup %g\n",zup_l);
-  printf(" milm %g\n",mlim);
-  printf(" nz %i\n",nz);
-  printf(" nM %i\n",nM);
-  printf("===================\n\n");  */
+  if(DEBUG3)
+  {
+    printf("\n===================\n");
+    printf("Antes del bucle de la integral\n");
+    printf("------------------------------\n");
+    printf(" N %g\n",N);
+    printf(" zlow %g\n",zlow_l);
+    printf(" zup %g\n",zup_l);
+    printf(" mDetectLim %g\n",mDetectLim);
+    printf(" nz %i\n",nz);
+    printf(" nM %i\n",nM);
+    printf("===================\n\n");
+  }
 
   for(i=0;i<nz;i++) 
   {
@@ -261,19 +251,20 @@ double Int_sch_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean
       }
       else
       {
-        /* printf("alfa %g Llow/Lstar %g dVdz(z,cosmo) %g gsl_sf_gamma %g gsl_sf_gamma %g\n", lf.alfa, Llow/Lstar, dVdz(z,cosmo), gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar), gsl_sf_gamma_inc(1.+lf.alfa,1.03162e-7)); */
+        if(DEBUG2) printf("alfa %g Llow/Lstar %g dVdz(z,cosmo) %g gsl_sf_gamma %g gsl_sf_gamma %g\n", lf.alfa, Llow/Lstar, dVdz(z,cosmo), gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar), gsl_sf_gamma_inc(1.+lf.alfa,1.03162e-7));
         Ngal=lf.phistar*(gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
       }
       Ncolor += gaussian(color, color_mean, color_stddev)*Ngal;
-      //printf(" icolor %d Ngal %g Ncolor %g z %g\n",iColor,Ngal,Ncolor,z); 
+      if(DEBUG2) printf(" color %g color_mean %g color_stddev %g\n",color,color_mean,color_stddev);
+      if(DEBUG2) printf(" icolor %d Ngal %g Ncolor %g z %g\n",iColor,Ngal,Ncolor,z); 
     }
     Ncolor = Ncolor/nColor*(colorUp - colorLow);
-    /* printf(" iz %d Ncolor %g z %g\n",i,Ncolor,z); */  
+    if(DEBUG2) printf(" iz %d Ncolor %g z %g\n",i,Ncolor,z);  
 
     N=N+Ncolor;
   }
   N=N/nz*(zup_l-zlow_l);
-  /* printf(" N %g phi %g mst %g\n",N,lf.phistar,lf.Mstar); */
+  if(DEBUG2) printf(" N %g phi %g mst %g\n",N,lf.phistar,lf.Mstar);
   return(N);
 }
 
@@ -376,16 +367,17 @@ double Int_sch_L(struct Schlf_L lf, double zlow,double zup,double fluxlim, struc
 
 double Int_sch_f_M(struct Schlf_M lf, double zlow, double zup, struct fermifsel_M fsel,struct cosmo_param cosmo) {
   double z;
+  double zlow_l, zup_l;
   int nz,nM_fs;
-  double Mup=-30;
   int i,j;
   double Mleft,Mright;
   double M,m;
-  double Lleft,Lright,Lup,Lstar;
-  double N,Npar;
+  double Lleft,Lright,Lstar;
+  double N,Ngal;
   double inttemp;
 
-  zlow = (zlow < ZMIN ? ZMIN : zlow);
+  zlow_l = (zlow < ZMIN ? ZMIN : zlow);
+  zup_l = (zup < ZMIN ? ZMAX : zup);
 
   nz=NSTEP_Z;
   nM_fs=NSTEP_MAG_FSEL;
@@ -393,66 +385,137 @@ double Int_sch_f_M(struct Schlf_M lf, double zlow, double zup, struct fermifsel_
   Lstar=pow(10.,-0.4*lf.Mstar);
 
   N=0;
-  if(lf.Mstar-Mup> 5 ) Mup=lf.Mstar-5.;  /* Para que irse tan lejos!, si es cero */
 
   for(i=0;i<nz;i++) 
   {
-    z=zlow+i*(zup-zlow)/(nz-1.);
+    z=zlow_l+i*(zup_l-zlow_l)/(nz-1.);
     /* Integro primero hasta 5 veces más a la izquierda del corte en Fermi */
-    Mleft =Mag(z,fsel.magcut-5*fsel.deltamag,cosmo);
-    Mright=Mag(z,fsel.magcut+5*fsel.deltamag,cosmo);
+    Mleft =Mag(z,fsel.magcut-6*fsel.deltamag,cosmo);
+    Mright=Mag(z,fsel.magcut+6*fsel.deltamag,cosmo);
     Lleft=pow(10.,-0.4*Mleft);
     Lright=pow(10.,-0.4*Mright);
-    Lup=pow(10.,-0.4*Mup);
     if(DEBUG) printf(" mag cu %f delt %f\n",fsel.magcut,fsel.deltamag);
     if(DEBUG) printf(" z %f Mleft %f Mrith %f\n",z,Mleft,Mright);
-    if(Lup/Lstar>200) Lup=200*Lstar;
-    if(Lright/Lstar>=200)      Npar=0;
-    else 
-    {
-      /* Esto que viene es haciendo la integral a pelo: de Mleft hasta Mright*/
-      Npar=0;
-      if(Mleft<lf.Mstar && Mright>lf.Mstar) {
-	for(j=0;j<nM_fs;j++) {
-	  M=Mleft+j*(lf.Mstar-Mleft)/(nM_fs-1.);
-	  m=mag(z,M,cosmo);
-	  Npar=Npar+Schechter_M(M,lf)*Fermi(m,fsel.magcut,fsel.deltamag);
-	}
-	Npar=Npar/nM_fs*(lf.Mstar-Mleft)*dVdz(z,cosmo)/1.e18;
-	if(DEBUG2) printf(" Caso 1 Primero Npar %f \n",Npar);
-	inttemp=0;
-	for(j=0;j<nM_fs;j++) {
-	  M=lf.Mstar+j*(Mright-lf.Mstar)/(nM_fs-1.);
-	  m=mag(z,M,cosmo);
-	  inttemp=inttemp+Schechter_M(M,lf)*Fermi(m,fsel.magcut,fsel.deltamag);
-	  if(DEBUG2) printf(" inttemp %g M %f m %f Sch %f Fermi %f\n",inttemp,M,m,Schechter_M(M,lf),Fermi(m,fsel.magcut,fsel.deltamag));
-	}
-	inttemp=inttemp/nM_fs*(Mright-lf.Mstar)*dVdz(z,cosmo)/1.e18;
-	Npar+=inttemp;
-	if(DEBUG2) printf(" Caso 1 Segundo inttemp %f Npar %f old %f\n",inttemp,Npar,lf.phistar*(incom(1+lf.alfa,1)-incom(1+lf.alfa,pow(10.,-0.4*Mag(z,fsel.magcut,cosmo))/Lstar))*dVdz(z,cosmo)/1.e18);
-      }
-      else {
-	for(j=0;j<nM_fs;j++) {
-	  M=Mleft+j*(Mright-Mleft)/(nM_fs-1.);
-	  m=mag(z,M,cosmo);
-	  Npar=Npar+Schechter_M(M,lf)*Fermi(m,fsel.magcut,fsel.deltamag);
-	  if(DEBUG) printf(" M %f Npar %g Sch %g Fer %f \n",M,Npar,Schechter_M(M,lf),Fermi(m,fsel.magcut,fsel.deltamag));
-	}
-	Npar=Npar/nM_fs*(Mright-Mleft)*dVdz(z,cosmo)/1.e18;  
-	if(DEBUG) printf(" Primer Npar %g \n",Npar);
-      }
-      
-      /* Y esto es con la funcion gamma incompleta incom desde Mleft a -inf*/
-      if(Lleft/Lstar<300) Npar+=lf.phistar*(incom(1+lf.alfa,Lup/Lstar)-incom(1+lf.alfa,Lleft/Lstar))*dVdz(z,cosmo)/1.e18; 
-      if(DEBUG) printf(" Segundo Npar %g \n",Npar);
-      if(DEBUG) printf(" COMP Npar %f old %f\n",Npar,lf.phistar*(incom(1+lf.alfa,Lup/Lstar)-incom(1+lf.alfa,pow(10.,-0.4*Mag(z,fsel.magcut,cosmo))/Lstar))*dVdz(z,cosmo)/1.e18); 
+    /* Esto que viene es haciendo la integral a pelo: de Mleft hasta Mright*/
+    Ngal=0;
+    for(j=0;j<nM_fs;j++) {
+      M=Mleft+j*(Mright-Mleft)/(nM_fs-1.);
+      m=mag(z,M,cosmo);
+      Ngal=Ngal+Schechter_M(M,lf)*Fermi(m,fsel.magcut,fsel.deltamag);
+      if(DEBUG) printf(" M %f Npar %g Sch %g Fer %f \n",M,Ngal,Schechter_M(M,lf),Fermi(m,fsel.magcut,fsel.deltamag));
     }
-    N=N+Npar;
+    Ngal=Ngal/nM_fs*(Mright-Mleft)*dVdz(z,cosmo)/1.e18;  
+    if(DEBUG) printf(" Primer Npar %g \n",Ngal);
+      
+    /* Y esto es con la funcion gamma incompleta incom desde Mleft a -inf*/
+    /* debido a un underflow, tuvimos que poner este if */
+    /* 0.25 es por la implementación de gamma_inc.c de gsl */
+    if(Lleft/Lstar > 0.25 && 
+       (lf.alfa*log(Lleft/Lstar) - Lleft/Lstar) <= GSL_LOG_DBL_MIN)
+    {
+      Ngal+=GSL_DBL_MIN;
+    }
+    else
+    {
+      Ngal+=lf.phistar*(gsl_sf_gamma_inc(1.+lf.alfa,Lleft/Lstar))*
+            dVdz(z,cosmo)/1.e18;
+      //Ngal+=lf.phistar*(incom(1+lf.alfa,Lup/Lstar)-incom(1+lf.alfa,Lleft/Lstar))*dVdz(z,cosmo)/1.e18; 
+    if(DEBUG) printf(" Segundo Npar %g \n",Ngal);
+    }
+    N=N+Ngal;
   }
-  N=N/nz*(zup-zlow);
+  N=N/nz*(zup_l-zlow_l);
   return(N);
 }
 
+double Int_sch_f_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean, double color_stddev, struct fermifsel_M fsel, struct cosmo_param cosmo) 
+{
+
+  /* TODO: this function is a copy of Int_sch_f_M_wC */
+
+  double z;
+  int nz,nM,nColor;
+  int i,iColor;
+  double Mlow;
+  double Llow,Lstar;
+  double N,Ncolor,Ngal;  /* WARNING: Ncolor != nColor */
+  double zlow_l;
+  double zup_l;
+  double color, colorLow, colorUp;
+  double mDistLim;
+
+  double mDetectLim = 0; // DELETE: only to avoid compilation errors !!
+
+  zlow_l = (zlow < ZMIN ? ZMIN : zlow);
+  zup_l = (zup < ZMIN ? ZMAX : zup);
+  colorLow=-5.*color_stddev+color_mean;
+  colorUp=5.*color_stddev+color_mean;
+
+  nz=NSTEP_Z;
+  nColor=NSTEP_COLOR;  /* nColor -> nStepColor ... */
+  nM=NSTEP_MAG;
+
+  Lstar=pow(10.,-0.4*lf.Mstar);
+
+  N=0;
+
+  if(DEBUG3)
+  {
+    printf("\n===================\n");
+    printf("Antes del bucle de la integral\n");
+    printf("------------------------------\n");
+    printf(" N %g\n",N);
+    printf(" zlow %g\n",zlow_l);
+    printf(" zup %g\n",zup_l);
+    printf(" mDetectLim %g\n",mDetectLim);
+    printf(" nz %i\n",nz);
+    printf(" nM %i\n",nM);
+    printf("===================\n\n");
+  }
+
+  for(i=0;i<nz;i++) 
+  {
+    z=zlow_l+i*(zup_l-zlow_l)/(nz-1.);
+    Ncolor=0;
+    for(iColor=0; iColor<nColor;iColor++)
+    {
+
+      /* color=distrib - detect -> J-K */
+
+      color=colorLow+iColor*(colorUp-colorLow)/(nColor-1.);
+
+      mDistLim=mDetectLim+color;
+      Mlow=Mag(z,mDistLim,cosmo);
+
+      Llow=pow(10.,-0.4*Mlow);
+
+      /* Y esto es con la funcion gamma incompleta incom */
+      /* estamos haciendo la integral desde Llow/Lstar hasta infinito */
+      /* debido a un underflow, tuvimos que poner este if */
+      /* 0.25 es por la implementación de gamma_inc.c de gsl */
+      if(Llow/Lstar > 0.25 && 
+         (lf.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
+      {
+        Ngal=GSL_DBL_MIN;
+      }
+      else
+      {
+        if(DEBUG2) printf("alfa %g Llow/Lstar %g dVdz(z,cosmo) %g gsl_sf_gamma %g gsl_sf_gamma %g\n", lf.alfa, Llow/Lstar, dVdz(z,cosmo), gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar), gsl_sf_gamma_inc(1.+lf.alfa,1.03162e-7));
+        Ngal=lf.phistar*(gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
+      }
+      Ncolor += gaussian(color, color_mean, color_stddev)*Ngal;
+      if(DEBUG2) printf(" color %g color_mean %g color_stddev %g\n",color,color_mean,color_stddev);
+      if(DEBUG2) printf(" icolor %d Ngal %g Ncolor %g z %g\n",iColor,Ngal,Ncolor,z); 
+    }
+    Ncolor = Ncolor/nColor*(colorUp - colorLow);
+    if(DEBUG2) printf(" iz %d Ncolor %g z %g\n",i,Ncolor,z);  
+
+    N=N+Ncolor;
+  }
+  N=N/nz*(zup_l-zlow_l);
+  if(DEBUG2) printf(" N %g phi %g mst %g\n",N,lf.phistar,lf.Mstar);
+  return(N);
+}
 
 double Int_sch_f_L(struct Schlf_L lf, double zlow,double zup,struct fermifsel_L fsel, struct cosmo_param cosmo) {
   double z;
@@ -572,9 +635,10 @@ double Int_sch_f_PO(struct Schlf_L lf, char photband[51], double gamma, double d
   int i,j,k;
   /* double Llow; */
   double Lup=1e60;
-  double xmin;
+  //double xmin;
   double N,Npar;
-  double fluxlim,ew;
+  //double fluxlim;
+  double ew;
   double intsup;
   double normaewd;
   /* double dLdm; */
@@ -668,14 +732,15 @@ double Int_sch_s_f_PO(struct Schlf_L lf, char photband[51], double gamma, double
   int nz,nM,nmag_fs;
   int nEW;
   int i,j,k;
-  double Llow;
+  //double Llow;
   double Lup=1e60;
-  double xmin;
+  //double xmin;
   double N,Npar,Ntot;
-  double fluxlim,ew;
+  //double fluxlim;
+  double ew;
   double intsup;
   double normaewd;
-  double dLdm;
+  //double dLdm;
   double zlow,zup;
   double Mleft,Mright,Lleft,Lright,fluxleft,fluxright,mleft,mright;
   double intmag;
@@ -774,14 +839,15 @@ double Int_sch_e_s_f_PO(struct Schlf_L lf, char photband[51], double gamma, doub
   int nz,nM,nmag_fs;
   int nEW;
   int i,j,k;
-  double Llow;
+  //double Llow;
   double Lup=1e60;
-  double xmin;
+  //double xmin;
   double N,Npar,Ntot;
-  double fluxlim,ew;
+  //double fluxlim;
+  double ew;
   double intsup;
   double normaewd;
-  double dLdm;
+  //double dLdm;
   double zlow,zup;
   double Mleft,Mright,Lleft,Lright,fluxleft,fluxright,mleft,mright;
   double intmag;
