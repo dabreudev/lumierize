@@ -9,6 +9,7 @@
 #  - Color mean [0.0]
 #  - Color stddev [0.0]
 #  - magnitud limite [25]
+#  - deltamag de funcion de seleccion [0.5]
 #  - Z up [0]
 #  - Z low [0]
 #  - área del survey [0.1]
@@ -21,9 +22,9 @@
 set estatus=0 #para guardar el status de salida de LumFunc_GOYA
 
 if ($1 == "--help") then
-   echo "Uso: LF_computeSTY_gmz_M_wC.csh inCat colorMean colorStddev magLim zlow zup area outFile"
+   echo "Uso: LF_computeSTY_gmz_M_wC.csh inCat colorMean colorStddev magLim deltmag_fsel zlow zup area outFile"
    echo ""
-   echo "Example: LF_computeSTY_gmz_M_wC.csh kk.cat 0 0.001 25 0 0 0.1 kk.lf"
+   echo "Example: LF_computeSTY_gmz_M_wC.csh kk.cat 0 0.001 25 0 0 0 0.1 kk.lf"
    exit
 endif
 
@@ -32,6 +33,7 @@ if ($1 == "") then
    set colorMean=0.0
    set colorStddev=0.0
    set magLim=25
+   set deltamag=0.5
    set zlow=0
    set zup=0
    set area=0.1
@@ -41,10 +43,11 @@ else
    set colorMean=$2
    set colorStddev=$3
    set magLim=$4
-   set zlow=$5
-   set zup=$6
-   set area=$7
-   set outFile=$8
+   set deltamag=$5
+   set zlow=$6
+   set zup=$7
+   set area=$8
+   set outFile=$9
 endif
 
 set colz=2
@@ -73,8 +76,8 @@ $magLim
 $zlow
 $zup
 $area
-1
 $magLim
+$deltamag
 $outFile
 0
 e
@@ -89,6 +92,7 @@ echo "Input file $inCat"
 echo "Color mean $colorMean"
 echo "Color stddev $colorStddev"
 echo "Mag lim $magLim"
+echo "Delta mag (Fermi) $deltamag"
 echo "Z low: $zlow"
 echo "Z up: $zup"
 echo "área: $area"
