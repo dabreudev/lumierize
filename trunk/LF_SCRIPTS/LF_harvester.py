@@ -131,10 +131,10 @@ def main():
         allData=[]
         for iter in range(niter):
 
-            computedFile=simulationsDir+"/ComputedLF/simlf_"+method+"_m_"+str(iter)+simulationName+".lf"
+            computedFile=simulationsDir+"/ComputedLF/"+method+"/simlf_m"+simulationName+"/"+str(iter)+".lf"
 
             # done files
-            doneFileName=simulationsDir+"/LockFiles/simlf_m_"+str(iter)+simulationName+method+".done"
+            doneFileName=simulationsDir+"/LockFiles/"+method+"/simlf_m"+simulationName+"/"+str(iter)+".done"
             if os.access(doneFileName,os.F_OK): 
                 toReadFile=open(computedFile,'r')
                 lines=toReadFile.readlines()
