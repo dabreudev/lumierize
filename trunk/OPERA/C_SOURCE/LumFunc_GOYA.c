@@ -105,7 +105,7 @@ void STY();
 void STY_MAG_ERR();
 void STY_wC();
 void STY_wC_errColor();
-void STY_gmz_M_wC();
+void STY_gmz_f_M_wC();
 void SWML();
 void CEG();
 void Calc_Num();
@@ -191,7 +191,7 @@ int main()
     case 'R':
     case 'r':
        set_cosmology();
-       STY_gmz_M_wC();
+       STY_gmz_f_M_wC();
        break;
     case 'W':
     case 'w':
@@ -682,11 +682,10 @@ void STY_wC_errColor()
 }
 
 /* Ya tenemos un nuevo miembro en la casa */
-void STY_gmz_M_wC() 
+void STY_gmz_f_M_wC() 
 {
   static struct lf_param sty;
   struct sample_data_gmz_wC sample;
-  static double mlim=0;
   struct fermifsel_M fsel;
   double zlow;
 
@@ -696,8 +695,6 @@ void STY_gmz_M_wC()
   int status=0;
   
   struct Schlf_M lfsch_M;
-
-  static int poissonflag=0;
 
   static int plots=0; /* para no hacer las gráficas */
   FILE *fout;
@@ -715,14 +712,6 @@ void STY_gmz_M_wC()
   zlow=sty.zlow;
   zlow = (zlow < ZMIN ? ZMIN : zlow);
   
-  printf(" The following question allows to use an improvement of STY that allows to \ncompute");
-  printf(" normalization using Maximum Likelihood. It assumes that number of \ndetected sources");
-  printf(" follows a Poisson event. It takes into account Poisson \nerrors both in Mstar, alfa");
-  printf(" and Phi_star. These errors are used to be \nlarger than for traditional method, wich");
-  printf(" does not take into account the \ninfluence of Poisson detections in Mstar, alfa and Phi_star\n");
-  printf(" Use modified method to compute normalization at ML time (0=no/1=yes)? \n");
-  poissonflag=readi(poissonflag);
- 
   if(sty.islum) 
   {
     printf(" This method is not (yet) available for luminosities (only for magnitudes).\n");
@@ -772,14 +761,12 @@ void STY_gmz_M_wC()
   }
   else 
   {
-    printf(" Input the limiting magnitude: ");
-    mlim=readd(mlim);
-    fsel.magcut=mlim;
-    //fsel.deltamag=0.001; /* for now we are not using the Fermi selection function, but it is implemented for testing */
-    fsel.deltamag=0.;
-    if(poissonflag) status=MLA_STY_gmz_p_f_M_wC(sample.ngalax,sample.magSel,sample.magDist, sample.errMagDist,color_mean,color_stddev,sample.z,sample.errz,fsel,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
-    /* else            status=  MLA_STY_M(sample.ngalax,sample.mag,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess); */
-    else printf("This method is not (yet) available (only poisson)\n");
+    printf(" Input limiting magnitude (.5 probability of detection): ");
+    fsel.magcut=readd(fsel.magcut);
+    printf(" Input selection function sharpness (0 for a step function): ");
+    fsel.deltamag=readd(fsel.deltamag); 
+    /* Actually calling the method */
+    status=MLA_STY_gmz_p_f_M_wC(sample.ngalax,sample.magSel,sample.magDist, sample.errMagDist,color_mean,color_stddev,sample.z,sample.errz,fsel,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
     printf("\n Solutioner exited with error status %d\n",status);
     printf("\n   Solution found at iteration %d\n",mlprocess.nIter);
     printf("\n   Likelihood function: %g\n",mlprocess.MLmax);
@@ -2713,11 +2700,10 @@ void Generate_Cat_M()
   double *zerror,*zobserved;
   static int plots=0; /* para no hacer las gráficas */
 
-  int i;
+  unsigned int i;
 /*   double xx[1000],yy[1000]; */
-  long long nobj;
-  double nobjAllSky;
-  double nobjMean;
+  double nobjAllSky, nobjMean;
+  unsigned int nobj;
 /*   char cnul; */
 /*   double kkk=1.1; */
 /*   double fnul; */
@@ -2728,6 +2714,15 @@ void Generate_Cat_M()
   static char filename[100]="";
   double mh1,mh2,Mh1,Mh2;
 
+  /* Setup random number generator */
+  gsl_rng* rng;
+  struct timeval tv;  /* algo falta porque me da un error con el timeval */
+
+  rng = gsl_rng_alloc(gsl_rng_default);
+  gettimeofday(&tv, NULL);
+  gsl_rng_set(rng,tv.tv_usec);
+
+  /* Setup cosmology and LF parameters */
   set_cosmology();
   set_Schechter_M();
   printf(" Input lower limit redshift: ");
@@ -2765,7 +2760,7 @@ void Generate_Cat_M()
   nobjAllSky=Int_sch_M(schlf_M, zlow, zup, mlow, cosmo); 
   printf("nobjAllSky %g\n", nobjAllSky);
   nobjMean=(nobjAllSky/41252.*area);
-  nobj=(long long)Poidev(nobjMean);
+  nobj=gsl_ran_poisson(rng, nobjMean);
   
   zsample=malloc(nobj*sizeof(double));
   Msample=malloc(nobj*sizeof(double));
@@ -2776,11 +2771,11 @@ void Generate_Cat_M()
   merror=malloc(nobj*sizeof(double));
   mobserved=malloc(nobj*sizeof(double));
 
-  printf(" Number of galaxies generated: %lld\n",nobj);
+  printf(" Number of galaxies generated: %d\n",nobj);
 
 /*   Teordist(schlf.Mstar,schlf.alfa,zlow,zup,mlow,mup) */
 
-  printf("\n 000000000 / %9lld\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
+  printf("\n 000000000 / %9d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
   for(i=0;i<nobj;i++) {
     printf("%9d\b\b\b\b\b\b\b\b\b",i);
 /*     //printf(" %d\n",i); */
@@ -2826,7 +2821,7 @@ void Generate_Cat_M()
     printf(" Couldn't open %s for writing\n",filename);
     return;
   }
-  fprintf(fout,"# Simulated catalog generated by Lumfunc with %lld objects\n",nobj);
+  fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent magnitude limits: %f-%f\n",zlow,zup,mlow,mup);
   fprintf(fout,"# Schechter function: Mstar %f Phistar %f Alfa %f\n",schlf_M.Mstar,schlf_M.phistar,schlf_M.alfa);
   fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
@@ -2883,9 +2878,9 @@ void Generate_Cat_M_C()
   double *zerror,*zobserved;
   static int plots=0; /* para no hacer las gráficas */
 
-  int i;
+  unsigned int i;
 /*   double xx[1000],yy[1000]; */
-  double nobj_mean;
+  double nobjAllSky, nobjMean;
   int nobj;
 /*   char cnul; */
 /*   double kkk=1.1; */
@@ -2897,7 +2892,7 @@ void Generate_Cat_M_C()
   static char filename[100]="";
   double mh1,mh2,Mh1,Mh2;
 
-  /* dabreu */
+  /* Setup random number generator */
   gsl_rng* rng;
   struct timeval tv;  /* algo falta porque me da un error con el timeval */
 
@@ -2942,9 +2937,10 @@ void Generate_Cat_M_C()
   nobj=(int)((double)nobj/41252.*area);
   nobj=Poidev(nobj); */
   /* dabreu */
-  nobj_mean=Int_sch_M(schlf_M, zlow, zup, mlow, cosmo); 
-  nobj_mean=nobj_mean/41252.*area;
-  nobj=(int)gsl_ran_poisson(rng, nobj_mean);
+  nobjAllSky=Int_sch_M(schlf_M, zlow, zup, mlow, cosmo); 
+  printf("nobjAllSky %g\n", nobjAllSky);
+  nobjMean=(nobjAllSky/41252.*area);
+  nobj=gsl_ran_poisson(rng, nobjMean);
 
   zsample=malloc(nobj*sizeof(double));
   Msample=malloc(nobj*sizeof(double));
@@ -3060,13 +3056,23 @@ void Generate_Cat_L()
   double *Lsample,*zsample,*fsample,*ferror,*fobserved; 
   static int plots=0; /* para no hacer las gráficas */
 
-  int i;
-  int nobj;
+  unsigned int i;
+  double nobjAllSky, nobjMean;
+  unsigned int nobj;
   char snul[1000];
   FILE *fout;
   static char filename[100]="";
   double fh1,fh2,Fh1,Fh2;
 
+  /* Setup random number generator */
+  gsl_rng* rng;
+  struct timeval tv;  /* algo falta porque me da un error con el timeval */
+
+  rng = gsl_rng_alloc(gsl_rng_default);
+  gettimeofday(&tv, NULL);
+  gsl_rng_set(rng,tv.tv_usec);
+
+  /* Setup cosmology and LF parameters */
   set_cosmology();
   set_Schechter_L();
   printf(" Input lower limit redshift: ");
@@ -3094,11 +3100,10 @@ void Generate_Cat_L()
   printf(" Do you want plots of the catalog (1=yes, 0=no)?\n");
   plots=readf(plots);
   
-  nobj=1000;
-
-  nobj=(int)Int_sch_L(schlf_L, zlow, zup, fluxlow, cosmo);
-  nobj=(int)((double)nobj/41252.*area);
-  nobj=Poidev(nobj);
+  nobjAllSky=(int)Int_sch_L(schlf_L, zlow, zup, fluxlow, cosmo);
+  printf("nobjAllSky %g\n", nobjAllSky);
+  nobjMean=(nobjAllSky/41252.*area);
+  nobj=gsl_ran_poisson(rng, nobjMean);
 
   zsample=malloc(nobj*sizeof(double));
   Lsample=malloc(nobj*sizeof(double));
@@ -3175,7 +3180,8 @@ void Generate_Cat_L()
 
 void Generate_Cat_M_wC()
 {
-  static double mSelLow=0, mSelUp=0, mSelError_mean=0, mSelError_stddev=0;
+  static double mSelLow=0, mDeltaMag=0, mSelUp=0;
+  static double mSelError_mean=0, mSelError_stddev=0;
   static double mDistLow=0, mDistUp=0, MDistLow=0, MDistUp=0;
   static double color_mean=0, color_stddev=0;
   static double colorError_mean=0, colorError_stddev=0;
@@ -3192,15 +3198,23 @@ void Generate_Cat_M_wC()
 
   /* color = mDist - mSel */
 
-  int i;
-  long long nobj;
-  double nobjAllSky;
-  double nobjMean;
+  unsigned int iobj = 0;
+  double nobjAllSky, nobjMean;
+  unsigned int nobj;
   char snul[1000];
   FILE *fout;
   static char filename[100]="";
   double mh1,mh2,Mh1,Mh2;
 
+  /* Setup random number generator */
+  gsl_rng* rng;
+  struct timeval tv;  /* algo falta porque me da un error con el timeval */
+
+  rng = gsl_rng_alloc(gsl_rng_default);
+  gettimeofday(&tv, NULL);
+  gsl_rng_set(rng,tv.tv_usec);
+
+  /* Setup cosmology and LF parameters */
   set_cosmology();
   set_Schechter_M();
   printf(" Input lower limit redshift: ");
@@ -3216,8 +3230,11 @@ void Generate_Cat_M_wC()
   printf(" Input the mean deviation for the error: ");
   zerror_stddev = readf(zerror_stddev);
 
-  printf(" Input the limiting magnitude (in the magnitude of selection): ");
+  printf(" Input the limiting magnitude \n"
+         "(.5 of detect probability in the magnitude of selection): ");
   mSelLow=readf(mSelLow);
+  printf(" Input selection function sharpness (0 for a step function): ");
+  mDeltaMag=readf(mDeltaMag);
   printf(" Input the maximum magnitude (in the magnitude of selection): ");
   mSelUp =readf(mSelUp);
   printf(" Input the mean error for the selection magnitude: ");
@@ -3247,11 +3264,20 @@ void Generate_Cat_M_wC()
   }
   else
   {
-    nobjAllSky=Int_sch_M_wC(schlf_M, zlow, zup, color_mean, color_stddev, mSelLow, cosmo);
+    if(mDeltaMag == 0)
+      nobjAllSky=Int_sch_M_wC(schlf_M, zlow, zup,
+                              color_mean, color_stddev, mSelLow, cosmo);
+    else
+    {
+      printf("DeltaMag != 0 not implemented yet");
+      nobjAllSky=Int_sch_f_M_wC(schlf_M, zlow, zup,
+                              color_mean, color_stddev, mSelLow, mDeltaMag, cosmo);
+      exit(1);
+    }
   }
   printf("nobjAllSky %g\n", nobjAllSky);
   nobjMean=(nobjAllSky/41252.*area);
-  nobj=(long long)Poidev(nobjMean);
+  nobj=gsl_ran_poisson(rng, nobjMean);
   
   zsample=malloc(nobj*sizeof(double));
   Msample=malloc(nobj*sizeof(double));
@@ -3270,39 +3296,44 @@ void Generate_Cat_M_wC()
   colorError=malloc(nobj*sizeof(double));
   colorObserved=malloc(nobj*sizeof(double));
 
-  printf(" Number of galaxies generated: %lld\n",nobj);
+  printf(" Number of galaxies generated: %d\n",nobj);
 
   /* Setting the approx limiting magnitude in the originally distributed mag */
   /* mDistLow = mSelLow + color_mean + 5 * color_stddev;
   mDistUp  = mSelUp  + color_mean - 5 * color_stddev; */
   /* removed, now using specific color for each object */  
 
-  printf("\n 000000000 / %9lld\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
-  for(i=0;i<nobj;i++) {
-    printf("%9d\b\b\b\b\b\b\b\b\b",i);
+  printf("\n 000000000 / %9d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
+  while(iobj<nobj)
+  {
+    double probdetec;
+    printf("%9d\b\b\b\b\b\b\b\b\b",iobj);
 /*     //printf(" %d\n",i); */
-    colorsample[i] = color_mean + Gasdev() * color_stddev;
-    mDistLow = mSelLow + colorsample[i];
-    mDistUp = mSelUp + colorsample[i];
-    zsample[i]= zSchdev_M(schlf_M, zlow, zup, mDistLow, mDistUp, cosmo);
-    MDistLow=Mag(zsample[i],mDistLow,cosmo);
-    MDistUp =Mag(zsample[i],mDistUp,cosmo);
-    MDist[i]= Schechterdev_M(schlf_M,MDistLow,MDistUp);
-    mDist[i]= mag(zsample[i],MDist[i],cosmo);
-    mSel[i] = mDist[i] - colorsample[i]; /* color = dist - sel */
-    while((mSelError[i] = mSelError_mean + Gasdev() * mSelError_stddev) < 0);
-    mSelObserved[i] = mSel[i] + Gasdev()*mSelError[i];
-    while((colorError[i] = colorError_mean + Gasdev() * colorError_stddev) < 0);
-    colorObserved[i] = colorsample[i] + Gasdev()*colorError[i];
-    while((zerror[i] = zerror_mean + Gasdev() * zerror_stddev) < 0);
-    zobserved[i] = zsample[i] + Gasdev()*zerror[i];
-    mDistObserved[i] = mSelObserved[i] + colorObserved[i];
-    if(DEBUG2) printf("z = %g\n", zsample[i]);
-    if(mSel[i] > mSelLow)  /* This galaxy does not pass the selection function */
-    { 
-      /* i--; */
-      printf("WARNING: something went bad. This galaxy doesn't pass the sel. func.\n");
+    colorsample[iobj] = color_mean + Gasdev() * color_stddev;
+    mDistLow = mSelLow + colorsample[iobj] + 6 * mDeltaMag;
+    mDistUp = mSelUp + colorsample[iobj];
+    zsample[iobj]= zSchdev_M(schlf_M, zlow, zup, mDistLow, mDistUp, cosmo);
+    MDistLow=Mag(zsample[iobj],mDistLow,cosmo);
+    MDistUp =Mag(zsample[iobj],mDistUp,cosmo);
+    MDist[iobj]= Schechterdev_M(schlf_M,MDistLow,MDistUp);
+    mDist[iobj]= mag(zsample[iobj],MDist[iobj],cosmo);
+    mSel[iobj] = mDist[iobj] - colorsample[iobj]; /* color = dist - sel */
+    probdetec = Fermi(mSel[iobj], mSelLow, mDeltaMag); 
+    if(gsl_ran_binomial(rng, probdetec, 1) == 0)
+    {
+       /* Object is not detected. The binomial dist gives the number
+          of sucesses in n trials (here trials is 1) */
+       continue;
     }
+    while((mSelError[iobj] = mSelError_mean + Gasdev() * mSelError_stddev) < 0);
+    mSelObserved[iobj] = mSel[iobj] + Gasdev()*mSelError[iobj];
+    while((colorError[iobj] = colorError_mean + Gasdev() * colorError_stddev) < 0);
+    colorObserved[iobj] = colorsample[iobj] + Gasdev()*colorError[iobj];
+    while((zerror[iobj] = zerror_mean + Gasdev() * zerror_stddev) < 0);
+    zobserved[iobj] = zsample[iobj] + Gasdev()*zerror[iobj];
+    mDistObserved[iobj] = mSelObserved[iobj] + colorObserved[iobj];
+    if(DEBUG2) printf("z = %g\n", zsample[iobj]);
+    ++iobj;
   }
   MinMax_d(nobj,msample,&mh1,&mh2);
   MinMax_d(nobj,Msample,&Mh1,&Mh2);
@@ -3335,7 +3366,7 @@ void Generate_Cat_M_wC()
     printf(" Couldn't open %s for writing\n",filename);
     return;
   }
-  fprintf(fout,"# Simulated catalog generated by Lumfunc with %lld objects\n",nobj);
+  fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent mag limits: %f-%f\n",zlow,zup,mDistLow,mDistUp);
   fprintf(fout,"# Schechter function: Mstar %f Phistar %f Alfa %f\n",schlf_M.Mstar,schlf_M.phistar,schlf_M.alfa);
   fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
@@ -3354,16 +3385,16 @@ void Generate_Cat_M_wC()
           "# 10 COLOR_OBS (observed color for the object taking into account obs. errors)\n"
           "# 11 COLOR_ERR (error in the observed color for the object = mDist - mSel\n"
           "# 12 M_DIST_APP_OBS (M_SEL_APP_OBS + COLOR_OBS)\n");
-  for(i=0;i<nobj;i++) {
+  for(iobj=0;iobj<nobj;iobj++) {
    /* fprintf(fout," %8.6f  %8.3f %8.3f",zsample[i],msample[i],Msample[i]); */
-    fprintf(fout," %8.6f  %8.6f %8.6f",zsample[i],zobserved[i],zerror[i]);
-    fprintf(fout," %8.6f %8.6f",mDist[i],MDist[i]);
-    fprintf(fout," %8.6f %8.6f",mSel[i],mSelObserved[i]);
-    fprintf(fout," %8.6f",mSelError[i]);
-    fprintf(fout," %8.6f", colorsample[i]);
-    fprintf(fout," %8.6f", colorObserved[i]);
-    fprintf(fout," %8.6f", colorError[i]);
-    fprintf(fout," %8.6f\n", mDistObserved[i]);
+    fprintf(fout," %8.6f  %8.6f %8.6f",zsample[iobj],zobserved[iobj],zerror[iobj]);
+    fprintf(fout," %8.6f %8.6f",mDist[iobj],MDist[iobj]);
+    fprintf(fout," %8.6f %8.6f",mSel[iobj],mSelObserved[iobj]);
+    fprintf(fout," %8.6f",mSelError[iobj]);
+    fprintf(fout," %8.6f", colorsample[iobj]);
+    fprintf(fout," %8.6f", colorObserved[iobj]);
+    fprintf(fout," %8.6f", colorError[iobj]);
+    fprintf(fout," %8.6f\n", mDistObserved[iobj]);
     
   }
   fclose(fout);
