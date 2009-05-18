@@ -5,7 +5,13 @@
 # Pequeño script para obtener la densidad de objetos dados unos parámetros del
 # survery utilizando la opción D de LumFunc_GOYA
 #
+# MODIFIED: 20090518 dabreu
+# Support for new cosmology
+#
 # Argumentos [valor por defecto]:
+#  - H0 [70]
+#  - Omega matter [0.3]
+#  - Omega lambda [0.7]
 #  - Magnitudes o Luminosidad [m] (puede ser "m" o "l")
 #  - magnitud limite [25]
 #  - Mstar [-20.4]
@@ -23,11 +29,14 @@
 set estatus=0 #para guardar el status de salida de LumFunc_GOYA
 
 if ($1 == "--help") then
-   echo "Uso: LF_get_object_density.csh MoL magLim Mstar Phistar Alfa colorMean colorStddev zlow zup"
+   echo "Uso: LF_get_object_density.csh H0 OM OL MoL magLim Mstar Phistar Alfa colorMean colorStddev zlow zup"
    exit
 endif
 
 if ($1 == "") then
+   set H0=70
+   set OM=0.3
+   set OL=0.7
    set MoL="m"
    set magLim=25
    set Mstar=-20.4
@@ -38,21 +47,25 @@ if ($1 == "") then
    set zlow=0
    set zup=0
 else
-   set MoL=$1
-   set magLim=$2
-   set Mstar=$3
-   set Phistar=$4
-   set Alfa=$5
-   set colorMean=$6
-   set colorStddev=$7
-   set zlow=$8
-   set zup=$9
+   set H0=$1
+   set OM=$2
+   set OL=$3
+   set MoL=$4
+   set magLim=$5
+   set Mstar=$6
+   set Phistar=$7
+   set Alfa=$8
+   set colorMean=$9
+   set colorStddev=$10
+   set zlow=$11
+   set zup=$12
 endif
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 d
-75
-0.5
+$H0
+$OM
+$OL
 0
 $MoL
 $magLim
@@ -71,6 +84,9 @@ set estatus=$status
 echo ""
 echo "-------------------------"
 echo $0 $*":"
+echo "H0: $H0"
+echo "OM: $OM"
+echo "OL: $OL"
 echo "Mag o Lum: $MoL"
 echo "Mag lim: $magLim"
 echo "Mstar: $Mstar"
