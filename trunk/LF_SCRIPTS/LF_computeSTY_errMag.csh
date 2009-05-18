@@ -5,7 +5,13 @@
 # Pequeño script para calcular la LF utilizando la opción STY en magnitudes de
 # LumFunc_GOYA con errores en la magnitud.
 #
+# MODIFIED: 20090518 dabreu
+# Support for new cosmology
+#
 # Argumentos [valor por defecto]:
+#  - H0 [70]
+#  - Omega matter [0.3]
+#  - Omega lambda [0.7]
 #  - Catálogo de entrada [kk.cat]
 #  - magnitud limite [25]
 #  - Z up [0]
@@ -20,13 +26,16 @@
 set estatus=0 #para guardar el status de salida de LumFunc_GOYA
 
 if ($1 == "--help") then
-   echo "Uso: LF_computeSTY_Mag.csh inCat magLim zlow zup area outFile"
+   echo "Uso: LF_computeSTY_Mag.csh H0 OM OL inCat magLim zlow zup area outFile"
    echo ""
-   echo "Uso: LF_computeSTY_Mag.csh kk.cat 25 0 0 0.1 kk.lf"
+   echo "Uso: LF_computeSTY_Mag.csh 70 0.3 0.7 kk.cat 25 0 0 0.1 kk.lf"
    exit
 endif
 
 if ($1 == "") then
+   set H0=70
+   set OM=0.3
+   set OL=0.7
    set inCat="kk.cat"
    set magLim=25
    set zlow=0
@@ -34,23 +43,31 @@ if ($1 == "") then
    set area=0.1
    set outFile="kk.lf"
 else
-   set inCat=$1
-   set magLim=$2
-   set zlow=$3
-   set zup=$4
-   set area=$5
-   set outFile=$6
+   set H0=$1
+   set OM=$2
+   set OL=$3
+   set inCat=$4
+   set magLim=$5
+   set zlow=$6
+   set zup=$7
+   set area=$8
+   set outFile=$9
 endif
+
+set colz=2
+set colm=7
+set colerrm=8
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 n
-75
-0.5
+$H0
+$OM
+$OL
 f
 $inCat
-2
-7
-8
+$colz
+$colm
+$colerrm
 m
 10
 $magLim
@@ -70,6 +87,9 @@ set estatus=$status
 echo ""
 echo "-------------------------"
 echo $0 $*":"
+echo "H0 $H0"
+echo "Omega matter $OM"
+echo "Omega lambda $OL"
 echo "Input file $inCat"
 echo "Mag lim $magLim"
 echo "Z low: $zlow"
