@@ -78,11 +78,17 @@ double Sch_rhoz_L(double zint, struct Schlf_L lf, double zlow,double zup,double 
   static double Lstarold,alfaold,zupold,zlowold,fluxlimold;
   int oldflag=0;
   double rhoz;
+  double q0;
 
   nstep_lf=NSTEP_LF;
   nstep_z =NSTEP_Z;
 
-  
+  if (cosmo.OL != 0)
+  {
+    printf("Method only valid for OL = 0\n");
+    return(-1);
+  }
+  q0 = cosmo.OM/2.;
   if(Lstarold==lf.Lstar && alfaold==lf.alfa && zupold==zup && zlowold==zlow && fluxlimold==fluxlim) {
     zlow = (zlow < ZMIN ? ZMIN : zlow);
     oldflag=1;
@@ -104,8 +110,8 @@ double Sch_rhoz_L(double zint, struct Schlf_L lf, double zlow,double zup,double 
       sch_int=(incom(1+lf.alfa,xmax)-incom(1+lf.alfa,xmin));
 /*       printf(" sch_int %g\n",sch_int); */
       /*       Ahora calculamos dVdz, pero sin los factores, que no influyen */
-      Dang_DH=(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(1+z); /* La distancia angular * (1+z) */
-      E=sqrt(2*cosmo.q0*(1+z)*(1+z)*(1+z)+(1-2*cosmo.q0)*(1+z)*(1+z));
+      Dang_DH=(2-2*q0*(1-z)-(2-2*q0)*sqrt(1+2*q0*z))/(1+z); /* La distancia angular * (1+z) */
+      E=sqrt(2*q0*(1+z)*(1+z)*(1+z)+(1-2*q0)*(1+z)*(1+z));
       dVdz=(Dang_DH*Dang_DH/E);
       /*       Aqui iria rho(z) si la densidad comovil variase con el z */
       /*       El z del final es porque estoy integrando en log(z), y dz=z*d(log(z)) */
