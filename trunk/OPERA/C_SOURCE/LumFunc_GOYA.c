@@ -157,61 +157,61 @@ int main()
     case 'c':
       set_cosmology();
       Calc_Num();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'D':
     case 'd':
       set_cosmology();
       Calc_Num_wC();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'V':
     case 'v':
       set_cosmology();
       VVmax();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'M':
     case 'm':
       set_cosmology();
       STY();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'N':
     case 'n':
       set_cosmology();
       STY_MAG_ERR();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'O':
     case 'o':
       set_cosmology();
       STY_wC();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'P':
     case 'p':
       set_cosmology();
       STY_wC_errColor();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'R':
     case 'r':
       set_cosmology();
       STY_gmz_f_M_wC();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'W':
     case 'w':
       set_cosmology();
       SWML();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'L':
     case 'l':
       set_cosmology();
       CEG();
-      cosmos_free(&cosmo);
+      cosmo_free(&cosmo);
       break;
     case 'G':
     case 'g':
