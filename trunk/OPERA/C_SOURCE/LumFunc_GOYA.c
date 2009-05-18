@@ -3256,6 +3256,7 @@ void Generate_Cat_M_wC()
   //double Mlow,Mup;
   static double zlow=0,zup=0.5;
   static double area=41252.;
+  static struct fermifsel_M fsel={21.,0.};
   double zerror_mean=0, zerror_stddev=0;
   double *Msample,*zsample,*msample,*merror,*mobserved;
   double *zerror,*zobserved;
@@ -3300,9 +3301,9 @@ void Generate_Cat_M_wC()
 
   printf(" Input the limiting magnitude \n"
          "(.5 of detect probability in the magnitude of selection): ");
-  mSelLow=readf(mSelLow);
+  fsel.magcut=readf(fsel.magcut);
   printf(" Input selection function sharpness (0 for a step function): ");
-  mDeltaMag=readf(mDeltaMag);
+  fsel.deltamag=readf(fsel.deltamag);
   printf(" Input the maximum magnitude (in the magnitude of selection): ");
   mSelUp =readf(mSelUp);
   printf(" Input the mean error for the selection magnitude: ");
@@ -3336,12 +3337,8 @@ void Generate_Cat_M_wC()
       nobjAllSky=Int_sch_M_wC(schlf_M, zlow, zup,
                               color_mean, color_stddev, mSelLow, cosmo);
     else
-    {
-      printf("DeltaMag != 0 not implemented yet");
       nobjAllSky=Int_sch_f_M_wC(schlf_M, zlow, zup,
-                              color_mean, color_stddev, mSelLow, mDeltaMag, cosmo);
-      exit(1);
-    }
+                              color_mean, color_stddev, fsel, cosmo);
   }
   printf("nobjAllSky %g\n", nobjAllSky);
   nobjMean=(nobjAllSky/41252.*area);
