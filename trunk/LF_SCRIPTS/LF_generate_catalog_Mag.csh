@@ -9,8 +9,13 @@
 # Ajuste de cambios en los nombres de los ficheros y los parámetros
 # MODIFIED: 20061212 dabreu
 # Ajuste de cambios en los parámetros
+# MODIFIED: 20090518 dabreu
+# Support for new cosmology
 #
 # Argumentos [valor por defecto]:
+#  - H0 [70]
+#  - Omega matter [0.3]
+#  - Omega lambda [0.7]
 #  - Mstar [-20.4]
 #  - Phistar [0.0033]
 #  - Alfa [-1.3]
@@ -31,13 +36,16 @@
 set estatus=0 #para guardar el status de salida de LumFunc_GOYA
 
 if ($1 == "--help") then
-   echo "Uso: LF_generate_catalog_Mag.csh Mstar Phistar Alfa zlow zup zError zdError magLim mError dError area outFile"
+   echo "Uso: LF_generate_catalog_Mag.csh H0 OM OL Mstar Phistar Alfa zlow zup zError zdError magLim mError dError area outFile"
    echo ""
-   echo "Uso: LF_generate_catalog_Mag.csh -20.4 0.0033 -1.3 0 0 0 0 25 0 0 0.1 kk.cat"
+   echo "Uso: LF_generate_catalog_Mag.csh 70 0.3 0.7 -20.4 0.0033 -1.3 0 0 0 0 25 0 0 0.1 kk.cat"
    exit
 endif
 
 if ($1 == "") then
+   set H0=70
+   set OM=0.3
+   set OL=0.7
    set Mstar=-20.4
    set Phistar=0.0033
    set Alfa=-1.3
@@ -51,24 +59,28 @@ if ($1 == "") then
    set area=0.1
    set outFile="kk.cat"
 else
-   set Mstar=$1
-   set Phistar=$2
-   set Alfa=$3
-   set zlow=$4
-   set zup=$5
-   set zError=$6
-   set zdError=$7
-   set magLim=$8
-   set mError=$9
-   set dError=$10
-   set area=$11
-   set outFile=$12
+   set H0=$1
+   set OM=$2
+   set OL=$3
+   set Mstar=$4
+   set Phistar=$5
+   set Alfa=$6
+   set zlow=$7
+   set zup=$8
+   set zError=$9
+   set zdError=$10
+   set magLim=$11
+   set mError=$12
+   set dError=$13
+   set area=$14
+   set outFile=$15
 endif
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 g
-75
-0.5
+$H0
+$OM
+$OL
 $Mstar
 $Phistar
 $Alfa
@@ -91,6 +103,9 @@ set estatus=$status
 echo ""
 echo "-------------------------"
 echo $0 $*":"
+echo "H0: $H0"
+echo "Omega matter: $OM"
+echo "Omega lambda: $OL"
 echo "Mstar: $Mstar"
 echo "Phistar: $Phistar"
 echo "Alfa: $Alfa"

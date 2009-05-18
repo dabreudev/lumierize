@@ -5,7 +5,13 @@
 # Pequeño script para generar un catálogo en magnitudes para realizar
 # simulaciones utilizando la opción I de LumFunc_GOYA
 #
+# MODIFIED: 20090518 dabreu
+# Support for new cosmology
+#
 # Argumentos [valor por defecto]:
+#  - H0 [70]
+#  - Omega matter [0.3]
+#  - Omega lambda [0.7]
 #  - Mstar [-20.4]
 #  - Phistar [0.0033]
 #  - Alfa [-1.3]
@@ -31,13 +37,16 @@
 set estatus=0 #para guardar el status de salida de LumFunc_GOYA
 
 if ($1 == "--help") then
-   echo "Uso: LF_generate_catalog_Mag_wC.csh Mstar Phistar Alfa zlow zup zError zdError magLim deltaMag mError dError meanColor stddevColor meanErrorColor meanStddevColor area outFile"
+   echo "Uso: LF_generate_catalog_Mag_wC.csh H0 OM OL Mstar Phistar Alfa zlow zup zError zdError magLim deltaMag mError dError meanColor stddevColor meanErrorColor meanStddevColor area outFile"
    echo ""
-   echo "Example: LF_generate_catalog_Mag_wC.csh -20.4 0.0033 -1.3 0 0 0 0 25 0 0 0 0 0 0 0 0.1 kk.cat"
+   echo "Example: LF_generate_catalog_Mag_wC.csh 70 0.3 0.7 -20.4 0.0033 -1.3 0 0 0 0 25 0 0 0 0 0 0 0 0.1 kk.cat"
    exit
 endif
 
 if ($1 == "") then
+   set H0=70
+   set OM=0.3
+   set OL=0.7
    set Mstar=-20.4
    set Phistar=0.0033
    set Alfa=-1.3
@@ -56,29 +65,33 @@ if ($1 == "") then
    set area=0.1
    set outFile="kk.cat"
 else
-   set Mstar=$1
-   set Phistar=$2
-   set Alfa=$3
-   set zlow=$4
-   set zup=$5
-   set zError=$6
-   set zdError=$7
-   set magLim=$8
-   set deltaMag=$9
-   set mError=$10
-   set dError=$11
-   set meanColor=$12
-   set stddevColor=$13
-   set meanErrorColor=$14
-   set stddevErrorColor=$15
-   set area=$16
-   set outFile=$17
+   set H0=$1
+   set OM=$2
+   set OL=$3
+   set Mstar=$4
+   set Phistar=$5
+   set Alfa=$6
+   set zlow=$7
+   set zup=$8
+   set zError=$9
+   set zdError=$10
+   set magLim=$11
+   set deltaMag=$12
+   set mError=$13
+   set dError=$14
+   set meanColor=$15
+   set stddevColor=$16
+   set meanErrorColor=$17
+   set stddevErrorColor=$18
+   set area=$19
+   set outFile=$20
 endif
 
-$OPERA_INST/bin/LumFunc_GOYA << COMANDOS
+$OPERA_INST/LumFunc_GOYA << COMANDOS
 I
-75
-0.5
+$H0
+$OM
+$OL
 $Mstar
 $Phistar
 $Alfa
@@ -106,6 +119,9 @@ set estatus=$status
 echo ""
 echo "-------------------------"
 echo $0 $*":"
+echo "H0: $H0"
+echo "Omega matter: $OM"
+echo "Omega lambda: $OL"
 echo "Mstar: $Mstar"
 echo "Phistar: $Phistar"
 echo "Alfa: $Alfa"

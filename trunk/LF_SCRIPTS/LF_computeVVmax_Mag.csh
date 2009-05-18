@@ -11,8 +11,13 @@
 # Ajustes con los cambios de algunos parámetros
 # MODIFIED: 20080317 dabreu
 # New param: File for full output.
+# MODIFIED: 20090518 dabreu
+# Support for new cosmology
 #
 # Argumentos [valor por defecto]:
+#  - HO [70]
+#  - Omega matter [0.3]
+#  - Omega lambda [0.7]
 #  - Catálogo de entrada [kk.cat]
 #  - Z up [0]
 #  - Z low [0]
@@ -28,13 +33,16 @@
 set estatus=0 #para guardar el status de salida de LumFunc_GOYA
 
 if ($1 == "--help") then
-   echo "Uso: LF_computeVVmax_Mag.csh inCat zlow zup area magLim outFile outFullFile"
+   echo "Uso: LF_computeVVmax_Mag.csh H0 OM OL inCat zlow zup area magLim outFile outFullFile"
    echo ""
-   echo "Example: LF_computeVVmax_Mag.csh kk.cat 0 0 0.1 25 kk.lf kk_full.lf"
+   echo "Example: LF_computeVVmax_Mag.csh 70 0.3 0.7 kk.cat 0 0 0.1 25 kk.lf kk_full.lf"
    exit
 endif
 
 if ($1 == "") then
+   set H0=70
+   set OM=0.3
+   set OL=0.7
    set inCat="kk.cat"
    set zlow=0
    set zup=0
@@ -43,28 +51,35 @@ if ($1 == "") then
    set outFile="kk.lf"
    set outFullFile = "kk_full.lf"
 else
-   set inCat=$1
-   set zlow=$2
-   set zup=$3
-   set area=$4
-   set magLim=$5
-   set outFile=$6
-   set outFullFile=$7
+   set H0=$1
+   set OM=$2
+   set OL=$3
+   set inCat=$4
+   set zlow=$5
+   set zup=$6
+   set area=$7
+   set magLim=$8
+   set outFile=$9
+   set outFullFile=$10
 endif
 
-# Hay que poner el link a estable cuando LumFunc_GOYA no esté ocupado
-# y cambiar las columnas para que utilice los colores (no será siempre 7 7 7 7)
+set colz=2
+set colmSel=7
+set colmDist=7
+
+# cambiar las columnas para que utilice los colores (no será siempre 7 7 7 7)
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 v
-75
-0.5
+$H0
+$OM
+$OL
 f
 $inCat
-2
-7
-7
-7
-7
+$colz
+$colmSel
+$colmSel
+$colmDist
+$colmDist
 m
 -30
 -8
@@ -85,6 +100,9 @@ set estatus=$status
 echo ""
 echo "-------------------------"
 echo $0 $*":"
+echo "H0 $H0"
+echo "Omega matter $OM"
+echo "Omega lambda $OL"
 echo "Input file $inCat"
 echo "Z low $zlow"
 echo "Z up $zup"
