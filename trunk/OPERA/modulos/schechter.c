@@ -500,8 +500,7 @@ double Int_sch_f_M_wC(struct Schlf_M lf, double zlow,double zup, double color_me
       }
       else
       {
-        Ngal_mag+=lf.phistar*(gsl_sf_gamma_inc(1.+lf.alfa,Lleft/Lstar))*
-          dVdz(z,cosmo)/1.e18;
+        Ngal_mag+=lf.phistar*(gsl_sf_gamma_inc(1.+lf.alfa,Lleft/Lstar));
         if(DEBUG) printf(" Segundo Npar %g \n",Ngal_mag);
       }
       Ngal_color+=Ngal_mag * gaussian(color, color_mean, color_stddev);
