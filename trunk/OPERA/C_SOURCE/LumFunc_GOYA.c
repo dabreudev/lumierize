@@ -3248,7 +3248,7 @@ void Generate_Cat_L()
 
 void Generate_Cat_M_wC()
 {
-  static double mSelLow=0, mDeltaMag=0, mSelUp=0;
+  static double mSelUp=0;
   static double mSelError_mean=0, mSelError_stddev=0;
   static double mDistLow=0, mDistUp=0, MDistLow=0, MDistUp=0;
   static double color_mean=0, color_stddev=0;
@@ -3329,13 +3329,14 @@ void Generate_Cat_M_wC()
   if (color_stddev==0.) /* to avoid problems in Int_sch_M_wC */
   {
     printf("color_stddev=0 -> calling Int_sch_M instead of Int_sch_M_wC\n");
-    nobjAllSky=Int_sch_M(schlf_M, zlow, zup, mSelLow, cosmo);
+    nobjAllSky=Int_sch_f_M(schlf_M, zlow, zup, fsel, cosmo);
   }
   else
   {
-    if(mDeltaMag == 0)
+    if(fsel.deltamag == 0)
       nobjAllSky=Int_sch_M_wC(schlf_M, zlow, zup,
-                              color_mean, color_stddev, mSelLow, cosmo);
+                              color_mean, color_stddev, fsel.magcut,
+                              cosmo);
     else
       nobjAllSky=Int_sch_f_M_wC(schlf_M, zlow, zup,
                               color_mean, color_stddev, fsel, cosmo);
@@ -3375,7 +3376,7 @@ void Generate_Cat_M_wC()
     printf("%9d\b\b\b\b\b\b\b\b\b",iobj);
 /*     //printf(" %d\n",i); */
     colorsample[iobj] = color_mean + Gasdev() * color_stddev;
-    mDistLow = mSelLow + colorsample[iobj] + 6 * mDeltaMag;
+    mDistLow = fsel.magcut + colorsample[iobj] + 6 * fsel.deltamag;
     mDistUp = mSelUp + colorsample[iobj];
     zsample[iobj]= zSchdev_M(schlf_M, zlow, zup, mDistLow, mDistUp, cosmo);
     MDistLow=Mag(zsample[iobj],mDistLow,cosmo);
@@ -3383,7 +3384,7 @@ void Generate_Cat_M_wC()
     MDist[iobj]= Schechterdev_M(schlf_M,MDistLow,MDistUp);
     mDist[iobj]= mag(zsample[iobj],MDist[iobj],cosmo);
     mSel[iobj] = mDist[iobj] - colorsample[iobj]; /* color = dist - sel */
-    probdetec = Fermi(mSel[iobj], mSelLow, mDeltaMag); 
+    probdetec = Fermi(mSel[iobj], fsel.magcut, fsel.deltamag); 
     if(gsl_ran_binomial(rng, probdetec, 1) == 0)
     {
        /* Object is not detected. The binomial dist gives the number
