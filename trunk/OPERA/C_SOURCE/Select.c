@@ -690,7 +690,8 @@ void LoadParam_file(struct param *P, char file[100]) {
   ffgky(parfile,TFLOAT,"SEEING",&((*P).seeing),comment,&status);
   ffgky(parfile,TFLOAT,"SECPPIX",&((*P).platescale),comment,&status);
   ffgky(parfile,TDOUBLE,"H0",&(((*P).cosmo).H0),comment,&status);
-  ffgky(parfile,TDOUBLE,"Q0",&(((*P).cosmo).q0),comment,&status);
+  ffgky(parfile,TDOUBLE,"OM",&(((*P).cosmo).OM),comment,&status);
+  ffgky(parfile,TDOUBLE,"OL",&(((*P).cosmo).OL),comment,&status);
   ffgky(parfile,TFLOAT,"COCCONT",&((*P).Kcoc),comment,&status);
   ffgky(parfile,TFLOAT,"NIIFACT",&((*P).niifact),comment,&status); 
   ffgky(parfile,TFLOAT,"MEANEBV",&((*P).meanebv),comment,&status); 
