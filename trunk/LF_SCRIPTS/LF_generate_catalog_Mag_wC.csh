@@ -14,6 +14,7 @@
 #  - z error medio [0]
 #  - z desviación del error [0]
 #  - magnitud limite [25] (salen ~2800 objetos)
+#  - deltamag [0.0]
 #  - error medio [0.0]
 #  - desviación del error [0.0]
 #  - mean Color [0.0]
@@ -30,9 +31,9 @@
 set estatus=0 #para guardar el status de salida de LumFunc_GOYA
 
 if ($1 == "--help") then
-   echo "Uso: LF_generate_catalog_Mag_wC.csh Mstar Phistar Alfa zlow zup zError zdError magLim mError dError meanColor stddevColor meanErrorColor meanStddevColor area outFile"
+   echo "Uso: LF_generate_catalog_Mag_wC.csh Mstar Phistar Alfa zlow zup zError zdError magLim deltaMag mError dError meanColor stddevColor meanErrorColor meanStddevColor area outFile"
    echo ""
-   echo "Example: LF_generate_catalog_Mag_wC.csh -20.4 0.0033 -1.3 0 0 0 0 25 0 0 0 0 0 0 0.1 kk.cat"
+   echo "Example: LF_generate_catalog_Mag_wC.csh -20.4 0.0033 -1.3 0 0 0 0 25 0 0 0 0 0 0 0 0.1 kk.cat"
    exit
 endif
 
@@ -45,6 +46,7 @@ if ($1 == "") then
    set zError=0
    set zdError=0
    set magLim=25
+   set deltaMag=0.0
    set mError=0.0
    set dError=0.0
    set meanColor=0.0
@@ -62,14 +64,15 @@ else
    set zError=$6
    set zdError=$7
    set magLim=$8
-   set mError=$9
-   set dError=$10
-   set meanColor=$11
-   set stddevColor=$12
-   set meanErrorColor=$13
-   set stddevErrorColor=$14
-   set area=$15
-   set outFile=$16
+   set deltaMag=$9
+   set mError=$10
+   set dError=$11
+   set meanColor=$12
+   set stddevColor=$13
+   set meanErrorColor=$14
+   set stddevErrorColor=$15
+   set area=$16
+   set outFile=$17
 endif
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
@@ -84,6 +87,7 @@ $zup
 $zError
 $zdError
 $magLim
+$deltaMag
 10
 $mError
 $dError
@@ -110,6 +114,7 @@ echo "Z up: $zup"
 echo "Z error medio: $zError"
 echo "Z desviacion error: $zdError"
 echo "Mag lim $magLim"
+echo "Delta mag $deltaMag"
 echo "Mean error $mError"
 echo "Dev error $dError"
 echo "Mean Color $meanColor"
