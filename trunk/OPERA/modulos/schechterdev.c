@@ -59,9 +59,7 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
   double sch_int=0;
   //double sch_int2=0;
   double Llow,Lup,Lstar;
-  double Dang_DH;  /* Distancia angular segun  Hogg astroph/9905116 */
-  double E;        /* Funcion E. */
-  double dVdz;      /* Los factores anteriores , para calcular dVdz */
+  double dVdz_val;      /* Los factores anteriores , para calcular dVdz */
   static double fz[NSTEP_Z],fz_sum[NSTEP_Z],flogz[NSTEP_Z]; /* //fz es la funcion distribucion en z, y fz_sum es la integral */
   static double fz_int;
   double dz;
@@ -71,6 +69,7 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
   int oldflag=0;
   static long idum =-1;
   struct timeval tv;
+
   if(idum==-1) 
   {
     gettimeofday(&tv,NULL);
@@ -114,15 +113,13 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
       //if(DEBUG) printf("zplot = %g sch_int = %g sch_int2 = %g\n",z,sch_int,sch_int2);
       //sch_int = sch_int2;
 
-      /*       Ahora calculamos dVdz, pero sin los factores, que no influyen */
-      Dang_DH=(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(1+z); /* La distancia angular * (1+z) */
-      E=sqrt(2*cosmo.q0*(1+z)*(1+z)*(1+z)+(1-2*cosmo.q0)*(1+z)*(1+z));
-      dVdz=(Dang_DH*Dang_DH/E);
+      /*       Ahora calculamos dVdz */
+      dVdz_val=dVdz(z,cosmo);
       /*       Aqui iria rho(z) si la densidad comovil variase con el z */
       /*       El z del final es porque estoy integrando en log(z), y dz=z*d(log(z)) */
-      flogz[i]=sch_int*dVdz*z;
+      flogz[i]=sch_int*dVdz_val*z;
       dz=exp(log(zlow)+i*(log(zup)-log(zlow))/(nstep_z-1.))-exp(log(zlow)+(i-1)*(log(zup)-log(zlow))/(nstep_z-1.));
-      fz[i]=sch_int*dVdz;
+      fz[i]=sch_int*dVdz_val;
       fz_int+=flogz[i];
     }
   }
@@ -194,9 +191,7 @@ double zSchdev_L(struct Schlf_L lf, double zlow,double zup,double ffaint,double 
   double Llow,Lup;
   double xmin,xmax;
   double sch_int=0;
-  double Dang_DH;  /* Distancia angular segun  Hogg astroph/9905116 */
-  double E;        /* Funcion E. */
-  double dVdz;      /* Los factores anteriores , para calcular dVdz */
+  double dVdz_val;      /* Los factores anteriores , para calcular dVdz */
   static double fz[NSTEP_Z],fz_sum[NSTEP_Z],flogz[NSTEP_Z]; /* //fz es la funcion distribucion en z, y fz_sum es la integral */
   static double fz_int;
   double dz;
@@ -238,15 +233,13 @@ double zSchdev_L(struct Schlf_L lf, double zlow,double zup,double ffaint,double 
       sch_int=(incom(1+lf.alfa,xmax)-incom(1+lf.alfa,xmin));
 /*       printf(" sch_int %g\n",sch_int); */
       /*       Ahora calculamos dVdz, pero sin los factores, que no influyen */
-      Dang_DH=(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(1+z); /* La distancia angular * (1+z) */
-      E=sqrt(2*cosmo.q0*(1+z)*(1+z)*(1+z)+(1-2*cosmo.q0)*(1+z)*(1+z));
-      dVdz=(Dang_DH*Dang_DH/E);
+      dVdz_val=dVdz(z, cosmo);
       /*       Aqui iria rho(z) si la densidad comovil variase con el z */
       /*       El z del final es porque estoy integrando en log(z), y dz=z*d(log(z)) */
-      if(DEBUG) printf(" z %f sch_int %f dVdz %f \n",z,sch_int,dVdz);
-      flogz[i]=sch_int*dVdz*z;
+      if(DEBUG) printf(" z %f sch_int %f dVdz %f \n",z,sch_int,dVdz_val);
+      flogz[i]=sch_int*dVdz_val*z;
       dz=exp(log(zlow)+i*(log(zup)-log(zlow))/(nstep_z-1.))-exp(log(zlow)+(i-1)*(log(zup)-log(zlow))/(nstep_z-1.));
-      fz[i]=sch_int*dVdz;
+      fz[i]=sch_int*dVdz_val;
       fz_int+=flogz[i];
     }
   }

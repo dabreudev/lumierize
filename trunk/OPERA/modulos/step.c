@@ -114,9 +114,7 @@ double zSteplfdev_M(struct Steplf_M lf, double zlow, double zup, double mlow, do
   double rr; 
   double Mlow,Mup;
   double step_int=0;
-  double Dang_DH;  /* Distancia angular segun  Hogg astroph/9905116 */
-  double E;        /* Funcion E. */
-  double dVdz;      /* Los factores anteriores , para calcular dVdz */
+  double dVdz_val;      /* Los factores anteriores , para calcular dVdz */
   static double fz[NSTEP_Z],fz_sum[NSTEP_Z],flogz[NSTEP_Z]; /* //fz es la funcion distribucion en z, y fz_sum es la integral */
   static double fz_int;
   double dz;
@@ -210,15 +208,13 @@ double zSteplfdev_M(struct Steplf_M lf, double zlow, double zup, double mlow, do
       /* 	step_int+=exp(lf.lf[j])*((lf.magni[j+1]-lf.magni[j-1])/2.); */
       /*       } */
       
-      /*       Ahora calculamos dVdz, pero sin los factores, que no influyen */
-      Dang_DH=(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(1+z); /* La distancia angular * (1+z) */
-      E=sqrt(2*cosmo.q0*(1+z)*(1+z)*(1+z)+(1-2*cosmo.q0)*(1+z)*(1+z));
-      dVdz=(Dang_DH*Dang_DH/E);
+      /*       Ahora calculamos dVdz */
+      dVdz_val=dVdz(z,cosmo);
       /*       Aqui iria rho(z) si la densidad comovil variase con el z */
       /*       El z del final es porque estoy integrando en log(z), y dz=z*d(log(z)) */
-      flogz[i]=step_int*dVdz*z;
+      flogz[i]=step_int*dVdz_val*z;
       dz=exp(log(zlow)+i*(log(zup)-log(zlow))/(nstep_z-1.))-exp(log(zlow)+(i-1)*(log(zup)-log(zlow))/(nstep_z-1.));
-      fz[i]=step_int*dVdz;
+      fz[i]=step_int*dVdz_val;
       fz_int+=flogz[i];
       if(DEBUG2) printf(" z %g fz %g \n",z,fz[i]);
     }
@@ -307,9 +303,7 @@ double zSteplfdev_L(struct Steplf_L lf, double zlow, double zup, double ffaint, 
   double rr; 
   double Llow,Lup;
   double step_int=0;
-  double Dang_DH;  /* Distancia angular segun  Hogg astroph/9905116 */
-  double E;        /* Funcion E. */
-  double dVdz;      /* Los factores anteriores , para calcular dVdz */
+  double dVdz_val;      /* Los factores anteriores , para calcular dVdz */
   static double fz[NSTEP_Z],fz_sum[NSTEP_Z],flogz[NSTEP_Z]; /* //fz es la funcion distribucion en z, y fz_sum es la integral */
   static double fz_int;
   double dz;
@@ -366,14 +360,12 @@ double zSteplfdev_L(struct Steplf_L lf, double zlow, double zup, double ffaint, 
  	if(DEBUG) printf(" %d Sumando en lumi %f-%f   %g  : %g\n",j,log10(exp(lf.lumi[j])),lf.lumi[j+1]/log(10),lf.lnlf[j],step_int); 
       }
       if(DEBUG) printf(" Al final step %g\n",step_int);
-      Dang_DH=(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(1+z); /* La distancia angular * (1+z) */
-      E=sqrt(2*cosmo.q0*(1+z)*(1+z)*(1+z)+(1-2*cosmo.q0)*(1+z)*(1+z));
-      dVdz=(Dang_DH*Dang_DH/E);
+      dVdz_val=dVdz(z,cosmo);
       /*       Aqui iria rho(z) si la densidad comovil variase con el z */
       /*       El z del final es porque estoy integrando en log(z), y dz=z*d(log(z)) */
-      flogz[i]=step_int*dVdz*z;
+      flogz[i]=step_int*dVdz_val*z;
       dz=exp(log(zlow)+i*(log(zup)-log(zlow))/(nstep_z-1.))-exp(log(zlow)+(i-1)*(log(zup)-log(zlow))/(nstep_z-1.));
-      fz[i]=step_int*dVdz;
+      fz[i]=step_int*dVdz_val;
       fz_int+=flogz[i];
       if(DEBUG2) printf(" z %g fz %g \n",z,fz[i]);
     }
@@ -987,7 +979,7 @@ double amofunc_schechterfitmag_d(int n, double *x, double *y, double *p)
 {
 
   int i;
-  double f,s;
+  double f=0.,s;
 
   if(p[2]<=0) p[2]=-p[2];
   
@@ -1014,7 +1006,7 @@ double amofunc_schechterfitlum_d(int n, double *x, double *y, double *p)
 {
 
   int i;
-  double f,s;
+  double f=0.,s;
 
 
   if(p[2]<=0) p[2]=-p[2];
