@@ -15,8 +15,9 @@ int main()
   
   n = 100;
   mlim = 10;
-  cosmo.H0 = 75;
-  cosmo.q0 = 1;
+  cosmo.H0 = 70;
+  cosmo.OM = 0.3;
+  cosmo.OL = 0.7;
   magn = vector_d(100);
   z = vector_d(100);
   

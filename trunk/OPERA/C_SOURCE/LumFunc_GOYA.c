@@ -121,9 +121,9 @@ void set_Schechter_L();
 double c=299792.46; /* // En km/s */
 /* //double alfa,phistar,Mstar; */
 /* dabreu */
-const double kk=144543977.0745928; /* pow(10.,-0.4*-20.4) */
+//const double kk=144543977.0745928; /* pow(10.,-0.4*-20.4) */
 struct Schlf_M schlf_M={-1.3,0.,0.0033,0.,-20.4,0.,0.,0.,0.};
-struct cosmo_param cosmo={75,0.5};
+struct cosmo_param cosmo;
 /* utilizamos la struct de modulos.h */
 struct Schlf_L schlf_L={-1.3,0.0,0.0033,0.0,144543977.0745928,0.0,0.0,0.0,0.0};
 
@@ -157,51 +157,61 @@ int main()
     case 'c':
       set_cosmology();
       Calc_Num();
+      cosmos_free(&cosmo);
       break;
     case 'D':
     case 'd':
       set_cosmology();
       Calc_Num_wC();
+      cosmos_free(&cosmo);
       break;
     case 'V':
     case 'v':
       set_cosmology();
       VVmax();
+      cosmos_free(&cosmo);
       break;
     case 'M':
     case 'm':
       set_cosmology();
       STY();
+      cosmos_free(&cosmo);
       break;
     case 'N':
     case 'n':
-       set_cosmology();
-       STY_MAG_ERR();
-       break;
+      set_cosmology();
+      STY_MAG_ERR();
+      cosmos_free(&cosmo);
+      break;
     case 'O':
     case 'o':
-       set_cosmology();
-       STY_wC();
-       break;
+      set_cosmology();
+      STY_wC();
+      cosmos_free(&cosmo);
+      break;
     case 'P':
     case 'p':
-       set_cosmology();
-       STY_wC_errColor();
-       break;
+      set_cosmology();
+      STY_wC_errColor();
+      cosmos_free(&cosmo);
+      break;
     case 'R':
     case 'r':
-       set_cosmology();
-       STY_gmz_f_M_wC();
-       break;
+      set_cosmology();
+      STY_gmz_f_M_wC();
+      cosmos_free(&cosmo);
+      break;
     case 'W':
     case 'w':
       set_cosmology();
       SWML();
+      cosmos_free(&cosmo);
       break;
     case 'L':
     case 'l':
       set_cosmology();
       CEG();
+      cosmos_free(&cosmo);
       break;
     case 'G':
     case 'g':
@@ -350,8 +360,13 @@ void STY()
     fprintf(fout, "# 6 ERR_ALPHA\n");
     fprintf(fout, "# 7 ERR_PHISTAR\n");
     fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
-    fprintf(fout, "# 9 ML_MAX\n");
-    fprintf(fout, "# 10 N_ITER\n");
+    fprintf(fout, "# 9 COVAR_ALPHA_M_STAR\n");
+    fprintf(fout, "# 10 COVAR_ALPHA_PHISTAR\n");
+    fprintf(fout, "# 11 COVAR_ALPHA_LOGPHISTAR\n");
+    fprintf(fout, "# 12 COVAR_PHISTAR_M_STAR\n");
+    fprintf(fout, "# 13 COVAR_LOGPHISTAR_M_STAR\n");
+    fprintf(fout, "# 14 ML_MAX\n");
+    fprintf(fout, "# 15 N_ITER\n");
     fprintf(fout, "%g\t", lfsch_M.Mstar);
     fprintf(fout, "%g\t", lfsch_M.alfa);
     fprintf(fout, "%g\t", lfsch_M.phistar);
@@ -360,6 +375,11 @@ void STY()
     fprintf(fout, "%g\t", lfsch_M.erralfa);
     fprintf(fout, "%g\t", lfsch_M.errphistar);
     fprintf(fout, "%g\t", lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covaralfaMstar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar);
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
     fprintf(fout, "%g\t", mlprocess.MLmax);
     fprintf(fout, "%i\n", mlprocess.nIter);
     fclose(fout);
@@ -474,8 +494,8 @@ void STY_wC()
     printf("\n   Likelihood function: %g\n",mlprocess.MLmax);
     printf(" Mstar:  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",lfsch_M.Mstar,lfsch_M.alfa,lfsch_M.phistar,log10(lfsch_M.phistar));
     printf(" E_Mstar:    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lfsch_M.errMstar,lfsch_M.erralfa,lfsch_M.errphistar,lfsch_M.errphistar/lfsch_M.phistar/log(10.));
-    printf(" Covar(Lstar,alpha): %g\n",lfsch_M.covaralfaMstar);
-    printf(" Covar(Lstar,Phistar): %g Covar(Lstar,log(Phistar)): %g\n",lfsch_M.covarphistarMstar,lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
+    printf(" Covar(Mstar,alpha): %g\n",lfsch_M.covaralfaMstar);
+    printf(" Covar(Mstar,Phistar): %g Covar(Mstar,log(Phistar)): %g\n",lfsch_M.covarphistarMstar,lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
     printf(" Covar(alpha,Phistar): %g Covar(alpha,log(Phistar)): %g\n",lfsch_M.covaralfaphistar,lfsch_M.covaralfaphistar/lfsch_M.phistar/log(10.));
     /* dabreu */
     printf("##################################################\n");
@@ -503,8 +523,13 @@ void STY_wC()
     fprintf(fout, "# 6 ERR_ALPHA\n");
     fprintf(fout, "# 7 ERR_PHISTAR\n");
     fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
-    fprintf(fout, "# 9 ML_MAX\n");
-    fprintf(fout, "# 10 N_ITER\n");
+    fprintf(fout, "# 9 COVAR_ALPHA_M_STAR\n");
+    fprintf(fout, "# 10 COVAR_ALPHA_PHISTAR\n");
+    fprintf(fout, "# 11 COVAR_ALPHA_LOGPHISTAR\n");
+    fprintf(fout, "# 12 COVAR_PHISTAR_M_STAR\n");
+    fprintf(fout, "# 13 COVAR_LOGPHISTAR_M_STAR\n");
+    fprintf(fout, "# 14 ML_MAX\n");
+    fprintf(fout, "# 15 N_ITER\n");
     fprintf(fout, "%g\t", lfsch_M.Mstar);
     fprintf(fout, "%g\t", lfsch_M.alfa);
     fprintf(fout, "%g\t", lfsch_M.phistar);
@@ -513,6 +538,11 @@ void STY_wC()
     fprintf(fout, "%g\t", lfsch_M.erralfa);
     fprintf(fout, "%g\t", lfsch_M.errphistar);
     fprintf(fout, "%g\t", lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covaralfaMstar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar);
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
     fprintf(fout, "%g\t", mlprocess.MLmax);
     fprintf(fout, "%i\n", mlprocess.nIter);
     fclose(fout);
@@ -801,8 +831,13 @@ void STY_gmz_f_M_wC()
     fprintf(fout, "# 6 ERR_ALPHA\n");
     fprintf(fout, "# 7 ERR_PHISTAR\n");
     fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
-    fprintf(fout, "# 9 ML_MAX\n");
-    fprintf(fout, "# 10 N_ITER\n");
+    fprintf(fout, "# 9 COVAR_ALPHA_M_STAR\n");
+    fprintf(fout, "# 10 COVAR_ALPHA_PHISTAR\n");
+    fprintf(fout, "# 11 COVAR_ALPHA_LOGPHISTAR\n");
+    fprintf(fout, "# 12 COVAR_PHISTAR_M_STAR\n");
+    fprintf(fout, "# 13 COVAR_LOGPHISTAR_M_STAR\n");
+    fprintf(fout, "# 14 ML_MAX\n");
+    fprintf(fout, "# 15 N_ITER\n");
     fprintf(fout, "%g\t", lfsch_M.Mstar);
     fprintf(fout, "%g\t", lfsch_M.alfa);
     fprintf(fout, "%g\t", lfsch_M.phistar);
@@ -811,6 +846,11 @@ void STY_gmz_f_M_wC()
     fprintf(fout, "%g\t", lfsch_M.erralfa);
     fprintf(fout, "%g\t", lfsch_M.errphistar);
     fprintf(fout, "%g\t", lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covaralfaMstar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar);
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
     fprintf(fout, "%g\t", mlprocess.MLmax);
     fprintf(fout, "%i\n", mlprocess.nIter);
     fclose(fout);
@@ -1017,8 +1057,13 @@ void STY_MAG_ERR()
     fprintf(fout, "# 6 ERR_ALPHA\n");
     fprintf(fout, "# 7 ERR_PHISTAR\n");
     fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
-    fprintf(fout, "# 9 ML_MAX\n");
-    fprintf(fout, "# 10 N_ITER\n");
+    fprintf(fout, "# 9 COVAR_ALPHA_M_STAR\n");
+    fprintf(fout, "# 10 COVAR_ALPHA_PHISTAR\n");
+    fprintf(fout, "# 11 COVAR_ALPHA_LOGPHISTAR\n");
+    fprintf(fout, "# 12 COVAR_PHISTAR_M_STAR\n");
+    fprintf(fout, "# 13 COVAR_LOGPHISTAR_M_STAR\n");
+    fprintf(fout, "# 14 ML_MAX\n");
+    fprintf(fout, "# 15 N_ITER\n");
     fprintf(fout, "%g\t", lfsch_M.Mstar);
     fprintf(fout, "%g\t", lfsch_M.alfa);
     fprintf(fout, "%g\t", lfsch_M.phistar);
@@ -1027,6 +1072,11 @@ void STY_MAG_ERR()
     fprintf(fout, "%g\t", lfsch_M.erralfa);
     fprintf(fout, "%g\t", lfsch_M.errphistar);
     fprintf(fout, "%g\t", lfsch_M.errphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covaralfaMstar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar);
+    fprintf(fout, "%g\t", lfsch_M.covaralfaphistar/lfsch_M.phistar/log(10.));
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar);
+    fprintf(fout, "%g\t", lfsch_M.covarphistarMstar/lfsch_M.phistar/log(10.));
     fprintf(fout, "%g\t", mlprocess.MLmax);
     fprintf(fout, "%i\n", mlprocess.nIter);
     fclose(fout);
@@ -1334,6 +1384,7 @@ void VVmax()
         {
 	  if(DEBUG2) printf(" Entro la m=%f con mlim=%f\n",sample.mag_sel[j],mlim_t[i]);
 	  zmax=Z_m(mlim_t[i],M,cosmo);
+          if(DEBUG2) printf("Z_m: m %g M %g\n",mlim_t[i],M);
 	  if(zmax==0) zmax=ZMIN;
 	  if(zmax>zup && zup!=0) zmax=zup;
 	  if(zmax<zlow && zlow!=0) {printf(" zlow %f zmax %f\n ERROR!!\n",zlow,zmax);exit(1);}
@@ -1380,7 +1431,7 @@ void VVmax()
       cpgband_d(6,1,0.,0.,&llim,&fnul,&cnul); 
       if(DEBUG) printf(" Pasae band\n");
       llim=pow(10.,llim);
-      if(DEBUG) printf("KKK Limiting flux: %g\n",llim);
+      if(DEBUG) printf("KK Limiting flux: %g\n",llim);
     }
     else
     {
@@ -1515,8 +1566,13 @@ void VVmax()
     fprintf(fout, "# 6 ERR_ALPHA\n");
     fprintf(fout, "# 7 ERR_PHISTAR\n");
     fprintf(fout, "# 8 ERR_LOG_PHISTAR\n");
-    fprintf(fout, "# 9 ML_MAX\n");
-    fprintf(fout, "# 10 N_ITER\n");
+    fprintf(fout, "# 9 COVAR_ALPHA_M_STAR\n");
+    fprintf(fout, "# 10 COVAR_ALPHA_PHISTAR\n");
+    fprintf(fout, "# 11 COVAR_ALPHA_LOGPHISTAR\n");
+    fprintf(fout, "# 12 COVAR_PHISTAR_M_STAR\n");
+    fprintf(fout, "# 13 COVAR_LOGPHISTAR_M_STAR\n");
+    fprintf(fout, "# 14 ML_MAX\n");
+    fprintf(fout, "# 15 N_ITER\n");
     fprintf(fout, "%g\t", lfschfit_M.Mstar);
     fprintf(fout, "%g\t", lfschfit_M.alfa);
     fprintf(fout, "%g\t", lfschfit_M.phistar);
@@ -1525,8 +1581,13 @@ void VVmax()
     fprintf(fout, "%g\t", lfschfit_M.erralfa);
     fprintf(fout, "%g\t", lfschfit_M.errphistar);
     fprintf(fout, "%g\t", lfschfit_M.errphistar/lfschfit_M.phistar/log(10));
-    fprintf(fout, "0\t");
-    fprintf(fout, "0\t");
+    fprintf(fout, "INDEF\t");
+    fprintf(fout, "INDEF\t");
+    fprintf(fout, "INDEF\t");
+    fprintf(fout, "INDEF\t");
+    fprintf(fout, "INDEF\t");
+    fprintf(fout, "INDEF\t");
+    fprintf(fout, "INDEF\n");
     fclose(fout);
 
     /* to store values of LF in each bin */
@@ -2655,11 +2716,16 @@ void get_sample_ceg(struct sample_data *sample)
 
 void set_cosmology()
 {
+  static double H0=70;
+  static double OM=0.3;
+  static double OL=0.7;
   printf(" Input H0: ");
-  cosmo.H0=readf(cosmo.H0);
-  printf(" Input q0: ");
-  cosmo.q0=readf(cosmo.q0);
-  
+  H0=readf(H0);
+  printf(" Input Omega Matter: ");
+  OM=readf(OM);
+  printf(" Input Omega Lambda: ");
+  OL=readf(OL);
+  cosmo_init(&cosmo, H0, OM, OL);
 }
 
 void set_Schechter_M() 
@@ -2824,7 +2890,7 @@ void Generate_Cat_M()
   fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent magnitude limits: %f-%f\n",zlow,zup,mlow,mup);
   fprintf(fout,"# Schechter function: Mstar %f Phistar %f Alfa %f\n",schlf_M.Mstar,schlf_M.phistar,schlf_M.alfa);
-  fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
+  fprintf(fout,"# Cosmology H0= %f  OM= %f  OL = %f\n",cosmo.H0,cosmo.OM,cosmo.OL);
   fprintf(fout,"# Square degrees covered = %f  (%f fraction of the sky)\n",area,area/41252.);
   /*fprintf(fout,"# Redshift   m_app   Mabs     merror   mobserved\n"); dabreu */
   fprintf(fout,"#\n"
@@ -2861,6 +2927,7 @@ void Generate_Cat_M()
 /* cpgline_d(1000,xx,yy); */ 
 /*   cpghist_d(nobj,Msample,mup,mlow,nbin,1); */
   cpgend(); 
+  cosmo_free(&cosmo);
 
 }
 
@@ -3004,7 +3071,7 @@ void Generate_Cat_M_C()
   fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent magnitude limits: %f-%f\n",zlow,zup,mlow,mup);
   fprintf(fout,"# Schechter function: Mstar %f Phistar %f Alfa %f\n",schlf_M.Mstar,schlf_M.phistar,schlf_M.alfa);
-  fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
+  fprintf(fout,"# Cosmology H0= %f  OM= %f  OL = %f\n",cosmo.H0,cosmo.OM,cosmo.OL);
   fprintf(fout,"# Square degrees covered = %f  (%f fraction of the sky)\n",area,area/41252.);
   /*fprintf(fout,"# Redshift   m_app   Mabs     merror   mobserved\n"); dabreu */
   fprintf(fout,"#\n"
@@ -3041,7 +3108,7 @@ void Generate_Cat_M_C()
 /* cpgline_d(1000,xx,yy); */ 
 /*   cpghist_d(nobj,Msample,mup,mlow,nbin,1); */
   cpgend(); 
-
+  cosmo_free(&cosmo);
 } 
 
 /* dabreu */
@@ -3160,7 +3227,7 @@ void Generate_Cat_L()
   fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent flux limits:%f-%f\n",zlow,zup,fluxlow,fluxup);
   fprintf(fout,"# Schechter function: Lstar %f Phistar %f Alfa %f\n",schlf_L.Lstar,schlf_L.phistar,schlf_L.alfa);
-  fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
+  fprintf(fout,"# Cosmology H0= %f OM= %f OL = %f\n",cosmo.H0,cosmo.OM,cosmo.OL);
   fprintf(fout,"# Square degrees covered = %f  (%f fraction of the sky)\n",area,area/41252.);
   /*fprintf(fout,"# Redshift   m_app   Mabs     merror   mobserved\n"); dabreu */
   fprintf(fout,"#\n# 1 Z  (redshift)\n# 2 F_APP (apparent flux without observational errors)\n# "
@@ -3174,6 +3241,7 @@ void Generate_Cat_L()
 
   sprintf(snul,"Random galaxy distribution following a Schechter distribution with \\ga= %5.2f",schlf_L.alfa);
   cpgend(); 
+  cosmo_free(&cosmo);
 }
 
 /* Generate_Cat_M_wC -> generate catalogs in two bands for selection using Color distribution */
@@ -3369,7 +3437,7 @@ void Generate_Cat_M_wC()
   fprintf(fout,"# Simulated catalog generated by Lumfunc with %d objects\n",nobj);
   fprintf(fout,"# with redshift limits: %f-%f. Apparent mag limits: %f-%f\n",zlow,zup,mDistLow,mDistUp);
   fprintf(fout,"# Schechter function: Mstar %f Phistar %f Alfa %f\n",schlf_M.Mstar,schlf_M.phistar,schlf_M.alfa);
-  fprintf(fout,"# Cosmology H0= %f  q0= %f  Lambda = 0\n",cosmo.H0,cosmo.q0);
+  fprintf(fout,"# Cosmology H0= %f OM = %f OL = %f\n",cosmo.H0,cosmo.OM,cosmo.OL);
   fprintf(fout,"# Square degrees covered = %f  (%f fraction of the sky)\n",area,area/41252.);
   /*fprintf(fout,"# Redshift   m_app   Mabs     merror   mobserved\n"); dabreu */
   fprintf(fout,"#\n"
@@ -3416,5 +3484,6 @@ void Generate_Cat_M_wC()
 /* cpgline_d(1000,xx,yy); */ 
 /*   cpghist_d(nobj,Msample,mup,mlow,nbin,1); */
   cpgend(); 
+  cosmo_free(&cosmo);
 }
 
