@@ -601,6 +601,7 @@ extern "C" {
   double Int_sch_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean, double color_stddev,double mlim,struct cosmo_param cosmo);
   double Int_sch_L_wC(struct Schlf_L lf, double zlow,double zup, double color_mean, double color_stddev,double fluxlim,struct cosmo_param cosmo);
   double Int_sch_f_M(struct Schlf_M lf, double zlow,double zup,struct fermifsel_M fsel, struct cosmo_param cosmo);
+  double Int_sch_f_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean, double color_stddev, struct fermifsel_M fsel, struct cosmo_param cosmo);
   double Int_sch_f_L(struct Schlf_L lf, double zlow,double zup,struct fermifsel_L fsel,struct cosmo_param cosmo);
   double Int_sch_PO(struct Schlf_L lf, char photband[51], double gamma, double delta, double Kcoc, double zlow,double zup,double mlim, double ewlim, struct Histdist ewd, struct cosmo_param cosmo);
   double Int_sch_f_PO(struct Schlf_L lf, char photband[51], double gamma, double delta, double Kcoc, struct poselfunc fsel, struct SurveyItem si, double ewlim, struct Histdist ewd, struct cosmo_param cosmo);
