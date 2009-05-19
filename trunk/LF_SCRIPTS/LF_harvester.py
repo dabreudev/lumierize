@@ -89,6 +89,9 @@ def main():
 
     niter=int(paramValues['NITER'])   
     tipo=paramValues['TYPE']
+    H0=float(paramValues['H0'])
+    OM=float(paramValues['OM'])
+    OL=float(paramValues['OL'])
     Mstar=float(paramValues['MSTAR'])
     Phistar=float(paramValues['PHISTAR'])
     Alfa=float(paramValues['ALFA'])
@@ -97,6 +100,7 @@ def main():
     zerr=float(paramValues['ZERR'])
     zderr=float(paramValues['ZDERR'])
     mlim=float(paramValues['MLIM'])
+    deltamag=float(paramValues['DELTAMAG'])
     merr=float(paramValues['MERR'])
     mderr=float(paramValues['MDERR'])
     color=float(paramValues['C'])
@@ -110,18 +114,20 @@ def main():
         if verbose: output.write('Dentro del bucle. '+str(int(numObjects))+'\n')
         area=numObjects/density
 
-        #Names of files      
-        simulationName ="_mstar"+str(Mstar)+"_phistar"
-        simulationName+=str(Phistar)+"_alfa"+str(Alfa)+"_zlow"+str(zlow)+"_zup"+str(zup)
+        #Names of files
+        simulationName="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+        simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)
+        simulationName+="_alfa"+str(Alfa)
+        simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
         simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-        simulationName+="_mlim"+str(mlim)+"_merr"+str(merr)+"_mderr"+str(mderr)
-        simulationName+="_c"+str(color)+"_cd"
-        simulationName+=str(colord)+"_cerr"+str(cerr)
-        simulationName+="_cderr"+str(cderr)
+        simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)
+        simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+        simulationName+="_c"+str(color)+"_cd"+str(colord)
+        simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
+        simulationName+="_area"+str(area)+"/"
 
-        resultsDir=simulationsDir+"/Results/"+method+"/cosecha_"+simulationName+"/"
 
-        simulationName+="_area"+str(area)
+        resultsDir=simulationsDir+"/Results/"+method+"/cosecha"+simulationName+"/"
 
         if not(os.access(resultsDir,os.F_OK)):
             os.makedirs(resultsDir)
@@ -139,14 +145,6 @@ def main():
                 toReadFile=open(computedFile,'r')
                 lines=toReadFile.readlines()
                 toReadFile.close()
-                if len(lines) > 11:
-                    output.write("Problems with "+computedFile+"\n")
-                    output.write("Lines with garbage "+str(lines[11:])+"\n")
-                    toWriteFile=open(computedFile,'w')
-                    lines=lines[0:11]
-                    for line in lines:
-                        toWriteFile.write(line)
-                    toWriteFile.close()
                 try:
                     data=catg.rcat(computedFile)
                     allData.append(data)
