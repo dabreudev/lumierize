@@ -117,6 +117,9 @@ def main():
       paramValues=readParams(parameterFileName)
 
       #tipo=paramValues['TYPE']
+      H0=float(paramValues['H0'])
+      OM=float(paramValues['OM'])
+      OL=float(paramValues['OL'])
       MStar0=float(paramValues['MSTAR'])
       PhiStar0=float(paramValues['PHISTAR'])
       Alfa0=float(paramValues['ALFA'])
@@ -125,6 +128,7 @@ def main():
       zerr=float(paramValues['ZERR'])
       zderr=float(paramValues['ZDERR'])
       mlim=float(paramValues['MLIM'])
+      deltamag=float(paramValues['DELTAMAG'])
       merr=float(paramValues['MERR'])
       mderr=float(paramValues['MDERR'])
       color=float(paramValues['C'])
@@ -134,12 +138,15 @@ def main():
       #density=float(paramValues['DENSITY'])
       #nobjects=[float(i) for i in paramValues['NOBJECTS']]
 
-      simulationName ="_mstar"+str(MStar0)+"_phistar"+str(PhiStar0)
-      simulationName+="_alfa"+str(Alfa0)+"_zlow"+str(zlow)+"_zup"+str(zup)
+      #Names of files
+      simulationName+="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+      simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)                              simulationName+="_alfa"+str(Alfa)
+      simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
       simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-      simulationName+="_mlim"+str(mlim)+"_merr"+str(merr)+"_mderr"+str(mderr) 
-      simulationName+="_c"+str(color)+"_cd"
-      simulationName+=str(colord)+"_cerr"+str(cerr)
+      simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)                                 simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+      simulationName+="_c"+str(color)+"_cd"+str(colord)
+      simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
+      simulationName+="_area"+str(area)+"/"
 
       if string == 'todos':
          # Se borran TODOS los ficheros de esa simulación
