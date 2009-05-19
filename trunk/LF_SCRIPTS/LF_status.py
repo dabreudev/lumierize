@@ -71,7 +71,7 @@ def main():
                      help="Set verbose level to INT", metavar="INT")
     parser.add_option("-l", "--locks", dest="process", default='0',
                      choices=['0','1'],
-                     help="Look only for process [default: %default]",
+                     help="Look only for process  [default: %default]",
                      metavar="INT")
     parser.add_option("-m", "--method", dest="method", default="all",
                      choices=['all','Cat','VVmax','STY','STY_wC','STY_errMag'],
@@ -94,7 +94,7 @@ def main():
         process=False
     else:
         process=True
-  
+
     if options.outfilename=="stdout":
         output=sys.stdout
     else:
@@ -105,6 +105,9 @@ def main():
 
     niter=int(paramValues['NITER'])   
     tipo=paramValues['TYPE'] # "m" or "l", but we are using only "m"
+    H0=float(paramValues['H0'])
+    OM=float(paramValues['OM'])
+    OL=float(paramValues['OL'])
     Mstar=float(paramValues['MSTAR'])
     Phistar=float(paramValues['PHISTAR'])
     Alfa=float(paramValues['ALFA'])
@@ -113,6 +116,7 @@ def main():
     zerr=float(paramValues['ZERR'])
     zderr=float(paramValues['ZDERR'])
     mlim=float(paramValues['MLIM'])
+    deltamag=float(paramValues['DELTAMAG'])
     merr=float(paramValues['MERR'])
     mderr=float(paramValues['MDERR'])
     color=float(paramValues['C'])
@@ -128,16 +132,18 @@ def main():
         area=numObjects/density
        
         #Names of files
-        simulationName="simlf_"+tipo+"_mstar"+str(Mstar)+"_phistar"
-        simulationName+=str(Phistar)+"_alfa"+str(Alfa)+"_zlow"
-        simulationName+=str(zlow)+"_zup"+str(zup)
+        simulationName="simlf_"+tipo
+        simulationName+="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+        simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)
+        simulationName+="_alfa"+str(Alfa)
+        simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
         simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-        simulationName+="_mlim"+str(mlim)+"_merr"+str(merr)+"_mderr"+str(mderr)
-        simulationName+="_c"+str(color)+"_cd"
-        simulationName+=str(colord)+"_cerr"+str(cerr)
-        simulationName+="_cderr"+str(cderr)
+        simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)
+        simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+        simulationName+="_c"+str(color)+"_cd"+str(colord)
+        simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
         simulationName+="_area"+str(area)+"/"
-   
+
         nameList.append(simulationName)
 
     if methodSelected=='all':
@@ -154,13 +160,13 @@ def main():
                      'STY_wC_errColor':[allLocks+'STY_wC_errColor/','.lock'],
                      'STY_errMag':[allLocks+'STY_errMag/','.lock']}
     else:
-        allCatalogs=simulationsDir+'/SimulatedCatalogs/'
-        allLFs=simulationsDir+'/ComputedLF/'
-        methodsData={'Cat':[allCatalogs,''],'VVmax':[allLFs+'VVmax/','.lf'],
-                     'STY':[allLFs+'STY/','.lf'],
-                     'STY_wC':[allLFs+'STY_wC/','.lf'],
-                     'STY_wC_errColor':[allLFs+'STY_wC_errColor/','.lf'],
-                     'STY_errMag':[allLFs+'STY_errMag/','.lf']}
+       	allCatalogs=simulationsDir+'/SimulatedCatalogs/'
+       	allLFs=simulationsDir+'/ComputedLF/'
+       	methodsData={'Cat':[allCatalogs,''],'VVmax':[allLFs+'VVmax/','.lf'],
+              	      'STY':[allLFs+'STY/','.lf'],
+              	      'STY_wC':[allLFs+'STY_wC/','.lf'],
+              	      'STY_wC_errColor':[allLFs+'STY_wC_errColor/','.lf'],
+              	      'STY_errMag':[allLFs+'STY_errMag/','.lf']}
 
     output.write("Status of simulation "+simulationParameterFile+"\n")
     output.write("==============================================\n\n")

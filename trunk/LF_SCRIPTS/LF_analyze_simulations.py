@@ -93,6 +93,9 @@ def main():
 
     niters=int(paramValues['NITER'])   
     tipo=paramValues['TYPE']
+    H0=float(paramValues['H0'])
+    OM=float(paramValues['OM'])
+    OL=float(paramValues['OL'])
     Mstar0=float(paramValues['MSTAR'])
     Phistar0=float(paramValues['PHISTAR'])
     Alfa0=float(paramValues['ALFA'])
@@ -101,6 +104,7 @@ def main():
     zerr=float(paramValues['ZERR'])
     zderr=float(paramValues['ZDERR'])
     mlim=float(paramValues['MLIM'])
+    deltamag=float(paramValues['DELTAMAG'])
     merr=float(paramValues['MERR'])
     mderr=float(paramValues['MDERR'])
     color=float(paramValues['C'])
@@ -135,13 +139,16 @@ def main():
         if verbose: output.write('Dentro del bucle. '+str(int(numObjects))+'\n')
         area=numObjects/density
 
-        simulationName ="_mstar"+str(Mstar0)+"_phistar"
-        simulationName+=str(Phistar0)+"_alfa"+str(Alfa0)+"_zlow"+str(zlow)+"_zup"+str(zup)
+        #Names of files
+        simulationName+="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+        simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)                              simulationName+="_alfa"+str(Alfa)
+        simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
         simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-        simulationName+="_mlim"+str(mlim)+"_merr"+str(merr)+"_mderr"+str(mderr)
-        simulationName+="_c"+str(color)+"_cd"
-        simulationName+=str(colord)+"_cerr"+str(cerr)
-        simulationName+="_cderr"+str(cderr)
+        simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)                                 simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+        simulationName+="_c"+str(color)+"_cd"+str(colord)
+        simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
+        simulationName+="_area"+str(area)+"/"
+
 
         resultsDir=simulationsDir+"/Results/"+method+"/cosecha_"+simulationName+"/"
 
