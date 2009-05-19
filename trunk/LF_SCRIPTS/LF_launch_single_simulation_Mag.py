@@ -148,6 +148,9 @@ def main():
 
    niter=int(paramValues['NITER'])   
    tipo=paramValues['TYPE']
+   H0=float(paramValues['H0'])
+   OM=float(paramValues['OM'])
+   OL=float(paramValues['OL'])
    Mstar=float(paramValues['MSTAR'])
    Phistar=float(paramValues['PHISTAR'])
    Alfa=float(paramValues['ALFA'])
@@ -156,6 +159,7 @@ def main():
    zerr=float(paramValues['ZERR'])
    zderr=float(paramValues['ZDERR'])
    mlim=float(paramValues['MLIM'])
+   deltamag=float(paramValues['DELTAMAG'])
    merr=float(paramValues['MERR'])
    errdev=float(paramValues['ERRDEV'])
    density=float(paramValues['DENSITY'])
@@ -167,13 +171,17 @@ def main():
       area=numObjects/density
        
       #Names of files
-            
-      simulationName="_"+tipo+"_"+str(simulationNumber)+"_mstar"+str(Mstar)+"_phistar"
-      simulationName+=str(Phistar)+"_alfa"+str(Alfa)+"_zlow"+str(zlow)+"_zup"+str(zup)
+      simulationName="_"+tipo+"_"+str(simulationNumber)
+      simulationName+="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+      simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)                              simulationName+="_alfa"+str(Alfa)
+      simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
       simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-      simulationName+="_mlim"+str(mlim)+"_merr"+str(merr)+"_errdev"+str(errdev)
+      simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)                                 simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+      simulationName+="_c"+str(color)+"_cd"+str(colord)
+      simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
       simulationName+="_area"+str(area)
-   
+
+            
       simulatedCatalogFile=simulationsDir+"SimulatedCatalogs/simlf"+simulationName+".cat"
       computedSTY_p_MFile=simulationsDir+"ComputedLF/simlf_STY_p_M"+simulationName+".lf"
       computedVVmaxFile=simulationsDir+"ComputedLF/simlf_VVmax"+simulationName+".lf"
@@ -192,17 +200,23 @@ def main():
          doneSTYFileName=simulationsDir+"LockFiles/simlf"+simulationName+"STY.done"
          lockSTYFileName=simulationsDir+"LockFiles/simlf"+simulationName+"STY.lock"
 
-         comandoCat ="LF_generate_catalog_Mag.csh "+str(Mstar)+" "+str(Phistar)
+         comandoCat ="LF_generate_catalog_Mag.csh "
+         comandoCat+=str(H0)+" "+str(OM)+" "+str(OL)+" "
+         comandoCat+=str(Mstar)+" "+str(Phistar)
          comandoCat+=" "+str(Alfa)+" "+str(zlow)+" "+str(zup)+" "+str(zerr)
 	 comandoCat+=" "+str(zderr)+" "+str(mlim)+" "
          comandoCat+=str(merr)+" "+str(errdev)+" "+str(area)+" "
          comandoCat+=simulatedCatalogFile
 
-         comandoVVmax ="LF_computeVVmax_Mag.csh "+simulatedCatalogFile+" "
+         comandoVVmax ="LF_computeVVmax_Mag.csh "
+         comandoVVmax+=str(H0)+" "+str(OM)+" "+str(OL)+" "
+         comandoVVmax+=simulatedCatalogFile+" "
          comandoVVmax+=str(zlow)+" "+str(zup)+" "+str(area)+" "+str(mlim)
          comandoVVmax+=" "+computedVVmaxFile
 
-         comandoSTY ="LF_computeSTY_Mag.csh "+simulatedCatalogFile+" "
+         comandoSTY ="LF_computeSTY_Mag.csh "
+         comandoSTY+=str(H0)+" "+str(OM)+" "+str(OL)+" "
+         comandoSTY+=simulatedCatalogFile+" "
          comandoSTY+=str(mlim)+" "+str(zlow)+" "+str(zup)+" "+str(area)
          comandoSTY+=" "+computedSTY_p_MFile
 		  

@@ -165,6 +165,9 @@ def main():
 
     niter=int(paramValues['NITER'])   
     tipo=paramValues['TYPE'] # "m" or "l", but only "m" works
+    H0=float(paramValues['H0'])
+    OM=float(paramValues['OM'])
+    OL=float(paramValues['OL'])
     Mstar=float(paramValues['MSTAR'])
     Phistar=float(paramValues['PHISTAR'])
     Alfa=float(paramValues['ALFA'])
@@ -173,6 +176,7 @@ def main():
     zerr=float(paramValues['ZERR'])
     zderr=float(paramValues['ZDERR'])
     mlim=float(paramValues['MLIM'])
+    deltamag=float(paramValues['DELTAMAG'])
     merr=float(paramValues['MERR'])
     mderr=float(paramValues['MDERR'])
     color=float(paramValues['C'])
@@ -188,15 +192,18 @@ def main():
         area=numObjects/density
        
         #Names of files
-        simulationName="simlf_"+tipo+"_mstar"+str(Mstar)+"_phistar"
-        simulationName+=str(Phistar)+"_alfa"+str(Alfa)+"_zlow"+str(zlow)+"_zup"+str(zup)
+        simulationName="simlf_"+tipo
+        simulationName+="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+        simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)
+        simulationName+="_alfa"+str(Alfa)
+        simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
         simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-        simulationName+="_mlim"+str(mlim)+"_merr"+str(merr)+"_mderr"+str(mderr)
-        simulationName+="_c"+str(color)+"_cd"
-        simulationName+=str(colord)+"_cerr"+str(cerr)
-        simulationName+="_cderr"+str(cderr)
+        simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)
+        simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+        simulationName+="_c"+str(color)+"_cd"+str(colord)
+        simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
         simulationName+="_area"+str(area)+"/"
-   
+
         catDir=simulationsDir+'/SimulatedCatalogs/'+simulationName
         simulatedCatalogFile=catDir+str(simulationNumber)+".cat"
 
@@ -217,7 +224,9 @@ def main():
         doneSTYFileName=doneDir+str(simulationNumber)+".done"
         lockSTYFileName=doneDir+str(simulationNumber)+".lock"
 
-        comando ="LF_computeSTY_Mag.csh "+simulatedCatalogFile+" "+str(mlim)
+        comando ="LF_computeSTY_Mag.csh "
+        comando+=str(H0)+" "+str(OM)+" "+str(OL)+" "
+        comando+=simulatedCatalogFile+" "+str(mlim)
         comando+=" "+str(zlow)+" "+str(zup)+" "+str(area)
 	comando+=" "+computedSTYFile
 

@@ -167,6 +167,9 @@ def main():
 
     niter=int(paramValues['NITER'])   
     tipo=paramValues['TYPE']
+    H0=float(paramValues['H0'])
+    OM=float(paramValues['OM'])
+    OL=float(paramValues['OL'])
     Mstar=float(paramValues['MSTAR'])
     Phistar=float(paramValues['PHISTAR'])
     Alfa=float(paramValues['ALFA'])
@@ -175,6 +178,7 @@ def main():
     zerr=float(paramValues['ZERR'])
     zderr=float(paramValues['ZDERR'])
     mlim=float(paramValues['MLIM'])
+    deltamag=float(paramValues['DELTAMAG'])
     merr=float(paramValues['MERR'])
     mderr=float(paramValues['MDERR'])
     color=float(paramValues['C'])
@@ -190,13 +194,16 @@ def main():
         area=numObjects/density
        
         #Names of files
-        simulationName="simlf_"+tipo+"_mstar"+str(Mstar)+"_phistar"
-        simulationName+=str(Phistar)+"_alfa"+str(Alfa)+"_zlow"+str(zlow)+"_zup"+str(zup)
+        simulationName="simlf_"+tipo
+        simulationName+="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+        simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)
+        simulationName+="_alfa"+str(Alfa)
+        simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
         simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-        simulationName+="_mlim"+str(mlim)+"_merr"+str(merr)+"_mderr"+str(mderr)
-        simulationName+="_c"+str(color)+"_cd"
-        simulationName+=str(colord)+"_cerr"+str(cerr)
-        simulationName+="_cderr"+str(cderr)
+        simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)
+        simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+        simulationName+="_c"+str(color)+"_cd"+str(colord)
+        simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
         simulationName+="_area"+str(area)+"/"
 
         catDir=simulationsDir+"/SimulatedCatalogs/"+simulationName
@@ -214,9 +221,11 @@ def main():
         doneCatFileName=doneDir+str(simulationNumber)+".done"
         lockCatFileName=doneDir+str(simulationNumber)+".lock"
 
-        comandoCat="LF_generate_catalog_Mag_wC.csh "+str(Mstar)+" "+str(Phistar)
+        comandoCat="LF_generate_catalog_Mag_wC.csh "
+        comandoCat+=str(H0)+" "+str(OM)+" "+str(OL)+" "
+        comandoCat+=str(Mstar)+" "+str(Phistar)
         comandoCat+=" "+str(Alfa)+" "+str(zlow)+" "+str(zup)+" "+str(zerr)
-	comandoCat+=" "+str(zderr)+" "+str(mlim)+" "
+	comandoCat+=" "+str(zderr)+" "+str(mlim)+" " +str(deltamag)+" "
         comandoCat+=str(merr)+" "+str(mderr)+" "+str(color)+" "
         comandoCat+=str(colord)+" "+str(cerr)+" "
         comandoCat+=str(cderr)+" "
