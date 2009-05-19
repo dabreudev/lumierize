@@ -87,7 +87,7 @@ else
    set outFile=$20
 endif
 
-$OPERA_INST/LumFunc_GOYA << COMANDOS
+$OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 I
 $H0
 $OM
