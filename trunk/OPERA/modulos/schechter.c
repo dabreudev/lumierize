@@ -4,7 +4,7 @@
 
 //#define NSTEP_LF 200
 #define NSTEP_Z  200
-#define NSTEP_COLOR  200
+#define NSTEP_COLOR  300
 //#define NSTEP_Z  80
 #define NSTEP_MAG 500
 #define NSTEP_MAG_FSEL 400
@@ -484,7 +484,7 @@ double Int_sch_f_M_wC(struct Schlf_M lf, double zlow,double zup, double color_me
         M=Mleft+iMag*(Mright-Mleft)/(nM_fs-1.);
         m=mag(z,M,cosmo);
         Ngal_mag=Ngal_mag+
-          Schechter_M(M,lf)*Fermi(m,fsel.magcut,fsel.deltamag);
+          Schechter_M(M,lf)*Fermi(m-color,fsel.magcut,fsel.deltamag);
         if(DEBUG2) printf(" M %f Npar %g Sch %g Fer %f \n",M,Ngal_mag,Schechter_M(M,lf),Fermi(m,fsel.magcut,fsel.deltamag));
       }
       Ngal_mag=Ngal_mag/nM_fs*(Mright-Mleft);  
