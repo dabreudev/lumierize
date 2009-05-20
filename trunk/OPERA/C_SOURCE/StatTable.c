@@ -2,7 +2,7 @@
 
 /* Parametros del programa */
 
-char tablefile[101];
+char tablefile[301];
 int xcol;
 int sigxcol;
 int ycol;
