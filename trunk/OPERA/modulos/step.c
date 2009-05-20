@@ -486,9 +486,9 @@ void PrintStepLF_M(struct Steplf_M lf)
   unsigned int i;
   for(i=0;i<lf.nbin;i++) 
   {
-    printf(" Mag %11g - %11g    LF %11g (log=%9g) Err_LF %11g (log=%9g)\n",
+    printf(" Mag %11g - %11g    LF %11g (log=%9g) Err_LF %11g (log=%9g) Ngal %d\n",
            lf.magni[i],lf.magni[i+1],exp(lf.lnlf[i]),lf.lnlf[i]/log(10),
-           exp(lf.lnlf[i])*lf.errlnlf[i],lf.errlnlf[i]);
+           exp(lf.lnlf[i])*lf.errlnlf[i],lf.errlnlf[i],lf.ngalbin[i]);
   }
 }
 
