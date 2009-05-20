@@ -140,17 +140,19 @@ def main():
         area=numObjects/density
 
         #Names of files
-        simulationName+="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
-        simulationName+="_mstar"+str(Mstar)+"_phistar"+str(Phistar)                              simulationName+="_alfa"+str(Alfa)
+        simulationName="_H0"+str(H0)+"_OM"+str(OM)+"_OL"+str(OL)
+        simulationName+="_mstar"+str(Mstar0)+"_phistar"+str(Phistar0)
+        simulationName+="_alfa"+str(Alfa0)
         simulationName+="_zlow"+str(zlow)+"_zup"+str(zup)
         simulationName+="_zerr"+str(zerr)+"_zderr"+str(zderr)
-        simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)                                 simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
+        simulationName+="_mlim"+str(mlim)+"_deltm"+str(deltamag)       
+        simulationName+="_merr"+str(merr)+"_mderr"+str(mderr)
         simulationName+="_c"+str(color)+"_cd"+str(colord)
         simulationName+="_cerr"+str(cerr)+"_cderr"+str(cderr)
         simulationName+="_area"+str(area)+"/"
 
 
-        resultsDir=simulationsDir+"/Results/"+method+"/cosecha_"+simulationName+"/"
+        resultsDir=simulationsDir+"/Results/"+method+"/cosecha"+simulationName+"/"
 
         dataFile=resultsDir+method+"_numObjects_"+str(int(numObjects))+".cat"
 
