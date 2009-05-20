@@ -86,16 +86,24 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
   lfvvmax.lf        =vector_d(lfvvmax.nbin);
   lfvvmax.errlf     =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   prepareGlobalVars_STY_p_M(z,magn); /* inicializa _Mabsn_STY_p_M */
 
   MinMax_d(n,_Mabsn_STY_p_M,&minMabs,&maxMabs);
-  /* printf("minMabs %g maxMags %g\n",minMabs,maxMabs); */
+  if(DEBUG3) printf("minMabs %g maxMabs %g\n",minMabs,maxMabs);
   for(i=0;i<=lfvvmax.nbin;i++) lfvvmax.magni[i]=minMabs+i*(maxMabs-minMabs)/lfvvmax.nbin;
+  if(DEBUG3) printf("Calling VVmax_M\n");
   VVmax_M(n,magn,magn,z,mlim,strrad,zlow,zup,cosmo,&lfvvmax);
 
-  /* printf("lfvvmax.magni %g lfvvmax.lnlf %g\n",lfvvmax.magni, lfvvmax.lnlf); */ 
+  if(DEBUG3)
+  {
+    for(i=0;i<=lfvvmax.nbin;i++)
+    {
+      printf("lfvvmax.magni %g lfvvmax.lnlf %g\n",lfvvmax.magni[i], lfvvmax.lnlf[i]); 
+    }
+  }
 
   /* Fit of the VVmax solution to a Schechter function */
   FitSch2StepLF_M(lfvvmax,&lffit, &chisq);
@@ -107,6 +115,7 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   free(lfvvmax.errlnlf);
   free(lfvvmax.lf);
   free(lfvvmax.errlf);
+  free(lfvvmax.ngalbin);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
   /* Feed the initial solution*/
