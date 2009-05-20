@@ -89,6 +89,7 @@ int  MLA_STY_p_f_M(int n,double *magn,double *z,struct fermifsel_M fsel, double 
   lfvvmax.errmagni  =vector_d(lfvvmax.nbin+1);
   lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   for(i=0;i<n;i++)   Mabs[i]=Mag(z[i],magn[i],cosmo);
@@ -179,6 +180,7 @@ int  MLA_STY_p_f_M(int n,double *magn,double *z,struct fermifsel_M fsel, double 
   free(lfvvmax.errmagni);
   free(lfvvmax.lnlf);
   free(lfvvmax.errlnlf);
+  free(lfvvmax.ngalbin);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
   return(iter_amo);
 }

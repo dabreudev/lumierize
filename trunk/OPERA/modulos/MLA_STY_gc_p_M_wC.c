@@ -122,6 +122,7 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
   lfvvmax.lf        =vector_d(lfvvmax.nbin);
   lfvvmax.errlf     =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   for(i=0;i<n;i++)   Mabs[i]=Mag(z[i],magDistn[i],cosmo);
@@ -151,6 +152,7 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
   free(lfvvmax.errlnlf);
   free(lfvvmax.lf);
   free(lfvvmax.errlf);
+  free(lfvvmax.ngalbin);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
   /* dabreu */
@@ -171,6 +173,13 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
     sigpar[0]=10.*lffit.erralfa;
     sigpar[1]=10.*lffit.errMstar;
     sigpar[2]=10.*lffit.errphistar/lffit.phistar;
+
+    if(VEGAS)
+    {
+      printf("Entering VEGAS\n");
+      iter_amo_VEGAS=Amoeba_d(n,magDistn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_gc_p_M_wC_main_VEGAS);
+    }
+
     iter_amo=Amoeba_d(n,magDistn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_gc_p_M_wC_main);
     if(DEBUG) printf(" iteramo %d\n",iter_amo);
     lf->alfa=par[0];
@@ -181,12 +190,6 @@ int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean
       printf(" Solucion MALA\n");
       printf(" Mstar :  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",lf->Mstar,lf->alfa,lf->phistar,log10(lf->phistar));
       printf(" E_log(Lstar):    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lf->errMstar,lf->erralfa,lf->errphistar,lf->errphistar/lf->phistar/log(10.));
-    }
-
-    if(VEGAS)
-    {
-      printf("Entering VEGAS\n");
-      iter_amo_VEGAS=Amoeba_d(n,magDistn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_gc_p_M_wC_main_VEGAS);
     }
 
   }

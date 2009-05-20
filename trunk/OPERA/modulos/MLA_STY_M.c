@@ -89,6 +89,9 @@ int  MLA_STY_M(int n,double *magn,double *z,double mlim, double strrad, double z
   lfvvmax.errmagni  =vector_d(lfvvmax.nbin+1);
   lfvvmax.lnlf      =vector_d(lfvvmax.nbin);
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
+  lfvvmax.lf        =vector_d(lfvvmax.nbin);
+  lfvvmax.errlf     =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   Mabs            =vector_d(n);
@@ -106,6 +109,9 @@ int  MLA_STY_M(int n,double *magn,double *z,double mlim, double strrad, double z
   free(lfvvmax.errmagni);
   free(lfvvmax.lnlf);
   free(lfvvmax.errlnlf);
+  free(lfvvmax.lf);
+  free(lfvvmax.errlf);
+  free(lfvvmax.ngalbin);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
   /* Feed the initial solution*/

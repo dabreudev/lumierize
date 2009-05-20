@@ -38,7 +38,8 @@ int  VVmax_M(int n,double *mag_sel, double *mag_cal,double *z, double mlim_sel, 
 	zmax=Z_m(mlim_sel,M_sel,cosmo);
 	if(DEBUG) printf(" zmax %f \n",zmax);
 	if(zmax>zup && zup!=0) zmax=zup;
-	if(zmax>zlow) {
+	if(zmax>zlow)
+        {
 	  lf->lf[i]+=1./(Vol(zmax,cosmo)-Vol(zlow,cosmo));
 	  ngalbin[i]++;
 	}
@@ -62,6 +63,7 @@ int  VVmax_M(int n,double *mag_sel, double *mag_cal,double *z, double mlim_sel, 
     
     if(DEBUG) printf(" bin %d M %g - %g lf %g (%g) +/- %g (%g)  ngal %d\n",i,lf->magni[i],lf->magni[i+1],lf->lf[i],lf->lnlf[i],lf->errlf[i],lf->errlnlf[i],ngalbin[i]);
 
+    lf->ngalbin[i]=ngalbin[i];
   }
   return(0);
 }
