@@ -53,10 +53,13 @@ def giveMeNumber(data,name):
     number=0
 
     dir=data[0]+name
-    files=os.listdir(dir)
-    for file in files:
-        if data[1] in file:
-            number+=1
+    try:
+        files=os.listdir(dir)
+        for file in files:
+            if data[1] in file:
+                number+=1
+    except:
+        number=0
 
     return number
 
