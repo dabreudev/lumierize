@@ -1285,6 +1285,7 @@ void VVmax()
   lf_vvmax_M.lf        =vector_d(lf_vvmax_M.nbin);
   lf_vvmax_M.errlf     =vector_d(lf_vvmax_M.nbin);
   lf_vvmax_M.covarlnlf =matrix_d(lf_vvmax_M.nbin,lf_vvmax_M.nbin);
+  lf_vvmax_M.ngalbin   =vector_i(lf_vvmax_M.nbin);
   lf_vvmax_L.nbin      =vvmax_param.npoint;
   lf_vvmax_L.lumi      =vector_d(lf_vvmax_L.nbin+1);
   lf_vvmax_L.errlumi   =vector_d(lf_vvmax_L.nbin+1);
@@ -1401,7 +1402,7 @@ void VVmax()
     else               printf(" Mag %g V/Vmax %f Ngal %d\n",mlim_t[i],vvmaxtest[i],ngaltest[i]);
   }
   /* dabreu */
-  printf("Despues de 'Mag g V/Vmax f Ngal'\n");
+  if(DEBUG2) printf("Despues de 'Mag g V/Vmax f Ngal'\n");
   printf(" Do you want plots(1=yes, 0=no)?\n");
   plots=readf(plots);
   if(plots) 
@@ -1606,10 +1607,12 @@ void VVmax()
       fprintf(fout, "# 2 LN_VVMAX\n");
       fprintf(fout, "# 3 VVMAX\n");
       fprintf(fout, "# 4 ERR_LN_VVMAX\n");
+      fprintf(fout, "# 5 NGALBIN\n");
       for(i=0;i<lf_vvmax_M.nbin;i++)
       {
          fprintf(fout, "%g\t%g\t", lf_vvmax_M.magni[i], lf_vvmax_M.lnlf[i]);
-         fprintf(fout, "%g\t%g\n",exp(lf_vvmax_M.lnlf[i]), lf_vvmax_M.errlnlf[i]);
+         fprintf(fout, "%g\t%g\t",exp(lf_vvmax_M.lnlf[i]), lf_vvmax_M.errlnlf[i]);
+         fprintf(fout, "%d\n",lf_vvmax_M.ngalbin[i]);
       }
       fclose(fout);
     }
@@ -1734,6 +1737,7 @@ void VVmax()
   free(lf_vvmax_M.errlnlf);
   free(lf_vvmax_M.lf);
   free(lf_vvmax_M.errlf);
+  free(lf_vvmax_M.ngalbin);
   free_matrix_d(lf_vvmax_M.covarlnlf, lf_vvmax_M.nbin,lf_vvmax_M.nbin);
   free(lf_vvmax_L.lumi);
   free(lf_vvmax_L.errlumi);
@@ -3343,7 +3347,10 @@ void Generate_Cat_M_wC()
   }
   printf("nobjAllSky %g\n", nobjAllSky);
   nobjMean=(nobjAllSky/41252.*area);
+  if(DEBUG2) printf("nobjMean %g\n",nobjMean);
+  if(DEBUG2) printf("Before gsl_ran_poisson\n");
   nobj=gsl_ran_poisson(rng, nobjMean);
+  if(DEBUG2) printf("After gsl_ran_poisson\n");
   
   zsample=malloc(nobj*sizeof(double));
   Msample=malloc(nobj*sizeof(double));
