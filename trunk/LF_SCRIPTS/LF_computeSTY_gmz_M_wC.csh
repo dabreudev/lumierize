@@ -48,7 +48,7 @@ if ($1 == "") then
    set area=0.1
    set outFile="kk.lf"
 else
-   set HO=$1
+   set H0=$1
    set OM=$2
    set OL=$3
    set inCat=$4
