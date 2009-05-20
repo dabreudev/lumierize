@@ -11,7 +11,7 @@
 #define MAXITER  1000
 #define MAXITER2 120
 #define VERBOSE 0
-#define DEBUG  1
+#define DEBUG  0
 #define DEBUG2 0
 #define DEBUG3 0
 #define DEBUGPLOT 0
@@ -93,6 +93,7 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
   lfvvmax.lf        =vector_d(lfvvmax.nbin);
   lfvvmax.errlf     =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   for(i=0;i<n;i++)   Mabs[i]=Mag(z[i],magn[i],cosmo);
@@ -105,7 +106,7 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
   if(DEBUG) for(i=0;i<lfvvmax.nbin;i++) printf(" Mabs %g - %g LF %g\n",lfvvmax.magni[i],lfvvmax.magni[i+1],lfvvmax.lnlf[i]/log(10));
   FitSch2StepLF_M(lfvvmax,&lffit, &chisq);
   if(DEBUG) {
-    printf(" Desuess ajuste MRQ\n");
+    printf(" Después ajuste MRQ\n");
     printf(" Schechter FIT\n");
     printf(" Mstar (:  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",lffit.Mstar,lffit.alfa,lffit.phistar,log10(lffit.phistar));
     printf(" E_Mstar:    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lffit.errMstar,lffit.erralfa,lffit.errphistar,lffit.errphistar/lffit.phistar/log(10.));
@@ -120,6 +121,7 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
   free(lfvvmax.errlnlf);
   free(lfvvmax.lf);
   free(lfvvmax.errlf);
+  free(lfvvmax.ngalbin);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
 /*   PlotStepSchLF_M(lfvvmax,lffit); */
@@ -225,12 +227,16 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
   {
     _z_i_STY_gm_p_M=y[i];
     _magn_i_STY_gm_p_M=x[i];
-    /* _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i]+0.001; */
-    _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i]+GSL_SQRT_DBL_MIN;
+    _errmagn_i_STY_gm_p_M=_errmagn_STY_gm_p_M[i];
+    if(_errmagn_STY_gm_p_M[i]==0)
+    {
+      _errmagn_i_STY_gm_p_M=GSL_DBL_EPSILON*1000;
+      if(DEBUG3) printf("Using 1000*GSL_DBL_EPSILON instead of 0 for errmag.\n");
+    }
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gm_p_M);
     Mlow=Mag(y[i],_mlim_STY_gm_p_M,*_cosmo_STY_gm_p_M);
     xmin =pow(10.,-0.4*Mlow)/Lstar;
-    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN */
+    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN? */
     {
       logL+=10; 
     }
@@ -293,7 +299,7 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
   if(DEBUG2) printf(" NTOT %f ndata*log(Ntot) %f gamm %f\n",Ntot,_ndata_STY_gm_p_M*log(Ntot),gammln((double)_ndata_STY_gm_p_M)+1.);
 
   _iter_m_STY_gm_p_M++;
-  if(DEBUG) printf(" Iter %d  logL %f logLold %f par0 %g par1 %g par2 %g\n",_iter_m_STY_gm_p_M,logL,logLold,p[0],p[1],p[2]);
+  if(DEBUG) printf(" Iter %d  logL %g logLold %g par0 %g par1 %g par2 %g\n",_iter_m_STY_gm_p_M,logL,logLold,p[0],p[1],p[2]);
   return(logL); 
 }
 
