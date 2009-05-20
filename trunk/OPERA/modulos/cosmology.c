@@ -478,12 +478,13 @@ double Z_m(double m, double M, struct cosmo_param cosmo)
   log10dlum_step=(cosmo.cached.maxlog10dlum-cosmo.cached.minlog10dlum)/NUMZ_CACHED;
   deltam=M-m;
   log10dlum=(-deltam+5.)/5.-6.;
-  if(DEBUG2) printf("Z_m: log10dlum_step %g\n",log10dlum_step);
-  if(DEBUG2) printf("Z_m: log10dlum %g\n",log10dlum);
+  if(DEBUG1) printf("Z_m: log10dlum_step %g\n",log10dlum_step);
+  if(DEBUG1) printf("Z_m: log10dlum %g\n",log10dlum);
   i=rint((log10dlum-cosmo.cached.minlog10dlum)/log10dlum_step);
   if (i >= NUMZ_CACHED || i < 0)
   {
-    printf("Out of range for cached values.\n");
+    printf("Out of range for cached values. i %d\n",i);
+    if(DEBUG1) printf("maxlog10dlum %g\n",cosmo.cached.maxlog10dlum);
     exit(-1);
   }
   ztemp = cosmo.cached.invz[i];
