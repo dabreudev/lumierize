@@ -73,8 +73,12 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   _magSeln_STY_p_M_wC=magSeln;
   _magDistn_STY_p_M_wC=magDistn;
   _color_mean_STY_p_M_wC=color_mean;
-  /* _color_stddev_STY_p_M_wC=color_stddev+0.001; */
-  _color_stddev_STY_p_M_wC=color_stddev+GSL_SQRT_DBL_MIN;
+  _color_stddev_STY_p_M_wC=color_stddev;
+  if(color_stddev==0)
+  {
+    _color_stddev_STY_p_M_wC=GSL_DBL_EPSILON*1000;
+    printf("Using 1000*GSL_DBL_EPSILON instead of 0 for color_stddev.\n");
+  }
 
   y=vector_d(n);
   _iter_m_STY_p_M_wC=0;
@@ -96,6 +100,7 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
   lfvvmax.lf        =vector_d(lfvvmax.nbin);
   lfvvmax.errlf     =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_d(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   prepareGlobalVars_STY_p_M_wC(z,magDistn); /* inicializa _Mabsn_STY_p_M_wC */
@@ -114,6 +119,7 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   free(lfvvmax.errlnlf);
   free(lfvvmax.lf);
   free(lfvvmax.errlf);
+  free(lfvvmax.ngalbin);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
   /* Feed the initial solution*/
@@ -216,17 +222,22 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
     if(Llow/Lstar > 0.25 && (lfamo.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
     {
       log_gamma_int=GSL_LOG_DBL_MIN;
+      if(DEBUG2) printf("log_gamma_int podía petar así que GSL_LOG_DBL_MIN\n");
     }
     else
     {
       log_gamma_int=log(gsl_sf_gamma_inc(1+lfamo.alfa,Llow/Lstar));
+      if(DEBUG2) printf("log_gamma_int: lfamo.alfa %g Llow %g Lstar %g\n",lfamo.alfa, Llow, Lstar);
     }
     /* log(lfamo.phistar) + log_gamma_int -> integral de la función de Schecter
     entre Llow e inf */
     if (DEBUG2) printf("logColor: %g  colori: %g\n",logColor,colori);
+    if (DEBUG2) printf("logSch %g log(phistar) %g loggamm %g\n",log(Schechter_M(Mabs,lfamo)),log(lfamo.phistar),log_gamma_int);
     if (DEBUG2) printf("_color_mean: %g _color_stddev: %g\n",_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC);
     logL-= log(Schechter_M(Mabs,lfamo)) + logColor - log(lfamo.phistar) - log_gamma_int;
     if (DEBUG2) printf("BUCLE logL: %g\n",logL);
+    if (DEBUG2) printf("#LSCH %g %g %g\n",log(Schechter_M(Mabs,lfamo)),log(lfamo.phistar),log_gamma_int);
+    if (DEBUG2) printf("iobj %d Mabs %g z %g\n",i,Mabs,y[i]); 
   }
 
   if(DEBUG) printf(" logL %g\n",logL);
