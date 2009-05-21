@@ -100,7 +100,7 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
   lfvvmax.lf        =vector_d(lfvvmax.nbin);
   lfvvmax.errlf     =vector_d(lfvvmax.nbin);
-  lfvvmax.ngalbin   =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   prepareGlobalVars_STY_p_M_wC(z,magDistn); /* inicializa _Mabsn_STY_p_M_wC */
