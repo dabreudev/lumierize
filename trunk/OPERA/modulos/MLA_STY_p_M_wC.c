@@ -5,6 +5,8 @@
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multimin.h>
+#include <gsl/gsl_monte.h>
+#include <gsl/gsl_monte_vegas.h>
 
 #define ZMIN 0.00001
 #define FTOL  1e-12
@@ -16,6 +18,7 @@
 #define DEBUG2 0
 #define DEBUG3 0
 #define DEBUGPLOT 0
+#define MAXITERVEGAS 10
 
 /* Estructura para contener los parámetros */
 struct Amoe_Funk_gsl_param_STY_p_M_wC
@@ -29,6 +32,11 @@ void prepareGlobalVars_STY_p_M_wC(double *z, double *magn);
 double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p);
 double Amoe_Funk_STY_p_M_wC_main_gsl_multimin(const gsl_vector *x, void *params);
 void   NumericalHessianCovars_STY_p_M_wC(int n,double *magn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf);
+double vegas_funk_denominator_STY_p_M_wC (double *x, size_t dim, void *params);
+double vegas_integrate_STY_p_M_wC(gsl_monte_function * f,
+                                  double xl[], double xu[],
+                                  size_t dim, size_t calls,
+                                  double *error);
 
 struct cosmo_param *_cosmo_STY_p_M_wC;
 double _mlim_STY_p_M_wC;
@@ -47,6 +55,10 @@ double *_magDistn_STY_p_M_wC;
 double _color_mean_STY_p_M_wC;
 double _color_stddev_STY_p_M_wC;
 double *_Mabsn_STY_p_M_wC;
+double _z_i_STY_p_M_wC;
+double _magSel_i_STY_p_M_wC;
+struct Schlf_M *_lf_STY_p_M_wC;
+gsl_rng * _random_gen_STY_gmz_p_f_M_wC;
 
 int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, double color_stddev, double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo)
 {
@@ -56,6 +68,7 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   double sigpar[3];
   int i;
   int iter_amo;
+  const gsl_rng_type *T_rng;
 
   /* Variables to use for vvmax fitting */
   struct Steplf_M  lfvvmax;
@@ -82,6 +95,11 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
 
   y=vector_d(n);
   _iter_m_STY_p_M_wC=0;
+
+  /* Init random number generator */
+  gsl_rng_env_setup ();
+  T_rng = gsl_rng_default;
+  _random_gen_STY_gmz_p_f_M_wC = gsl_rng_alloc (T_rng);
 
   iter_amo=MAXITER+1;
 
@@ -160,6 +178,7 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
   if(DEBUG) printf(" MLF %g\n",_MLmax_STY_p_M_wC); 
 
   if(iter_amo>=MAXITER-1) return(2);
+  gsl_rng_free(_random_gen_STY_gmz_p_f_M_wC);
   return(0);
 }
 
@@ -184,12 +203,22 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
   double Ntot;
 
   double colori;
-  /* double gcolor; */
   double logColor;
+
+  /* Variables for the VEGAS integral */
+  double probabajo, errprobabajo;
+  double xl_den[4], xu_den[4];
+  size_t dim_den=4;
+  size_t calls_den = 5000;
+  
+  gsl_monte_function G_den = 
+    {&vegas_funk_denominator_STY_p_M_wC, dim_den, 0 };
+  
 
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
   lfamo.phistar=exp(p[2]);
+  _lf_STY_p_M_wC=&lfamo;
 
   logL=0.;
 
@@ -229,12 +258,20 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
       log_gamma_int=log(gsl_sf_gamma_inc(1+lfamo.alfa,Llow/Lstar));
       if(DEBUG2) printf("log_gamma_int: lfamo.alfa %g Llow %g Lstar %g\n",lfamo.alfa, Llow, Lstar);
     }
+    _z_i_STY_p_M_wC=y[i];
+    _magSel_i_STY_p_M_wC=_magSeln_STY_p_M_wC[i];
+
+    xl_den[0]=_color_mean_STY_p_M_wC-6*_color_stddev_STY_p_M_wC;
+    xu_den[0]=_color_mean_STY_p_M_wC+6*_color_stddev_STY_p_M_wC;
+    probabajo = vegas_integrate_STY_p_M_wC
+        (&G_den, xl_den, xu_den, dim_den, calls_den, &errprobabajo);
     /* log(lfamo.phistar) + log_gamma_int -> integral de la función de Schecter
     entre Llow e inf */
     if (DEBUG2) printf("logColor: %g  colori: %g\n",logColor,colori);
     if (DEBUG2) printf("logSch %g log(phistar) %g loggamm %g\n",log(Schechter_M(Mabs,lfamo)),log(lfamo.phistar),log_gamma_int);
     if (DEBUG2) printf("_color_mean: %g _color_stddev: %g\n",_color_mean_STY_p_M_wC,_color_stddev_STY_p_M_wC);
-    logL-= log(Schechter_M(Mabs,lfamo)) + logColor - log(lfamo.phistar) - log_gamma_int;
+    logL-= log(Schechter_M(Mabs,lfamo)) + logColor - probabajo;
+    //logL-= log(Schechter_M(Mabs,lfamo)) + logColor - log(lfamo.phistar) - log_gamma_int;
     if (DEBUG2) printf("BUCLE logL: %g\n",logL);
     if (DEBUG2) printf("#LSCH %g %g %g\n",log(Schechter_M(Mabs,lfamo)),log(lfamo.phistar),log_gamma_int);
     if (DEBUG2) printf("iobj %d Mabs %g z %g\n",i,Mabs,y[i]); 
@@ -263,6 +300,52 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
   if(DEBUG) printf(" Iter %d  logL %f par0 %g par1 %g par2 %g (%.10g)\n",_iter_m_STY_p_M_wC,logL,p[0],p[1],exp(p[2]),p[2]);
   return(logL);
 }
+double vegas_funk_denominator_STY_p_M_wC (double *x, size_t dim, void *params)
+{
+  double res;
+  double zreal;
+  double mDistreal;
+  double colorobs;
+  static double dMDistdmDist=1.;
+  double logfacLF;
+  double logfacColor;
+  double Mlow, Llow, Lstar;
+  double log_gamma_int;
+
+  if(DEBUG3) printf(" inside vegas_funk_denominator.\n");
+
+  /*
+  x[0] -> mdist - mobssel
+  */
+
+  colorobs  = x[0];
+  zreal     = _z_i_STY_p_M_wC;
+  mDistreal = _magSel_i_STY_p_M_wC + colorobs;
+
+  Mlow=Mag(zreal,_mlim_STY_p_M_wC+colorobs,*_cosmo_STY_p_M_wC);
+  Llow=pow(10.,-0.4*Mlow);
+  Lstar=pow(10.,-0.4*_lf_STY_p_M_wC->Mstar);
+  if(Llow/Lstar > 0.25 && (_lf_STY_p_M_wC->alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
+  {
+    log_gamma_int=GSL_LOG_DBL_MIN;
+    if(DEBUG2) printf("log_gamma_int podía petar así que GSL_LOG_DBL_MIN\n");
+  }
+  else
+  {
+    log_gamma_int=log(gsl_sf_gamma_inc(1+_lf_STY_p_M_wC->alfa,Llow/Lstar));
+    if(DEBUG2) printf("log_gamma_int: lfamo.alfa %g Llow %g Lstar %g\n",_lf_STY_p_M_wC->alfa, Llow, Lstar);
+  }
+  
+  //logfacLF = log(Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC));
+  logfacLF = log_gamma_int + log(_lf_STY_p_M_wC->phistar);
+  logfacColor = lngaussian(colorobs, _color_mean_STY_p_M_wC, _color_stddev_STY_p_M_wC);
+  res=exp(logfacLF+logfacColor);
+  res=res*dMDistdmDist;
+
+  return(res); 
+}
+
+
 
 /* Errores utilizando derivadas numéricas con GSL */
 void NumericalHessianCovars_STY_p_M_wC(int n,double *magn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
@@ -336,3 +419,37 @@ double Amoe_Funk_STY_p_M_wC_main_gsl_multimin(const gsl_vector *x, void *params)
   free(lf_param);
   return value;
 }
+
+double vegas_integrate_STY_p_M_wC(gsl_monte_function * f,
+                                  double xl[], double xu[],
+                                  size_t dim, size_t calls,
+                                  double *error)
+
+{
+  int itervegas = 0;
+  double result, abserr;
+  gsl_monte_vegas_state *state = gsl_monte_vegas_alloc (dim);
+  /* Warm-up */
+  gsl_monte_vegas_integrate (f, xl, xu, dim, calls/MAXITERVEGAS/5, 
+                             _random_gen_STY_gmz_p_f_M_wC, 
+                             state, &result, &abserr);
+  if(DEBUG2) printf (" first iter: %g +- %g",result,abserr);
+  if(DEBUG2) printf (" converging...\n");
+
+  do
+  {
+    itervegas+=1;
+    gsl_monte_vegas_integrate (f, xl, xu, dim, calls/MAXITERVEGAS, 
+                               _random_gen_STY_gmz_p_f_M_wC,
+                               state, &result, &abserr);
+    if(DEBUG3) printf (" result = % .9f sigma = % .9f "
+                       "chisq/dof = %.1f\n", result, abserr, state->chisq);
+    if(DEBUG3) printf(" itervegas: %d\n",itervegas);
+  }
+  while (fabs (state->chisq - 1.0) > 0.5 && itervegas < MAXITERVEGAS);
+
+  gsl_monte_vegas_free (state);
+   
+  return result;
+}
+
