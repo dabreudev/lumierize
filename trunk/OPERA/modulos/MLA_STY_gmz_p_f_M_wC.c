@@ -624,40 +624,6 @@ double vegas_funk_denominator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *par
   return(res); 
 }
 
-double compute_rho_STY_gmz_p_f_M_wC()
-{
-  int i;
-  double z;
-  double Dang_DH;  /* Distancia angular segun  Hogg astroph/9905116 */
-  double E;
-  double sch_int=0;
-  double xmin,xmax;
-  double zstep;
-
-  if(DEBUG3) printf(" computing rho.\n");
-
-  zstep=(_zup_STY_gmz_p_f_M_wC-_zlow_STY_gmz_p_f_M_wC)/_nRho;
-
-  for (i=0;i<_nRho;i++)
-  {
-    z=_zlow_STY_gmz_p_f_M_wC+i*zstep;
-    _zRho_STY_gmz_p_f_M_wC[i]=z;
-    Dang_DH=(2-2*_cosmo_STY_gmz_p_f_M_wC->q0*(1-z)-(2-2*_cosmo_STY_gmz_p_f_M_wC->q0)*sqrt(1+2*_cosmo_STY_gmz_p_f_M_wC->q0*z))/(1+z);
-    /* La distancia angular * (1+z) */
-    E=sqrt(2*_cosmo_STY_gmz_p_f_M_wC->q0*(1+z)*(1+z)*(1+z)+(1-2*_cosmo_STY_gmz_p_f_M_wC->q0)*(1+z)*(1+z));
-    _dVdz_STY_gmz_p_f_M_wC[i]=(Dang_DH*Dang_DH/E);
-
-    /* TODO: change sch_int -> Sch * Fermi */
-    xmin=1;
-    xmax=100;
-    sch_int=(incom(1+_lf_STY_gmz_p_f_M_wC->alfa,xmax)-incom(1+_lf_STY_gmz_p_f_M_wC->alfa,xmin));
-    _rho_STY_gmz_p_f_M_wC[i]=sch_int*_dVdz_STY_gmz_p_f_M_wC[i];
-    if(DEBUG3) printf(" computed: z %g rho %g\n",z,_rho_STY_gmz_p_f_M_wC[i]);
-    if(DEBUG3) printf("z: %g dVdz: %g\n",z,_dVdz_STY_gmz_p_f_M_wC[i]);
-  }
-  return(0);
-}
-
 /* Errores utilizando derivadas numéricas con GSL */
 
 void NumericalHessianCovars_STY_gmz_p_f_M_wC(int n,double *magn,double *errmagn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
