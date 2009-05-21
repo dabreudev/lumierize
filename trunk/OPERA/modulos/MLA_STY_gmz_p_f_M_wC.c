@@ -376,20 +376,20 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       if(DEBUG4) printf(" errors: %g %g\n",_errz_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC);
       if(DEBUG3) printf(" Computing numerator.\n");
       /* x[0] are zreal-zobs integral limits */
-      xl_num[0]=-6*_errz_i_STY_gmz_p_f_M_wC;
-      xu_num[0]=+6*_errz_i_STY_gmz_p_f_M_wC;
+      xl_num[0] = -6*_errz_i_STY_gmz_p_f_M_wC;
+      xu_num[0] = +6*_errz_i_STY_gmz_p_f_M_wC;
       /* x[1] are mreal-mobs integral limits */
       if(4 * _fsel_STY_gmz_p_f_M_wC.deltamag >  _errmagDistn_i_STY_gmz_p_f_M_wC)
       {
-         /* The Fermi factor has smooth gradients along the gaussian (the factor 4 has been tested) */
-         xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-         xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-         if(DEBUG3) printf(" Caso 1Limits xl_num: %g %g\n",xl_num[0],xl_num[1]);
-         if(DEBUG3) printf(" Caso 1Limits xu_num: %g %g\n",xu_num[0],xu_num[1]);
-         /* integration */
-         probarriba = vegas_integrate_STY_gmz_p_f_M_wC
-             (&G_num, xl_num, xu_num, dim_num, calls_num,
-              &errprobarriba);
+        /* The Fermi factor has smooth gradients along the gaussian (the factor 4 has been tested) */
+        xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+        xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+        if(DEBUG3) printf(" Caso 1Limits xl_num: %g %g\n",xl_num[0],xl_num[1]);
+        if(DEBUG3) printf(" Caso 1Limits xu_num: %g %g\n",xu_num[0],xu_num[1]);
+        /* integration */
+        probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+          (&G_num, xl_num, xu_num, dim_num, calls_num,
+           &errprobarriba);
       }
       else
       {
@@ -401,75 +401,75 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
         if(DEBUG3) printf(" magcut_sigma %g\n", magcut_sigma);
         if(magcut_sigma < -6)
         {
-            /* The integral will be almost 0. Since the gaussian
-               is ~0 when Fermi = 1 and Fermi~0 when gaussian 
-               is relevant. */
-            /* The -10 * deltamag factor is to allow a little bit
-               of integration into the Fermi~1 regime */
-            xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC -
-                         10 * _fsel_STY_gmz_p_f_M_wC.deltamag;; 
-            xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-            if(DEBUG3) printf(" Caso 2Limits xl_num: %g %g\n",
-                              xl_num[0],xl_num[1]);
-            if(DEBUG3) printf(" Caso 2Limits xu_num: %g %g\n",
-                              xu_num[0],xu_num[1]);
-            /* integration */
-            probarriba = vegas_integrate_STY_gmz_p_f_M_wC
-                (&G_num, xl_num, xu_num, dim_num, calls_num/10,
-                 &errprobarriba);
+          /* The integral will be almost 0. Since the gaussian
+             is ~0 when Fermi = 1 and Fermi~0 when gaussian 
+             is relevant. */
+          /* The -10 * deltamag factor is to allow a little bit
+             of integration into the Fermi~1 regime */
+          xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC -
+                       10 * _fsel_STY_gmz_p_f_M_wC.deltamag;; 
+          xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+          if(DEBUG3) printf(" Caso 2Limits xl_num: %g %g\n",
+                                   xl_num[0],xl_num[1]);
+          if(DEBUG3) printf(" Caso 2Limits xu_num: %g %g\n",
+                                   xu_num[0],xu_num[1]);
+          /* integration */
+          probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+                     (&G_num, xl_num, xu_num, dim_num, calls_num/10,
+                      &errprobarriba);
 
         }
         else if(magcut_sigma > 6)
         {
-            /* The gaussian is all in the Fermi ~=1 regime */
-            xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-            xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-            if(DEBUG3) printf(" Caso 3Limits xl_num: %g %g\n",
-                              xl_num[0],xl_num[1]);
-            if(DEBUG3) printf(" Caso 3Limits xu_num: %g %g\n",
-                              xu_num[0],xu_num[1]);
-            /* integration */
-            probarriba = vegas_integrate_STY_gmz_p_f_M_wC
-                (&G_num, xl_num, xu_num, dim_num, calls_num,
-                 &errprobarriba);
+          /* The gaussian is all in the Fermi ~=1 regime */
+          xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+          xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+          if(DEBUG3) printf(" Caso 3Limits xl_num: %g %g\n",
+                            xl_num[0],xl_num[1]);
+          if(DEBUG3) printf(" Caso 3Limits xu_num: %g %g\n",
+                            xu_num[0],xu_num[1]);
+          /* integration */
+          probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+                 (&G_num, xl_num, xu_num, dim_num, calls_num,
+                  &errprobarriba);
         }
         else
         {
-                 /* The Fermi cut is in the middle of the gaussian.
-                    There will be two integration intervals */
-                 probarriba = 0;
-                 /* First interval */
-                 /* The -6 *deltmag factor ensures that xl[1] < xu[1] */
-                 xl_num[1] = -6 * _errmagDistn_i_STY_gmz_p_f_M_wC
-                             -10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
-                 xu_num[1] = magcut_sigma *
-                     _errmagDistn_i_STY_gmz_p_f_M_wC -
+          /* The Fermi cut is in the middle of the gaussian.
+             There will be two integration intervals */
+          probarriba = 0;
+          /* First interval */
+          /* The -6 *deltmag factor ensures that xl[1] < xu[1] */
+          xl_num[1] = -6 * _errmagDistn_i_STY_gmz_p_f_M_wC
+                      -10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+          xu_num[1] = magcut_sigma *
+                      _errmagDistn_i_STY_gmz_p_f_M_wC -
                      10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
-                 if(DEBUG3) printf(" Caso 4.1Limits xl_num: %g %g\n",
-                                   xl_num[0],xl_num[1]);
-                 if(DEBUG3) printf(" Caso 4.1Limits xu_num: %g %g\n",
-                                   xu_num[0],xu_num[1]);
-                 /* integration of first half */
-                 probarriba += vegas_integrate_STY_gmz_p_f_M_wC
-                     (&G_num, xl_num, xu_num, dim_num, calls_num,
-                      &errprobarriba);
-                 /* Second interval */
-                 if(_fsel_STY_gmz_p_f_M_wC.deltamag != 0)
-                 {
-                     xl_num[1] = magcut_sigma *
-                          _errmagDistn_i_STY_gmz_p_f_M_wC -
-                   	  10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
-                     xu_num[1] = magcut_sigma * 
-                          _errmagDistn_i_STY_gmz_p_f_M_wC +
-                          10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
-                     if(DEBUG3) printf("Caso 4.2Limits xl_num: %g %g\n",
-                                       xl_num[0],xl_num[1]);
-                     if(DEBUG3) printf("Caso 4.2Limits xu_num: %g %g\n",
-                                       xu_num[0],xu_num[1]);
-                     /* integration of second half */
-                     probarriba += vegas_integrate_STY_gmz_p_f_M_wC
-                         (&G_num, xl_num, xu_num, dim_num, calls_num,
-                          &errprobarriba);
+          if(DEBUG3) printf(" Caso 4.1Limits xl_num: %g %g\n",
+                            xl_num[0],xl_num[1]);
+          if(DEBUG3) printf(" Caso 4.1Limits xu_num: %g %g\n",
+                            xu_num[0],xu_num[1]);
+          /* integration of first half */
+          probarriba += vegas_integrate_STY_gmz_p_f_M_wC
+              (&G_num, xl_num, xu_num, dim_num, calls_num,
+               &errprobarriba);
+          /* Second interval */
+          if(_fsel_STY_gmz_p_f_M_wC.deltamag != 0)
+          {
+            xl_num[1] = magcut_sigma *
+                 _errmagDistn_i_STY_gmz_p_f_M_wC -
+          	  10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+            xu_num[1] = magcut_sigma * 
+                  _errmagDistn_i_STY_gmz_p_f_M_wC +
+                  10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+            if(DEBUG3) printf("Caso 4.2Limits xl_num: %g %g\n",
+                              xl_num[0],xl_num[1]);
+            if(DEBUG3) printf("Caso 4.2Limits xu_num: %g %g\n",
+                              xu_num[0],xu_num[1]);
+            /* integration of second half */
+            probarriba += vegas_integrate_STY_gmz_p_f_M_wC
+                       (&G_num, xl_num, xu_num, dim_num, calls_num,
+                        &errprobarriba);
           }
         }
       }
