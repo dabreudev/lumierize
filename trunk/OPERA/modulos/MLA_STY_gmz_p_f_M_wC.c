@@ -489,7 +489,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   /* Aqui viene la parte de la poissoniana de npob */
   /* TODO: Change to Int_sch_f_M_wC (when done) */
   /* TODO: Change integration method in Int_sch_f_M_wC */
-  Ntot=Int_sch_f_M_wC(lfamo,_zlow_STY_gmz_p_f_M_wC,_zup_STY_gmz_p_f_M_wC,_color_mean_STY_gmz_p_f_M_wC,_color_stddev_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut,*_cosmo_STY_gmz_p_f_M_wC)*_strrad_STY_gmz_p_f_M_wC/4./M_PI; 
+  Ntot=Int_sch_f_M_wC(lfamo,_zlow_STY_gmz_p_f_M_wC,_zup_STY_gmz_p_f_M_wC,_color_mean_STY_gmz_p_f_M_wC,_color_stddev_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC,*_cosmo_STY_gmz_p_f_M_wC)*_strrad_STY_gmz_p_f_M_wC/4./M_PI; 
   logL-=    (_ndata_STY_gmz_p_f_M_wC*log(Ntot) - Ntot - gammln((double)_ndata_STY_gmz_p_f_M_wC+1.)); 
   
   if(DEBUG2) printf(" NTOT %f ndata*log(Ntot) %f gamm %f\n",Ntot,_ndata_STY_gmz_p_f_M_wC*log(Ntot),gammln((double)_ndata_STY_gmz_p_f_M_wC)+1.);
@@ -555,11 +555,11 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   res=exp(logfacerrm+logfacerrz+logfacLF);
   /* test without rhoz */
   rhoz=1.0;
-  res=res*dVdzreal*rhoz*facsel;
+  res=res*dVdzreal*rhoz*facsel*dMDistdmDist;
 
-  if(DEBUG4) printf("Num todopati: zreal %10g zobs %10g mreal %10g mobs %10g Mabs %10g\n",zreal,zobs,mDistReal,mDistObs,Mabs);
-  if(DEBUG4) printf("Num morralla: logfacLF %g logfacerrz %g logfacerrm %g dVdzreal %g rhoz %g  facsel %g\n",logfacLF,logfacerrz,logfacerrm,dVdzreal,rhoz,facsel);
-  if(DEBUG4) printf("Num result: %g\n",res);
+  if(DEBUG4) printf(" Num todopati: zreal %10g zobs %10g mreal %10g mobs %10g Mabs %10g\n",zreal,zobs,mDistReal,mDistObs,Mabs);
+  if(DEBUG4) printf(" Num morralla: logfacLF %g logfacerrz %g logfacerrm %g dVdzreal %g rhoz %g  facsel %g\n",logfacLF,logfacerrz,logfacerrm,dVdzreal,rhoz,facsel);
+  if(DEBUG4) printf(" Num result: %g\n",res);
   return(res);
 }
 
