@@ -58,7 +58,8 @@ else
 endif
 
 set colz=2
-set colm=7
+set colmSel=7
+set colmDist=12
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 m
@@ -68,8 +69,10 @@ $OL
 f
 $inCat
 $colz
-$colm
-$colm
+$colmSel
+$colmSel
+$colmDist
+$colmDist
 m
 10
 $magLim
