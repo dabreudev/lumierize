@@ -207,12 +207,12 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
 
   /* Variables for the VEGAS integral */
   double probabajo, errprobabajo;
-  double xl_den[4], xu_den[4];
-  size_t dim_den=4;
+  double xl_den[1], xu_den[1];
+  size_t dim_den=1;
   size_t calls_den = 5000;
   
   gsl_monte_function G_den = 
-    {&vegas_funk_denominator_STY_p_M_wC, dim_den, 0 };
+    {&vegas_funk_denominator_STY_p_M_wC, dim_den, 0};
   
 
   lfamo.alfa=p[0];
