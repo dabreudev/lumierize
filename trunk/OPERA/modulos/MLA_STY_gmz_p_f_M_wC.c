@@ -43,7 +43,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p);
 double Amoe_Funk_STY_gmz_p_f_M_wC_main_gsl_multimin(const gsl_vector *x, void *params);
 double vegas_funk_numerator_STY_gmz_p_f_M_wC(double *x, size_t dim, void *params);
 double vegas_funk_denominator_STY_gmz_p_f_M_wC(double *x, size_t dim, void *params);
-double compute_rho_STY_gmz_p_f_M_wC();
 double vegas_integrate_STY_gmz_p_f_M_wC(gsl_monte_function * f,
                                         double xl[], double xu[],
                                         size_t dim, size_t calls,
@@ -146,6 +145,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   lfvvmax.errlnlf   =vector_d(lfvvmax.nbin);
   lfvvmax.lf        =vector_d(lfvvmax.nbin);
   lfvvmax.errlf     =vector_d(lfvvmax.nbin);
+  lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   for(i=0;i<n;i++)   Mabs[i]=Mag(z[i],magDistn[i],cosmo);
@@ -173,6 +173,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   free(lfvvmax.errlnlf);
   free(lfvvmax.lf);
   free(lfvvmax.errlf);
+  free(lfvvmax.ngalbin);
   free_matrix_d(lfvvmax.covarlnlf,lfvvmax.nbin,lfvvmax.nbin);
 
 /*   PlotStepSchLF_M(lfvvmax,lffit); */
