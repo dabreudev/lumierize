@@ -369,9 +369,8 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       _magDistn_i_STY_gmz_p_f_M_wC=x[i];
       _errmagDistn_i_STY_gmz_p_f_M_wC=_errmagDistn_STY_gmz_p_f_M_wC[i];//+GSL_SQRT_DBL_MIN;
 
-      if(_errmagDistn_i_STY_gmz_p_f_M_wC==0) _errmagDistn_i_STY_gmz_p_f_M_wC=0.00001;
-      if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.00001;
-    
+      if(_errmagDistn_i_STY_gmz_p_f_M_wC==0) _errmagDistn_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
+      if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
 
       {
         /* NUMERATOR*/
