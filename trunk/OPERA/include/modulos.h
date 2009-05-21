@@ -685,7 +685,7 @@ extern "C" {
   int  MLA_SWML_L    (int n,double *flux,double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Steplf_L *lf);
   int  MLA_SWML_PO   (int n,double *flux,double *ew,double *z,char photband[51], float gamma, float delta, float Kcoc, double mlim, double ewlim, struct Histdist ewd, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_L *lf);
   /* Con normalizacion de Poisson */
-  int  MLA_STY_p_M   (int n,double *magn,double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo); 
+  int  MLA_STY_p_M   (int n,double *magSeln,double *magDistn,double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo); 
   int  MLA_STY_p_M_wC (int n,double *magSel, double *magDist, double color_mean, double color_stddev, double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo);
   int  MLA_STY_p_L   (int n,double *flux,double *z,double flim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_L *lf, struct MLProcessInfo *mlinfo);
   int  MLA_STY_p_PO  (int n,double *flux,double *ew,double *z,char photband[51], float gamma, float delta, float Kcoc, double mlim, double ewlim, struct Histdist ewd, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_L *lf);
