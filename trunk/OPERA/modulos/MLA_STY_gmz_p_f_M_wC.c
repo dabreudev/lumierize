@@ -325,7 +325,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       _errmagDistn_i_STY_gmz_p_f_M_wC=0.0001;
       /* printf("Using GSL_SQRT_DBL_MIN instead of 0 for errmag.\n"); */
     }
-    if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.00001;
+    if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
 
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gmz_p_f_M_wC);
     Mlow=Mag(y[i],_fsel_STY_gmz_p_f_M_wC.magcut+colori,*_cosmo_STY_gmz_p_f_M_wC);
@@ -485,12 +485,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       if(DEBUG3) printf(" #LPA %g %g\n",log(probarriba),log(probabajo));
     }
   } /* end of objects loop */
-
-  /* free gsl interp */
-  //gsl_interp_free(_rho_interp_STY_gmz_p_f_M_wC);
-  //gsl_interp_accel_free(_rho_interp_accel_STY_gmz_p_f_M_wC);
-  //gsl_interp_free(_dVdz_interp_STY_gmz_p_f_M_wC);
-  //gsl_interp_accel_free(_dVdz_interp_accel_STY_gmz_p_f_M_wC);
 
   /* Aqui viene la parte de la poissoniana de npob */
   /* TODO: Change to Int_sch_f_M_wC (when done) */
