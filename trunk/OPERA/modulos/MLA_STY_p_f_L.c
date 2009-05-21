@@ -225,7 +225,7 @@ double Amoe_Funk_STY_p_f_L_main(int n, double *x, double *y, double *p) {
 /*     Llow=Lum(y[i],fluxl_STY_p_f_L,*co_STY_p_f_L); */
 /*     xmin=Llow/lfamo.Lstar; */
     if(xleft>=150) {
-      logL+=10; 
+      logL+=GSL_LOG_DBL_MAX; 
     }
     else {
       intabajo=0;
@@ -243,7 +243,7 @@ double Amoe_Funk_STY_p_f_L_main(int n, double *x, double *y, double *p) {
       logprobarriba=Schechter_L(Lumi,lfamo) + log(Fermi(flux_STY_p_f_L,fsel_STY_p_f_L.fluxcut,-fsel_STY_p_f_L.deltaflux));
       
 
-      if(Fermi(flux_STY_p_f_L,fsel_STY_p_f_L.fluxcut,-fsel_STY_p_f_L.deltaflux)==0 || probabajo==0) logL+=10;
+      if(Fermi(flux_STY_p_f_L,fsel_STY_p_f_L.fluxcut,-fsel_STY_p_f_L.deltaflux)==0 || probabajo==0) logL+=GSL_LOG_DBL_MAX;
       else logL-= logprobarriba  - log(probabajo);   /* Perfectamente testado */
 /*       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g flux %g err %g\n",i,logL,logLold,Schechter_L(Lumi,lfamo),log(probarriba),log(probabajo),probabajo,xmin,xleft,xright,flux_STY_p_f_L,errflux_STY_p_f_L); */
 /*       printf(" iobj %d logL %f loglold %f      sch %g int %g (%g)   pa %g pb %g (%g)  xmin %g x1 %f x2 %f\n",i,logL,logLold,Schechter_L(Lumi,lfamo),log(intsch),intsch,log(probarriba),log(probabajo),probabajo,xmin,x1,x2); */
