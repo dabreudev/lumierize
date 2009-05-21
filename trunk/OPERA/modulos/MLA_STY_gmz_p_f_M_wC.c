@@ -372,7 +372,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       if(_errmagDistn_i_STY_gmz_p_f_M_wC==0) _errmagDistn_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
       if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
 
-      {
         /* NUMERATOR*/
         if(DEBUG4) printf(" errors: %g %g\n",_errz_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC);
         if(DEBUG3) printf(" Computing numerator.\n");
@@ -471,7 +470,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
                      probarriba += vegas_integrate_STY_gmz_p_f_M_wC
                          (&G_num, xl_num, xu_num, dim_num, calls_num,
                           &errprobarriba);
-                 }
              }
         }
       }
