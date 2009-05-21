@@ -25,7 +25,7 @@ struct Amoe_Funk_gsl_param_STY_p_M
   double *z;
 };
 
-void prepareGlobalVars_STY_p_M(double *z, double *magn);
+void prepareGlobalVars_STY_p_M(double *z, double *magDistn);
 double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p);
 double Amoe_Funk_STY_p_M_main_gsl_multimin(const gsl_vector *x, void *params);
 void   NumericalHessianCovars_STY_p_M(int n,double *magn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf);
@@ -43,9 +43,11 @@ double _xf_STY_p_M,_Tf_STY_p_M;
 double _sigi_STY_p_M;
 double _xtmp_STY_p_M;
 double _zlow_STY_p_M,_zup_STY_p_M,_strrad_STY_p_M;
+double *_magSeln_STY_p_M;
+double *_magDistn_STY_p_M;
 double *_Mabsn_STY_p_M;
 
-int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo)
+int  MLA_STY_p_M(int n,double *magSeln, double *magDistn, double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo)
 {
 
   double par[3];
@@ -66,6 +68,8 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   _strrad_STY_p_M=strrad;
   _zlow_STY_p_M=zlow;
   _zup_STY_p_M=zup;
+  _magSeln_STY_p_M=magSeln;
+  _magDistn_STY_p_M=magDistn;
 
   _iter_m_STY_p_M=0;
 
@@ -89,13 +93,13 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
   lfvvmax.ngalbin   =vector_i(lfvvmax.nbin);
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
-  prepareGlobalVars_STY_p_M(z,magn); /* inicializa _Mabsn_STY_p_M */
+  prepareGlobalVars_STY_p_M(z,magDistn); /* inicializa _Mabsn_STY_p_M */
 
   MinMax_d(n,_Mabsn_STY_p_M,&minMabs,&maxMabs);
   if(DEBUG3) printf("minMabs %g maxMabs %g\n",minMabs,maxMabs);
   for(i=0;i<=lfvvmax.nbin;i++) lfvvmax.magni[i]=minMabs+i*(maxMabs-minMabs)/lfvvmax.nbin;
   if(DEBUG3) printf("Calling VVmax_M\n");
-  VVmax_M(n,magn,magn,z,mlim,strrad,zlow,zup,cosmo,&lfvvmax);
+  VVmax_M(n,magSeln,magDistn,z,mlim,strrad,zlow,zup,cosmo,&lfvvmax);
 
   if(DEBUG3)
   {
@@ -128,11 +132,11 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
 
   printf(" Computing LF...\n");
 
-  iter_amo=Amoeba_d(n,magn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_p_M_main);
+  iter_amo=Amoeba_d(n,magDistn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_p_M_main);
 /*   printf(" FINAL par0 %.15g par1 %.15g \n",par[0],par[1]); */
   
   /* Info that will be output in mlinfo */
-  _MLmax_STY_p_M=Amoe_Funk_STY_p_M_main(n,magn,z,par);
+  _MLmax_STY_p_M=Amoe_Funk_STY_p_M_main(n,magDistn,z,par);
   mlinfo->nIter = iter_amo;
   mlinfo->MLmax = _MLmax_STY_p_M;
 
@@ -145,7 +149,7 @@ int  MLA_STY_p_M(int n,double *magn,double *z,double mlim, double strrad, double
 
   printf(" Computing errors in LF parameters...\n");
 
-  NumericalHessianCovars_STY_p_M(n,magn,z,par,sigpar,mlim,cosmo,lf); 
+  NumericalHessianCovars_STY_p_M(n,magDistn,z,par,sigpar,mlim,cosmo,lf); 
   if(DEBUG) printf(" Solucion final: Mstar %.15g +/- %.15g alpha %.4g +/- %.4g\n",lf->Mstar,lf->errMstar,lf->alfa,lf->erralfa);  
   
   if(DEBUG) printf(" MLF %g\n",_MLmax_STY_p_M); 
@@ -162,10 +166,13 @@ void prepareGlobalVars_STY_p_M(double *z, double *magn)
 
   _Mabsn_STY_p_M = vector_d(_ndata_STY_p_M);
   for(i=0;i<_ndata_STY_p_M;i++) _Mabsn_STY_p_M[i]=Mag(z[i],magn[i],*_cosmo_STY_p_M);
-  /* for(i=0;i<_ndata_STY_p_M;i++)
+  if(DEBUG2)
   {
-     printf("Mabs %g magni %g zi %g\n",_Mabsn_STY_p_M[i],magn[i],z[i]);
-  } */
+    for(i=0;i<_ndata_STY_p_M;i++)
+    {
+      printf("Mabs %g magni %g zi %g\n",_Mabsn_STY_p_M[i],magn[i],z[i]);
+    }
+  }
 }
 
 double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
@@ -180,6 +187,8 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
   double Llow;
   double Ntot;
 
+  double colori;
+
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
   lfamo.phistar=exp(p[2]);
@@ -190,8 +199,9 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
 
   for(i=0;i<_ndata_STY_p_M;i++)
   {
+    colori=_magDistn_STY_p_M[i]-_magSeln_STY_p_M[i];
     Mabs=_Mabsn_STY_p_M[i];
-    Mlow=Mag(y[i],_mlim_STY_p_M,*_cosmo_STY_p_M);
+    Mlow=Mag(y[i],_mlim_STY_p_M+colori,*_cosmo_STY_p_M);
     Llow=pow(10.,-0.4*Mlow);
 
     /* debido a un underflow, tuvimos que poner este if

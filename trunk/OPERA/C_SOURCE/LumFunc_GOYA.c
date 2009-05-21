@@ -25,16 +25,15 @@ struct sample_data {
   char   **image;
 };
 
-/* creamos una estrucura para añadir una m de seleccion y una m de cálculo
-dabreu */
-struct sample_data_sel_cal 
+/* struct to contain selection and distribution magnitudes */
+struct sample_data_sel_dist 
 {
   int ngalax;
   double *z;
-  double *lum_sel;
-  double *lum_cal;
-  double *mag_sel;
-  double *mag_cal;
+  double *lumSel;
+  double *lumDist;
+  double *magSel;
+  double *magDist;
   char   **image;
 };
 
@@ -92,7 +91,7 @@ struct lum_func_ceg {
 
 
 void get_sample(struct sample_data *sample);
-void get_sample_sel_cal(struct sample_data_sel_cal *sample);
+void get_sample_sel_dist(struct sample_data_sel_dist *sample);
 void get_sample_mag_err(struct sample_data_mag_err *sample);
 void get_sample_wC_errColor(struct sample_data_wC_errColor *sample);
 void get_sample_gmz_wC(struct sample_data_gmz_wC *sample);
@@ -235,7 +234,7 @@ int main()
 void STY() 
 {
   static struct lf_param sty;
-  struct sample_data sample;
+  struct sample_data_sel_dist sample;
   static double mlim=0;
   static double flim=0;
   double zlow;
@@ -255,7 +254,7 @@ void STY()
   /* Information about the ML process */
   struct MLProcessInfo mlprocess;
   
-  get_sample(&sample);  
+  get_sample_sel_dist(&sample);  
   set_lf_parameters(&sty);
   zlow=sty.zlow;
   zlow = (zlow < ZMIN ? ZMIN : zlow);
@@ -272,8 +271,8 @@ void STY()
   {
     printf(" Input the limiting flux: ");
     flim=readd(flim);
-    if(poissonflag) status=MLA_STY_p_L(sample.ngalax,sample.lum,sample.z,flim,sty.area,zlow,sty.zup,cosmo,&lfsch_L,&mlprocess);
-    else            status=  MLA_STY_L(sample.ngalax,sample.lum,sample.z,flim,sty.area,zlow,sty.zup,cosmo,&lfsch_L,&mlprocess);
+    if(poissonflag) status=MLA_STY_p_L(sample.ngalax,sample.lumDist,sample.z,flim,sty.area,zlow,sty.zup,cosmo,&lfsch_L,&mlprocess);
+    else            status=  MLA_STY_L(sample.ngalax,sample.lumDist,sample.z,flim,sty.area,zlow,sty.zup,cosmo,&lfsch_L,&mlprocess);
     printf("\n Solutioner exited with error status %d\n",status);
     printf("\n   Solution found at iteration %d\n",mlprocess.nIter);
     printf("\n   Likelihood function: %g\n",mlprocess.MLmax);
@@ -323,8 +322,8 @@ void STY()
   {
     printf(" Input the limiting magnitude: ");
     mlim=readd(mlim);
-    if(poissonflag) status=MLA_STY_p_M(sample.ngalax,sample.mag,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
-    else            status=  MLA_STY_M(sample.ngalax,sample.mag,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
+    if(poissonflag) status=MLA_STY_p_M(sample.ngalax,sample.magSel,sample.magDist,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
+    else            status=  MLA_STY_M(sample.ngalax,sample.magDist,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
     printf("\n Solutioner exited with error status %d\n",status);
     printf("\n   Solution found at iteration %d\n",mlprocess.nIter);
     printf("\n   Likelihood function: %g\n",mlprocess.MLmax);
@@ -398,7 +397,7 @@ void STY()
 void STY_wC() 
 {
   static struct lf_param sty;
-  struct sample_data_sel_cal sample;
+  struct sample_data_sel_dist sample;
   static double mlim=0;
   double zlow;
 
@@ -418,7 +417,7 @@ void STY_wC()
   /* Information about the ML process */
   struct MLProcessInfo mlprocess;
   
-  get_sample_sel_cal(&sample);
+  get_sample_sel_dist(&sample);
   printf("Input the color mean:\n");
   color_mean=readd(color_mean);
   printf("Input the color stddev:\n");
@@ -486,7 +485,7 @@ void STY_wC()
   {
     printf(" Input the limiting magnitude: ");
     mlim=readd(mlim);
-    if(poissonflag) status=MLA_STY_p_M_wC(sample.ngalax,sample.mag_sel,sample.mag_cal,color_mean,color_stddev,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
+    if(poissonflag) status=MLA_STY_p_M_wC(sample.ngalax,sample.magSel,sample.magDist,color_mean,color_stddev,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess);
     /* else            status=  MLA_STY_M(sample.ngalax,sample.mag,sample.z,mlim,sty.area,zlow,sty.zup,cosmo,&lfsch_M,&mlprocess); */
     else printf("This method is not (yet) available (only poisson)\n");
     printf("\n Solutioner exited with error status %d\n",status);
@@ -1222,7 +1221,7 @@ void VVmax()
   struct Steplf_M lf_vvmax_M;
   struct Steplf_L lf_vvmax_L;
   static struct lf_param vvmax_param={-40,40,0,0,0,10,41252,1,10};
-  struct sample_data_sel_cal sample;
+  struct sample_data_sel_dist sample;
   struct Schlf_M  lfschfit_M;
   struct Schlf_L  lfschfit_L;
 
@@ -1273,7 +1272,7 @@ void VVmax()
   static char allVVmaxResultsFileName[300]="";
   
   /* Obtengo los datos y los parametros de la LF */
-  get_sample_sel_cal(&sample);
+  get_sample_sel_dist(&sample);
   set_lf_parameters(&vvmax_param);
 
   /* Allocateo la LF */
@@ -1296,13 +1295,13 @@ void VVmax()
   printf(" Performing the V/Vmax test\n");
   if(vvmax_param.islum) 
   {
-    MinMax_d(sample.ngalax,sample.lum_sel,&lmin_t,&lmax_t);
+    MinMax_d(sample.ngalax,sample.lumSel,&lmin_t,&lmax_t);
     printf(" Fluxes range: %g - %g\n",lmin_t,lmax_t);
     lmin_t*=0.3;lmax_t*=1.2;
   }
   else 
   {
-    MinMax_d(sample.ngalax,sample.mag_sel,&mmin_t,&mmax_t);
+    MinMax_d(sample.ngalax,sample.magSel,&mmin_t,&mmax_t);
     printf(" Apparent magnitude range: %g - %g\n",mmin_t,mmax_t);
     mmin_t-=1.;mmax_t+=4.;
   }
@@ -1346,18 +1345,18 @@ void VVmax()
     {
       if(vvmax_param.islum)
       {
-	loglhist[j]=log10(sample.lum_sel[j]);
-	L=Lum(sample.z[j],sample.lum_sel[j],cosmo);
-	if(DEBUG2)        printf(" Galax %d z %f flux %g Lum %g mag %f Mag %f\n",j,sample.z[j],sample.lum_sel[j],L,sample.mag_sel[j],Mag(sample.z[j],sample.mag_sel[j],cosmo));
+	loglhist[j]=log10(sample.lumSel[j]);
+	L=Lum(sample.z[j],sample.lumSel[j],cosmo);
+	if(DEBUG2)        printf(" Galax %d z %f flux %g Lum %g mag %f Mag %f\n",j,sample.z[j],sample.lumSel[j],L,sample.magSel[j],Mag(sample.z[j],sample.magSel[j],cosmo));
 	if(L>1e36) 
- 	printf(" Galax %d z %f flux %g Lum %g mag %f Mag %f\n",j,sample.z[j],sample.lum_sel[j],L,sample.mag_sel[j],Mag(sample.z[j],sample.mag_sel[j],cosmo)); 
+ 	printf(" Galax %d z %f flux %g Lum %g mag %f Mag %f\n",j,sample.z[j],sample.lumSel[j],L,sample.magSel[j],Mag(sample.z[j],sample.magSel[j],cosmo)); 
 
       }
       else
       {
-	mhist[j]=sample.mag_sel[j];
-	M=Mag(sample.z[j],sample.mag_sel[j],cosmo);
-	if(DEBUG2)        printf(" Galax %d z %f mag %f Mag %f\n",j,sample.z[j],sample.mag_sel[j],M);
+	mhist[j]=sample.magSel[j];
+	M=Mag(sample.z[j],sample.magSel[j],cosmo);
+	if(DEBUG2)        printf(" Galax %d z %f mag %f Mag %f\n",j,sample.z[j],sample.magSel[j],M);
       }
       /*       if(sample.mag[j]<mlim_t[i]) {   Esta es la antigua, cuando no podia hacer en luminosidades */
       /* Cuidado, sample.lum[j] (o mag[j]) puede no estar alocateado, 
@@ -1366,9 +1365,9 @@ void VVmax()
 /*       if(( !vvmax.islum && sample.mag[j]<mlim_t[i])  || (vvmax.islum && sample.lum[j]<llim_t[i]) ) { */
       if(vvmax_param.islum)
       {
-	if(sample.lum_sel[j]>llim_t[i])
+	if(sample.lumSel[j]>llim_t[i])
         {
-	  if(DEBUG2) printf(" Entro la flux=%f con llim=%f\n",sample.lum_sel[j],llim_t[i]);
+	  if(DEBUG2) printf(" Entro la flux=%f con llim=%f\n",sample.lumSel[j],llim_t[i]);
 	  zmax=Z_l(llim_t[i],L,cosmo);
 	  if(zmax==0) zmax=ZMIN;
 	  if(zmax>zup && zup!=0) zmax=zup;
@@ -1381,9 +1380,9 @@ void VVmax()
       }
       else
       {
-	if(sample.mag_sel[j]<mlim_t[i])
+	if(sample.magSel[j]<mlim_t[i])
         {
-	  if(DEBUG2) printf(" Entro la m=%f con mlim=%f\n",sample.mag_sel[j],mlim_t[i]);
+	  if(DEBUG2) printf(" Entro la m=%f con mlim=%f\n",sample.magSel[j],mlim_t[i]);
 	  zmax=Z_m(mlim_t[i],M,cosmo);
           if(DEBUG2) printf("Z_m: m %g M %g\n",mlim_t[i],M);
 	  if(zmax==0) zmax=ZMIN;
@@ -1394,7 +1393,7 @@ void VVmax()
 	  vvmaxtest[i]+=(Vol(sample.z[j],cosmo)-Vol(zlow,cosmo))/(Vol(zmax,cosmo)-Vol(zlow, cosmo));  /* Cambiado para un zlow!=0 */
 	  ngaltest[i]++;
 	}
-	if(DEBUG2) printf(" No entro la m=%f con mlim=%f\n",sample.mag_sel[j],mlim_t[i]);
+	if(DEBUG2) printf(" No entro la m=%f con mlim=%f\n",sample.magSel[j],mlim_t[i]);
       }
     }
     vvmaxtest[i]/=ngaltest[i];
@@ -1495,12 +1494,12 @@ void VVmax()
   /* Calculo la FL */
   if(vvmax_param.islum)
   {
-    VVmax_L(sample.ngalax, sample.lum_sel, sample.lum_cal, sample.z, llim, vvmax_param.area, vvmax_param.zlow, vvmax_param.zup, cosmo, &lf_vvmax_L);
+    VVmax_L(sample.ngalax, sample.lumSel, sample.lumDist, sample.z, llim, vvmax_param.area, vvmax_param.zlow, vvmax_param.zup, cosmo, &lf_vvmax_L);
     PrintStepLF_L(lf_vvmax_L);
   }
   else
   {
-    VVmax_M(sample.ngalax, sample.mag_sel, sample.mag_cal, sample.z, mlim, vvmax_param.area, vvmax_param.zlow, vvmax_param.zup, cosmo, &lf_vvmax_M);
+    VVmax_M(sample.ngalax, sample.magSel, sample.magDist, sample.z, mlim, vvmax_param.area, vvmax_param.zlow, vvmax_param.zup, cosmo, &lf_vvmax_M);
     PrintStepLF_M(lf_vvmax_M);
   }
 
@@ -2275,12 +2274,12 @@ void get_sample(struct sample_data *sample)
 
 }
 
-void get_sample_sel_cal(struct sample_data_sel_cal *sample) 
+void get_sample_sel_dist(struct sample_data_sel_dist *sample) 
 {
   char opt;
   static char datafile[300]="";
-  static int colz=3,collum_sel=1,collum_cal=2,colmag_sel=1,colmag_cal=2;
-  double *z,*mag_sel,*mag_cal,*lum_sel,*lum_cal;
+  static int colz=3,collum_sel=1,collum_dist=2,colmag_sel=1,colmag_dist=2;
+  double *z,*magSel,*magDist,*lumSel,*lumDist;
   int *log1,*log2,*log3,*log4,*log5;
   int ndat;
   int i,j=0;
@@ -2301,41 +2300,41 @@ void get_sample_sel_cal(struct sample_data_sel_cal *sample)
     /*     }else{ */
     printf(" Input column with selection apparent magnitude data: ");
     colmag_sel=readi(colmag_sel);
-    printf(" Input column with apparent calculation luminosity (fluxes in W/m2)  data: ");
-    collum_cal=readi(collum_cal);
+    printf(" Input column with apparent distribution luminosity (fluxes in W/m2)  data: ");
+    collum_dist=readi(collum_dist);
     /*     }else{ */
-    printf(" Input column with apparent calculation magnitude data: ");
-    colmag_cal=readi(colmag_cal);
+    printf(" Input column with apparent distribution magnitude data: ");
+    colmag_dist=readi(colmag_dist);
     /*     } */
     ndat=FileNLin(datafile);
     z  =malloc(ndat*sizeof(double));
-    lum_sel=malloc(ndat*sizeof(double));
-    mag_sel=malloc(ndat*sizeof(double));
-    lum_cal=malloc(ndat*sizeof(double));
-    mag_cal=malloc(ndat*sizeof(double));
+    lumSel=malloc(ndat*sizeof(double));
+    magSel=malloc(ndat*sizeof(double));
+    lumDist=malloc(ndat*sizeof(double));
+    magDist=malloc(ndat*sizeof(double));
     log1=malloc(ndat*sizeof(int));
     log2=malloc(ndat*sizeof(int));
     log3=malloc(ndat*sizeof(int));
     log4=malloc(ndat*sizeof(int));
     log5=malloc(ndat*sizeof(int));
-    sample->mag_sel=malloc(ndat*sizeof(double));
-    sample->lum_sel=malloc(ndat*sizeof(double));
-    sample->mag_cal=malloc(ndat*sizeof(double));
-    sample->lum_cal=malloc(ndat*sizeof(double));
+    sample->magSel=malloc(ndat*sizeof(double));
+    sample->lumSel=malloc(ndat*sizeof(double));
+    sample->magDist=malloc(ndat*sizeof(double));
+    sample->lumDist=malloc(ndat*sizeof(double));
     sample->z  =malloc(ndat*sizeof(double));
     ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colmag_sel,mag_sel,log2,&ndat);
-    ReadDoublecol(datafile,collum_sel,lum_sel,log3,&ndat);
-    ReadDoublecol(datafile,colmag_cal,mag_cal,log4,&ndat);
-    ReadDoublecol(datafile,collum_cal,lum_cal,log5,&ndat);
+    ReadDoublecol(datafile,colmag_sel,magSel,log2,&ndat);
+    ReadDoublecol(datafile,collum_sel,lumSel,log3,&ndat);
+    ReadDoublecol(datafile,colmag_dist,magDist,log4,&ndat);
+    ReadDoublecol(datafile,collum_dist,lumDist,log5,&ndat);
     for(i=0;i<ndat;i++) { 
 /*       //printf(" z %f log %d\n",z[i],log[i]); */
       if(log1[i] && log2[i] && log3[i] && log4[i] && log5[i]) {
 /* 	//printf(" YESSS\n"); */
-	sample->mag_sel[j]=(double)mag_sel[i];
-	sample->lum_sel[j]=(double)lum_sel[i];
-	sample->mag_cal[j]=(double)mag_cal[i];
-	sample->lum_cal[j]=(double)lum_cal[i];
+	sample->magSel[j]=(double)magSel[i];
+	sample->lumSel[j]=(double)lumSel[i];
+	sample->magDist[j]=(double)magDist[i];
+	sample->lumDist[j]=(double)lumDist[i];
 	sample->z[j]  =(double)z[i];
 /* 	//printf(" Por aqui %d %f %f \n",j,sample->mag[j],sample->z[j]); */
 	j++;
@@ -2347,28 +2346,28 @@ void get_sample_sel_cal(struct sample_data_sel_cal *sample)
   case 'k':
     j=0;
     sample->z  =malloc(sizeof(double));
-    sample->mag_sel=malloc(sizeof(double));
-    sample->lum_sel=malloc(sizeof(double));
-    sample->mag_cal=malloc(sizeof(double));
-    sample->lum_cal=malloc(sizeof(double));
+    sample->magSel=malloc(sizeof(double));
+    sample->lumSel=malloc(sizeof(double));
+    sample->magDist=malloc(sizeof(double));
+    sample->lumDist=malloc(sizeof(double));
     opt='y';
     while(opt=='y' ){
       printf(" Input redshift  : ");
       sample->z[j]=(double)readf(0.);
       printf(" Input selection magnitude : ");
-      sample->mag_sel[j]=(double)readf(0.);
+      sample->magSel[j]=(double)readf(0.);
       printf(" Input selection luminosity (W): ");
-      sample->lum_sel[j]=(double)readf(0.);
+      sample->lumSel[j]=(double)readf(0.);
       printf(" Input calculation magnitude : ");
-      sample->mag_cal[j]=(double)readf(0.);
+      sample->magDist[j]=(double)readf(0.);
       printf(" Input calculation luminosity (W): ");
-      sample->lum_cal[j]=(double)readf(0.);
+      sample->lumDist[j]=(double)readf(0.);
       j++;
       sample->z  =realloc(sample->z  ,(j+1)*sizeof(double));
-      sample->mag_sel=realloc(sample->mag_sel,(j+1)*sizeof(double));
-      sample->lum_sel=realloc(sample->lum_sel,(j+1)*sizeof(double));
-      sample->mag_cal=realloc(sample->mag_cal,(j+1)*sizeof(double));
-      sample->lum_cal=realloc(sample->lum_cal,(j+1)*sizeof(double));
+      sample->magSel=realloc(sample->magSel,(j+1)*sizeof(double));
+      sample->lumSel=realloc(sample->lumSel,(j+1)*sizeof(double));
+      sample->magDist=realloc(sample->magDist,(j+1)*sizeof(double));
+      sample->lumDist=realloc(sample->lumDist,(j+1)*sizeof(double));
       
       printf(" Other?: ");
       opt=readc('y');
@@ -2384,8 +2383,8 @@ void get_sample_wC_errColor(struct sample_data_wC_errColor *sample)
 {
   char opt;
   static char datafile[300]="";
-  static int colz=2,colmag_sel=1,colmag_cal=2,colerrColor=3;
-  double *z,*mag_sel,*mag_cal,*errColor;
+  static int colz=2,colmag_sel=1,colmag_dist=2,colerrColor=3;
+  double *z,*magSel,*magDist,*errColor;
   int *log1,*log2,*log3,*log4;
   int ndat;
   int i,j=0;
@@ -2403,13 +2402,13 @@ void get_sample_wC_errColor(struct sample_data_wC_errColor *sample)
     printf(" Input column with selection apparent magnitude data: ");
     colmag_sel=readi(colmag_sel);
     printf(" Input column with apparent calculation magnitude data: ");
-    colmag_cal=readi(colmag_cal);
+    colmag_dist=readi(colmag_dist);
     printf(" Input column with error in color data: ");
     colerrColor=readi(colerrColor);
     ndat=FileNLin(datafile);
     z  =malloc(ndat*sizeof(double));
-    mag_sel=malloc(ndat*sizeof(double));
-    mag_cal=malloc(ndat*sizeof(double));
+    magSel=malloc(ndat*sizeof(double));
+    magDist=malloc(ndat*sizeof(double));
     errColor=malloc(ndat*sizeof(double));
     log1=malloc(ndat*sizeof(int));
     log2=malloc(ndat*sizeof(int));
@@ -2420,15 +2419,15 @@ void get_sample_wC_errColor(struct sample_data_wC_errColor *sample)
     sample->z       =malloc(ndat*sizeof(double));
     sample->errColor=malloc(ndat*sizeof(double));
     ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colmag_sel,mag_sel,log2,&ndat);
-    ReadDoublecol(datafile,colmag_cal,mag_cal,log3,&ndat);
+    ReadDoublecol(datafile,colmag_sel,magSel,log2,&ndat);
+    ReadDoublecol(datafile,colmag_dist,magDist,log3,&ndat);
     ReadDoublecol(datafile,colerrColor,errColor,log4,&ndat);
     for(i=0;i<ndat;i++) { 
 /*       //printf(" z %f log %d\n",z[i],log[i]); */
       if(log1[i] && log2[i] && log3[i] && log4[i]) {
 /* 	//printf(" YESSS\n"); */
-	sample->magSel[j]  =(double)mag_sel[i];
-	sample->magDist[j] =(double)mag_cal[i];
+	sample->magSel[j]  =(double)magSel[i];
+	sample->magDist[j] =(double)magDist[i];
 	sample->z[j]       =(double)z[i];
         sample->errColor[j]=(double)errColor[i];
 /* 	//printf(" Por aqui %d %f %f \n",j,sample->mag[j],sample->z[j]); */
@@ -3456,7 +3455,9 @@ void Generate_Cat_M_wC()
           "# 9 COLOR (color for the object = mDist - mSel)\n"
           "# 10 COLOR_OBS (observed color for the object taking into account obs. errors)\n"
           "# 11 COLOR_ERR (error in the observed color for the object = mDist - mSel\n"
-          "# 12 M_DIST_APP_OBS (M_SEL_APP_OBS + COLOR_OBS)\n");
+          "# 12 M_DIST_APP_OBS (M_SEL_APP_OBS + COLOR_OBS)\n"
+          "# 13 M_DIST_APP_ERR (M_SEL_APP_ERR + COLOR_ERR\n");
+          
   for(iobj=0;iobj<nobj;iobj++) {
    /* fprintf(fout," %8.6f  %8.3f %8.3f",zsample[i],msample[i],Msample[i]); */
     fprintf(fout," %8.6f  %8.6f %8.6f",zsample[iobj],zobserved[iobj],zerror[iobj]);
@@ -3466,8 +3467,8 @@ void Generate_Cat_M_wC()
     fprintf(fout," %8.6f", colorsample[iobj]);
     fprintf(fout," %8.6f", colorObserved[iobj]);
     fprintf(fout," %8.6f", colorError[iobj]);
-    fprintf(fout," %8.6f\n", mDistObserved[iobj]);
-    
+    fprintf(fout," %8.6f", mDistObserved[iobj]);
+    fprintf(fout," %8.6f\n", mSelError[iobj]+colorError[iobj]);
   }
   fclose(fout);
 
