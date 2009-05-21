@@ -381,15 +381,15 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       /* x[1] are mreal-mobs integral limits */
       if(4 * _fsel_STY_gmz_p_f_M_wC.deltamag >  _errmagDistn_i_STY_gmz_p_f_M_wC)
       {
-             /* The Fermi factor has smooth gradients along the gaussian (the factor 4 has been tested) */
-             xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-             xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-             if(DEBUG3) printf(" Caso 1Limits xl_num: %g %g\n",xl_num[0],xl_num[1]);
-             if(DEBUG3) printf(" Caso 1Limits xu_num: %g %g\n",xu_num[0],xu_num[1]);
-             /* integration */
-             probarriba = vegas_integrate_STY_gmz_p_f_M_wC
-                 (&G_num, xl_num, xu_num, dim_num, calls_num,
-                  &errprobarriba);
+         /* The Fermi factor has smooth gradients along the gaussian (the factor 4 has been tested) */
+         xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+         xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+         if(DEBUG3) printf(" Caso 1Limits xl_num: %g %g\n",xl_num[0],xl_num[1]);
+         if(DEBUG3) printf(" Caso 1Limits xu_num: %g %g\n",xu_num[0],xu_num[1]);
+         /* integration */
+         probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+             (&G_num, xl_num, xu_num, dim_num, calls_num,
+              &errprobarriba);
       }
       else
       {
@@ -520,11 +520,11 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   double dVdzreal, rhoz;
 
   if(DEBUG4) printf(" inside vegas_funk_numerator.\n");
-  /* x[0] -> zreal
+  /* x[0] -> zreal - zobs
      x[1] -> mreal - mobs */
 
-  zreal = x[0];
   zobs  = _z_i_STY_gmz_p_f_M_wC;
+  zreal = x[0] + zobs;
   mDistObs  = _magDistn_i_STY_gmz_p_f_M_wC;
   mDistReal = x[1] + mDistObs;
   Mabs = Mag(zreal,mDistReal,*_cosmo_STY_gmz_p_f_M_wC);
