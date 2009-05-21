@@ -1,4 +1,5 @@
 #include "modulos.h"
+#include <gsl/gsl_machine.h>
 #define FTOL  1e-11
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -186,16 +187,14 @@ double Amoe_Funk_STY_p_f_L_main(int n, double *x, double *y, double *p) {
   double fluxtmp,fmin;
   double Lleft,Lright;
   double xleft,xright;
-  double xmin;
 /*   double Mup=-30; */
 /*   double Lup; */
   double Ntot;
   double intabajo;
-  double probarriba;
   double logprobarriba;
   double probabajo;
 
-  double intsch,intsup;
+  double intsup;
   int j;
   int nL_fs=200;
 

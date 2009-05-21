@@ -1,4 +1,6 @@
 #include "modulos.h"
+#include <gsl/gsl_machine.h>
+#include <gsl/gsl_sf_gamma.h>
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -188,13 +190,12 @@ double Amoe_Funk_STY_M_main(int n, double *x, double *y, double *p) {
   double logL=0.;
   struct Schlf_M lfamo;
   double Mabs;
-  double intsch;
   double Mlow;
   double Lstar;
   double Llow;
 /*   double Mup=-30; */
 /*   double Lup; */
-  double intsup;
+  double log_gamma_int;
 
   lfamo.alfa=p[0];
   lfamo.phistar=1;
@@ -203,7 +204,6 @@ double Amoe_Funk_STY_M_main(int n, double *x, double *y, double *p) {
   logL=0.;
 
   Lstar=pow(10.,-0.4*lfamo.Mstar);
-  intsup=incom(1+lfamo.alfa,100.);
   for(i=0;i<_ndata_STY_M;i++) {
     Mabs=Mag(y[i],x[i],*_co_STY_M);
     Mlow=Mag(y[i],_mlim_STY_M,*_co_STY_M);
