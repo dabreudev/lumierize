@@ -52,7 +52,7 @@ else
 endif
 
 set colz=2
-set colm=7
+set colm=12
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 m

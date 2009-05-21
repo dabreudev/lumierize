@@ -55,8 +55,8 @@ else
 endif
 
 set colz=2
-set colm=7
-set colerrm=8
+set colm=12
+set colerrm=13
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 n
