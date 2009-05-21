@@ -329,10 +329,10 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gmz_p_f_M_wC);
     Mlow=Mag(y[i],_fsel_STY_gmz_p_f_M_wC.magcut+colori,*_cosmo_STY_gmz_p_f_M_wC);
     xmin =pow(10.,-0.4*Mlow)/Lstar;
-    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN? */
+    if(xmin>=100) 
     {
-      logL+=10;
-      if(DEBUG3) printf("Pasando por logL+=10\n");
+      logL+=GSL_LOG_DBL_MAX;
+      if(DEBUG3) printf("Pasando por logL+=GSL_LOG_DBL_MAX\n");
       if(DEBUG3) printf("y[i] %g\n",y[i]);
     }
     else 
@@ -386,9 +386,9 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
         xl_num[0]=_z_i_STY_gmz_p_f_M_wC-6*_errz_i_STY_gmz_p_f_M_wC;
         xu_num[0]=_z_i_STY_gmz_p_f_M_wC+6*_errz_i_STY_gmz_p_f_M_wC;
         /* x[1] are mreal-mobs integral limits */
-        if(_fsel_STY_gmz_p_f_M_wC.deltamag > _errmagDistn_i_STY_gmz_p_f_M_wC)
+        if(4 * _fsel_STY_gmz_p_f_M_wC.deltamag >  _errmagDistn_i_STY_gmz_p_f_M_wC)
         {
-             /* The Fermi factor has smooth gradients along the gaussian */
+             /* The Fermi factor has smooth gradients along the gaussian (the factor 4 has been tested) */
              xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
              xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
              if(DEBUG3) printf(" Caso 1Limits xl_num: %g %g\n",xl_num[0],xl_num[1]);
@@ -410,9 +410,11 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
              {
                  /* The integral will be almost 0. Since the gaussian
                     is ~0 when Fermi = 1 and Fermi~0 when gaussian 
-                    is relevant. However we still integrate in -6,+6 but
-                    with less points */
-                 xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+                    is relevant. */
+                 /* The -10 * deltamag factor is to allow a little bit
+                    of integration into the Fermi~1 regime */
+                 xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC -
+                              10 * _fsel_STY_gmz_p_f_M_wC.deltamag;; 
                  xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
                  if(DEBUG3) printf(" Caso 2Limits xl_num: %g %g\n",
                                    xl_num[0],xl_num[1]);
@@ -444,10 +446,12 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
                     There will be two integration intervals */
                  probarriba = 0;
                  /* First interval */
-                 xl_num[1] = -6 * _errmagDistn_i_STY_gmz_p_f_M_wC; 
+                 /* The -6 *deltmag factor ensures that xl[1] < xu[1] */
+                 xl_num[1] = -6 * _errmagDistn_i_STY_gmz_p_f_M_wC
+                             -10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
                  xu_num[1] = magcut_sigma *
                      _errmagDistn_i_STY_gmz_p_f_M_wC -
-                     6 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+                     10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
                  if(DEBUG3) printf(" Caso 4.1Limits xl_num: %g %g\n",
                                    xl_num[0],xl_num[1]);
                  if(DEBUG3) printf(" Caso 4.1Limits xu_num: %g %g\n",
@@ -461,10 +465,10 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
                  {
                      xl_num[1] = magcut_sigma *
                           _errmagDistn_i_STY_gmz_p_f_M_wC -
-                   	  6 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+                   	  10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
                      xu_num[1] = magcut_sigma * 
                           _errmagDistn_i_STY_gmz_p_f_M_wC +
-                          6 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
+                          10 * _fsel_STY_gmz_p_f_M_wC.deltamag; 
                      if(DEBUG3) printf("Caso 4.2Limits xl_num: %g %g\n",
                                        xl_num[0],xl_num[1]);
                      if(DEBUG3) printf("Caso 4.2Limits xu_num: %g %g\n",
@@ -479,7 +483,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       }
       if(DEBUG2) printf(" Calculo arriba %g +- %g magn %g err %g magnl %g\n",probarriba,errprobarriba,_magDistn_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut);
 
-      if(probarriba==0 || probabajo==0) logL+=10; /* 10 por poner un número */
+      if(probarriba==0 || probabajo==0) logL+=GSL_LOG_DBL_MAX; 
       else logL-= log(probarriba) - log(probabajo);   /* Perfectamente testado */
       logL-= logColor;
 
