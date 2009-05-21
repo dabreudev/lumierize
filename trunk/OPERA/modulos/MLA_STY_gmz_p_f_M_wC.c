@@ -375,9 +375,9 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       /* NUMERATOR*/
       if(DEBUG4) printf(" errors: %g %g\n",_errz_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC);
       if(DEBUG3) printf(" Computing numerator.\n");
-      /* x[0] are zreal integral limits */
-      xl_num[0]=_z_i_STY_gmz_p_f_M_wC-6*_errz_i_STY_gmz_p_f_M_wC;
-      xu_num[0]=_z_i_STY_gmz_p_f_M_wC+6*_errz_i_STY_gmz_p_f_M_wC;
+      /* x[0] are zreal-zobs integral limits */
+      xl_num[0]=-6*_errz_i_STY_gmz_p_f_M_wC;
+      xu_num[0]=+6*_errz_i_STY_gmz_p_f_M_wC;
       /* x[1] are mreal-mobs integral limits */
       if(4 * _fsel_STY_gmz_p_f_M_wC.deltamag >  _errmagDistn_i_STY_gmz_p_f_M_wC)
       {
@@ -393,48 +393,48 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       }
       else
       {
-             /* The Fermi factor changes abrouptly within the gaussian */
-             double magcut_sigma =
-                   (_fsel_STY_gmz_p_f_M_wC.magcut -
-                    _magDistn_i_STY_gmz_p_f_M_wC) /
-		     _errmagDistn_i_STY_gmz_p_f_M_wC;
-             if(DEBUG3) printf(" magcut_sigma %g\n", magcut_sigma);
-             if(magcut_sigma < -6)
-             {
-                 /* The integral will be almost 0. Since the gaussian
-                    is ~0 when Fermi = 1 and Fermi~0 when gaussian 
-                    is relevant. */
-                 /* The -10 * deltamag factor is to allow a little bit
-                    of integration into the Fermi~1 regime */
-                 xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC -
-                              10 * _fsel_STY_gmz_p_f_M_wC.deltamag;; 
-                 xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-                 if(DEBUG3) printf(" Caso 2Limits xl_num: %g %g\n",
-                                   xl_num[0],xl_num[1]);
-                 if(DEBUG3) printf(" Caso 2Limits xu_num: %g %g\n",
-                                   xu_num[0],xu_num[1]);
-                 /* integration */
-                 probarriba = vegas_integrate_STY_gmz_p_f_M_wC
-                     (&G_num, xl_num, xu_num, dim_num, calls_num/10,
-                      &errprobarriba);
+        /* The Fermi factor changes abrouptly within the gaussian */
+        double magcut_sigma =
+            (_fsel_STY_gmz_p_f_M_wC.magcut -
+             _magDistn_i_STY_gmz_p_f_M_wC) /
+             _errmagDistn_i_STY_gmz_p_f_M_wC;
+        if(DEBUG3) printf(" magcut_sigma %g\n", magcut_sigma);
+        if(magcut_sigma < -6)
+        {
+            /* The integral will be almost 0. Since the gaussian
+               is ~0 when Fermi = 1 and Fermi~0 when gaussian 
+               is relevant. */
+            /* The -10 * deltamag factor is to allow a little bit
+               of integration into the Fermi~1 regime */
+            xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC -
+                         10 * _fsel_STY_gmz_p_f_M_wC.deltamag;; 
+            xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+            if(DEBUG3) printf(" Caso 2Limits xl_num: %g %g\n",
+                              xl_num[0],xl_num[1]);
+            if(DEBUG3) printf(" Caso 2Limits xu_num: %g %g\n",
+                              xu_num[0],xu_num[1]);
+            /* integration */
+            probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+                (&G_num, xl_num, xu_num, dim_num, calls_num/10,
+                 &errprobarriba);
 
-             }
-             else if(magcut_sigma > 6)
-             {
-                 /* The gaussian is all in the Fermi ~=1 regime */
-                 xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-                 xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-                 if(DEBUG3) printf(" Caso 3Limits xl_num: %g %g\n",
-                                   xl_num[0],xl_num[1]);
-                 if(DEBUG3) printf(" Caso 3Limits xu_num: %g %g\n",
-                                   xu_num[0],xu_num[1]);
-                 /* integration */
-                 probarriba = vegas_integrate_STY_gmz_p_f_M_wC
-                     (&G_num, xl_num, xu_num, dim_num, calls_num,
-                      &errprobarriba);
-             }
-             else
-             {
+        }
+        else if(magcut_sigma > 6)
+        {
+            /* The gaussian is all in the Fermi ~=1 regime */
+            xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+            xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
+            if(DEBUG3) printf(" Caso 3Limits xl_num: %g %g\n",
+                              xl_num[0],xl_num[1]);
+            if(DEBUG3) printf(" Caso 3Limits xu_num: %g %g\n",
+                              xu_num[0],xu_num[1]);
+            /* integration */
+            probarriba = vegas_integrate_STY_gmz_p_f_M_wC
+                (&G_num, xl_num, xu_num, dim_num, calls_num,
+                 &errprobarriba);
+        }
+        else
+        {
                  /* The Fermi cut is in the middle of the gaussian.
                     There will be two integration intervals */
                  probarriba = 0;
@@ -470,7 +470,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
                      probarriba += vegas_integrate_STY_gmz_p_f_M_wC
                          (&G_num, xl_num, xu_num, dim_num, calls_num,
                           &errprobarriba);
-           }
+          }
         }
       }
       if(DEBUG2) printf(" Calculo arriba %g +- %g magn %g err %g magnl %g\n",probarriba,errprobarriba,_magDistn_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut);
