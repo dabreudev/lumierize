@@ -1,4 +1,5 @@
 #include "modulos.h"
+#include <gsl/gsl_machine.h>
 #define FTOL  1e-10
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -258,7 +259,8 @@ int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,cha
 
 double Amoe_Funk_STY_s_p_f_PO_main(int n, double *x, double *y, double *p) {
 
-  int i,j,k; 
+  int i;
+  //int j,k; 
   double logL=0.;
   struct Schlf_L lfamo;
   struct Schlf_M lfamo_M;
@@ -275,9 +277,9 @@ double Amoe_Funk_STY_s_p_f_PO_main(int n, double *x, double *y, double *p) {
   double z,ew,magn,flux;
   double logprobarriba;
   double probabajo;
-  double ewint,zint,Lint,magnint;
+  //double ewint,zint,Lint,magnint;
   int nEW=150;
-  int nz=300;
+  //int nz=300;
   double normaewd;
   double pd;
   int isurvey;

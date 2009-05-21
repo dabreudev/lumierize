@@ -1,4 +1,5 @@
 #include "modulos.h"
+#include <gsl/gsl_machine.h>
 #define FTOL  1e-10
 #define FTOL2 1e-6
 #define FTOL3 1e-7
