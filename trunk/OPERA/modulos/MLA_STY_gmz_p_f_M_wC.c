@@ -373,11 +373,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=0.00001;
     
 
-      if(_errmagDistn_i_STY_gmz_p_f_M_wC==0)
-      {
-        probarriba=Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC);
-      }
-      else
       {
         /* NUMERATOR*/
         if(DEBUG4) printf(" errors: %g %g\n",_errz_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC);
