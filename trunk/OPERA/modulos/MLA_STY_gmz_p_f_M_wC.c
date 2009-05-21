@@ -489,7 +489,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   /* Aqui viene la parte de la poissoniana de npob */
   /* TODO: Change to Int_sch_f_M_wC (when done) */
   /* TODO: Change integration method in Int_sch_f_M_wC */
-  Ntot=Int_sch_M_wC(lfamo,_zlow_STY_gmz_p_f_M_wC,_zup_STY_gmz_p_f_M_wC,_color_mean_STY_gmz_p_f_M_wC,_color_stddev_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut,*_cosmo_STY_gmz_p_f_M_wC)*_strrad_STY_gmz_p_f_M_wC/4./M_PI; 
+  Ntot=Int_sch_f_M_wC(lfamo,_zlow_STY_gmz_p_f_M_wC,_zup_STY_gmz_p_f_M_wC,_color_mean_STY_gmz_p_f_M_wC,_color_stddev_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut,*_cosmo_STY_gmz_p_f_M_wC)*_strrad_STY_gmz_p_f_M_wC/4./M_PI; 
   logL-=    (_ndata_STY_gmz_p_f_M_wC*log(Ntot) - Ntot - gammln((double)_ndata_STY_gmz_p_f_M_wC+1.)); 
   
   if(DEBUG2) printf(" NTOT %f ndata*log(Ntot) %f gamm %f\n",Ntot,_ndata_STY_gmz_p_f_M_wC*log(Ntot),gammln((double)_ndata_STY_gmz_p_f_M_wC)+1.);
@@ -508,6 +508,7 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   double mDistReal;
   double mDistObs;
   double Mabs;
+  static double dMDistdmDist=1.;
   double logfacerrz;
   double logfacerrm;
   double logfacLF;
@@ -536,7 +537,8 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
     return(0);
   } Pertenece a los límites */
 
-  logfacLF = log(Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC));
+  //logfacLF = log(Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC));
+  logfacLF = lnSchechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC);
   logfacerrz = lngaussian(zobs, zreal, 
                           _errz_i_STY_gmz_p_f_M_wC);
   logfacerrm = lngaussian(mDistObs, mDistReal, 
