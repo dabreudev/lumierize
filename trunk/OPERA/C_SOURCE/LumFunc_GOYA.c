@@ -3344,8 +3344,10 @@ void Generate_Cat_M_wC()
       nobjAllSky=Int_sch_f_M_wC(schlf_M, zlow, zup,
                               color_mean, color_stddev, fsel, cosmo);
   }
-  printf("nobjAllSky %g\n", nobjAllSky);
+  printf("Total number of objects in the sky %g\n", nobjAllSky);
   nobjMean=(nobjAllSky/41252.*area);
+  printf("Number of objects per degree %.10g\n", nobjAllSky/41252.);
+  printf("Mean number of objects in the survey %g\n", nobjMean);
   if(DEBUG2) printf("nobjMean %g\n",nobjMean);
   if(DEBUG2) printf("Before gsl_ran_poisson\n");
   nobj=gsl_ran_poisson(rng, nobjMean);
@@ -3368,7 +3370,7 @@ void Generate_Cat_M_wC()
   colorError=malloc(nobj*sizeof(double));
   colorObserved=malloc(nobj*sizeof(double));
 
-  printf(" Number of galaxies generated: %d\n",nobj);
+  printf(" Number of galaxies generated (after poisson dist): %d\n",nobj);
 
   printf("\n 000000000 / %9d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",nobj);
   while(iobj<nobj)
