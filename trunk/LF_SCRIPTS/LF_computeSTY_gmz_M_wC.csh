@@ -66,7 +66,7 @@ set colz=2
 set colerrz=3
 set colmSel=7
 set colmDist=12
-set colerrmDist=8
+set colerrmDist=13
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 R

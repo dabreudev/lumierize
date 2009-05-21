@@ -65,7 +65,7 @@ endif
 
 set colz=2
 set colmSel=7
-set colmDist=7
+set colmDist=12
 
 # cambiar las columnas para que utilice los colores (no será siempre 7 7 7 7)
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS

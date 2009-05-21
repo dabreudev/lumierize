@@ -61,7 +61,7 @@ endif
 
 set colz=2
 set colmsel=7
-set colmdist=4
+set colmdist=12
 
 $OPERA_INST/bin/LumFunc_GOYA << COMANDOS
 O
