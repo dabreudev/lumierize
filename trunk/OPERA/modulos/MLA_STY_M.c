@@ -208,15 +208,22 @@ double Amoe_Funk_STY_M_main(int n, double *x, double *y, double *p) {
     Mabs=Mag(y[i],x[i],*_co_STY_M);
     Mlow=Mag(y[i],_mlim_STY_M,*_co_STY_M);
     Llow=pow(10.,-0.4*Mlow);
-    if(Llow/Lstar>50) {
-      logL+=10;
+    /* debido a un underflow, tuvimos que poner este if
+       El 0.25 es debido a que gsl_sfi_gamma_inc llama a gsl_sf_gamma_inc_CF
+       para x > 0.25 y nos devolvía un underflow cuando se cumplía la segunda
+       condición -> los fuentes de gsl están en:
+       /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/exp.c
+       /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/gamma_inc.c
+    */
+    if(Llow/Lstar > 0.25 && (lfamo.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
+    {
+      log_gamma_int=GSL_LOG_DBL_MIN;
     }
-    else {
-      intsch=(intsup-incom(1+lfamo.alfa,Llow/Lstar));   
-      logL-= log(Schechter_M(Mabs,lfamo)/intsch);
+    else
+    {
+      log_gamma_int=log(gsl_sf_gamma_inc(1+lfamo.alfa,Llow/Lstar));
     }
-/*      printf(" ndata %d  logL %g x %f  y %f Mabs %f Lstar %g Llow %g intsup %g  sch %g int %g\n",i,logL,x[i],y[i],Mabs,Lstar,Llow,intsup,Schechter_M(Mabs,lfamo),intsch);  */
-/*     printf(" LF: lfamo.Mstar %g lfamo.phistar %f lf.alfa  %f\n",lfamo.Mstar,lfamo.phistar,lfamo.alfa); */
+    logL-= log(Schechter_M(Mabs,lfamo)) - log(lfamo.phistar) - log_gamma_int;
   }
 
   _iter_m_STY_M++;
