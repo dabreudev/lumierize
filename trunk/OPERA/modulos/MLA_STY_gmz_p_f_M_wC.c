@@ -321,9 +321,8 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
     _errmagDistn_i_STY_gmz_p_f_M_wC=_errmagDistn_STY_gmz_p_f_M_wC[i];
     if(_errmagDistn_i_STY_gmz_p_f_M_wC==0)
     {
-      /* _errmagn_i_STY_gm_p_M=GSL_SQRT_DBL_MIN; */
-      _errmagDistn_i_STY_gmz_p_f_M_wC=0.0001;
-      /* printf("Using GSL_SQRT_DBL_MIN instead of 0 for errmag.\n"); */
+      _errmagDistn_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
+      if(DEBUG4) printf("Using 1000*GSL_DBL_EPSILON instead of 0 for errmag.\n");
     }
     if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
 
