@@ -197,7 +197,7 @@ double Amoe_Funk_STY_M2_main(int n, double *x, double *y, double *p) {
     Mlow=Mag(y[i],magl_STY_M2,*co_STY_M2);
     Llow=pow(10.,-0.4*Mlow);
     if(Llow/Lstar>50) {
-      logL+=10;
+      logL+=GSL_LOG_DBL_MAX;
     }
     else {
 /*       intsch=(intsup-incom(1+lfamo.alfa,Llow/Lstar));    */

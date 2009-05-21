@@ -268,7 +268,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
     xmin =pow(10.,-0.4*Mlow)/Lstar;
     if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN ? */
     {
-      logL+=10; 
+      logL+= GSL_LOG_DBL_MAX;
     }
     else 
     {
@@ -312,7 +312,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
       if(DEBUG2) printf(" Calculo arriba %g old %g x1 %g  x2 % g magn %g err %g magnl %g\n",probarriba,Schechter_M(Mabs,*_lf_STY_gc_p_M_wC),x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC,_mlim_STY_gc_p_M_wC);
 
 
-      if(probarriba==0 || probabajo==0) logL+=10; /* 10 por poner un número */
+      if(probarriba==0 || probabajo==0) logL+=GSL_LOG_DBL_MAX; 
       logL-= log(probarriba) - log(probabajo);
       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g magn %g err %g\n",i,logL,logLold,Schechter_M(Mabs,lfamo),log(probarriba),log(probabajo),probabajo,xmin,x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC);
 /*       printf(" iobj %d logL %f loglold %f      sch %g int %g (%g)   pa %g pb %g (%g)  xmin %g x1 %f x2 %f\n",i,logL,logLold,Schechter_M(Lumi,lfamo),log(intsch),intsch,log(probarriba),log(probabajo),probabajo,xmin,x1,x2); */
@@ -542,9 +542,9 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
     Mabs=Mag(y[i],x[i],*_cosmo_STY_gc_p_M_wC);
     Mlow=Mag(y[i],_mlim_STY_gc_p_M_wC+_colorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
     xmin =pow(10.,-0.4*Mlow)/Lstar;
-    if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN ? */
+    if(xmin>=100) 
     {
-      logL+=10; 
+      logL+=GSL_LOG_DBL_MAX; 
     }
     else 
     {
@@ -603,7 +603,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
       if(DEBUG2) printf(" Calculo arriba %g old %g x1 %g  x2 % g magn %g err %g magnl %g\n",probarriba,Schechter_M(Mabs,*_lf_STY_gc_p_M_wC),x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC,_mlim_STY_gc_p_M_wC);
 
 
-      if(probarriba==0 || probabajo==0) logL+=10; /* 10 por poner un número */
+      if(probarriba==0 || probabajo==0) logL+=GSL_LOG_DBL_MAX; 
       logL-= log(probarriba) - log(probabajo);
       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g magn %g err %g\n",i,logL,logLold,Schechter_M(Mabs,lfamo),log(probarriba),log(probabajo),probabajo,xmin,x1,x2,_magDistn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC);
     }

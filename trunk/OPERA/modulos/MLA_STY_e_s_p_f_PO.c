@@ -345,7 +345,7 @@ double Amoe_Funk_STY_e_s_p_f_PO_main(int n, double *x, double *y, double *p) {
     logprobarriba=log(area/4*M_PI)+Schechter_L(Lumi,lfamo)+log(ewhis)+log(dLdm)+log(dVdz(z,*co_STY_e_s_p_f_PO))+log(pd);
     if(DEBUG) printf(" area %f Sch %g His %f pd %f \n",area,Schechter_L(Lumi,lfamo),log(Histfunc(ew,*ewd_STY_e_s_p_f_PO)/normaewd),pd);
 
-    if(probabajo==0 || pd==0) logL+=100;
+    if(probabajo==0 || pd==0) logL+=GSL_LOG_DBL_MAX;
     else  logL-= logprobarriba - log(probabajo);
     if(DEBUG) printf(" obj %d logL %g logprobarriba %f probabajo %f oldint %f\n",i,logL,logprobarriba,probabajo,lfamo.phistar*(incom(1+lfamo.alfa,200)-incom(1+lfamo.alfa,xmin)));
   }

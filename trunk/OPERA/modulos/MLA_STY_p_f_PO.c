@@ -316,7 +316,7 @@ double Amoe_Funk_STY_p_f_PO_main(int n, double *x, double *y, double *p) {
     pd=prob_poselfunc_scale(*fsel_STY_p_f_PO,*si_STY_p_f_PO,ew,z,magn);
     if(DEBUG2) printf(" TESTFL _L %g _M %g\n",Schechter_L(Lumi,lfamo)+log(dLdm),log(Schechter_M(Mabs,lfamo_M)));
     logprobarriba=Schechter_L(Lumi,lfamo)+log(Histfunc(ew,*ewd_STY_p_f_PO)/normaewd)+log(dLdm)+log(dVdz(z,*co_STY_p_f_PO)/1e18)+log(pd);
-    if(probabajo==0 || pd==0) logL+=100;
+    if(probabajo==0 || pd==0) logL+=GSL_LOG_DBL_MAX;
     else  logL-= logprobarriba - log(probabajo);
     if(DEBUG2) printf(" FACTORES Sch %f His %f dLdm %f dVdz %f \n",Schechter_L(Lumi,lfamo),log(Histfunc(ew,*ewd_STY_p_f_PO)),log(dLdm),log(dVdz(z,*co_STY_p_f_PO)));
     if(DEBUG2) printf(" obj %d logL %f logprobarriba %f probabajo %f oldint %f\n",i,logL,logprobarriba,probabajo,lfamo.phistar*(incom(1+lfamo.alfa,200)-incom(1+lfamo.alfa,xmin)));

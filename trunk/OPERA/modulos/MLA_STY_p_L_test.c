@@ -239,7 +239,7 @@ double Amoe_Funk_STY_p_L_test_main(int n, double *x, double *y, double *p) {
     Llow=Lum(y[i],fluxl,*co);
     xmin=Llow/lfamo.Lstar;
     if(xmin>=200) {
-      logL+=10; 
+      logL+= GSL_LOG_DBL_MAX;
     }
     else {
       intsch=lfamo.phistar*(intsup-incom(1+lfamo.alfa,xmin));

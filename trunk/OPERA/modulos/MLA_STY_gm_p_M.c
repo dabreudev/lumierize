@@ -238,7 +238,7 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
     xmin =pow(10.,-0.4*Mlow)/Lstar;
     if(xmin>=100) /* cambiar por el GSL_LOG_DBL_MIN? */
     {
-      logL+=10; 
+      logL+= GSL_LOG_DBL_MAX;
     }
     else 
     {
@@ -285,7 +285,7 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
       /* Una vez comprobado que Schechter_M funciona bien, lo hago con esa */
       /*       logL-= log(probarriba)  -log(probabajo);  */    /* Esta hay que decomentarla */
 /*       logLold-= Schechter_M(Lumi,lfamo)-log(intsch); */
-      if(probarriba==0 || probabajo==0) logL+=10; /* 10 por poner un número */
+      if(probarriba==0 || probabajo==0) logL+=GSL_LOG_DBL_MAX; 
       logL-= log(probarriba) - log(probabajo);   /* Perfectamente testado */
       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g magn %g err %g\n",i,logL,logLold,Schechter_M(Mabs,lfamo),log(probarriba),log(probabajo),probabajo,xmin,x1,x2,_magn_i_STY_gm_p_M,_errmagn_i_STY_gm_p_M);
 /*       printf(" iobj %d logL %f loglold %f      sch %g int %g (%g)   pa %g pb %g (%g)  xmin %g x1 %f x2 %f\n",i,logL,logLold,Schechter_M(Lumi,lfamo),log(intsch),intsch,log(probarriba),log(probabajo),probabajo,xmin,x1,x2); */

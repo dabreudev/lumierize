@@ -241,7 +241,7 @@ double GA_Funk_STY_p_L_main(int n, double *x, double *y, double *p) {
     Llow=Lum(y[i],fluxl,*co);
     xmin=Llow/lfga.Lstar;
     if(xmin>=200) {
-      logL+=10; 
+      logL+=GSL_LOG_DBL_MAX; 
     }
     else {
       intsch=lfga.phistar*(intsup-incom(1+lfga.alfa,xmin));
