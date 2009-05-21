@@ -372,15 +372,15 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       if(_errmagDistn_i_STY_gmz_p_f_M_wC==0) _errmagDistn_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
       if(_errz_i_STY_gmz_p_f_M_wC==0) _errz_i_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
 
-        /* NUMERATOR*/
-        if(DEBUG4) printf(" errors: %g %g\n",_errz_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC);
-        if(DEBUG3) printf(" Computing numerator.\n");
-        /* x[0] are zreal integral limits */
-        xl_num[0]=_z_i_STY_gmz_p_f_M_wC-6*_errz_i_STY_gmz_p_f_M_wC;
-        xu_num[0]=_z_i_STY_gmz_p_f_M_wC+6*_errz_i_STY_gmz_p_f_M_wC;
-        /* x[1] are mreal-mobs integral limits */
-        if(4 * _fsel_STY_gmz_p_f_M_wC.deltamag >  _errmagDistn_i_STY_gmz_p_f_M_wC)
-        {
+      /* NUMERATOR*/
+      if(DEBUG4) printf(" errors: %g %g\n",_errz_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC);
+      if(DEBUG3) printf(" Computing numerator.\n");
+      /* x[0] are zreal integral limits */
+      xl_num[0]=_z_i_STY_gmz_p_f_M_wC-6*_errz_i_STY_gmz_p_f_M_wC;
+      xu_num[0]=_z_i_STY_gmz_p_f_M_wC+6*_errz_i_STY_gmz_p_f_M_wC;
+      /* x[1] are mreal-mobs integral limits */
+      if(4 * _fsel_STY_gmz_p_f_M_wC.deltamag >  _errmagDistn_i_STY_gmz_p_f_M_wC)
+      {
              /* The Fermi factor has smooth gradients along the gaussian (the factor 4 has been tested) */
              xl_num[1] = -6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
              xu_num[1] = +6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
@@ -390,9 +390,9 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
              probarriba = vegas_integrate_STY_gmz_p_f_M_wC
                  (&G_num, xl_num, xu_num, dim_num, calls_num,
                   &errprobarriba);
-        }
-        else
-        {
+      }
+      else
+      {
              /* The Fermi factor changes abrouptly within the gaussian */
              double magcut_sigma =
                    (_fsel_STY_gmz_p_f_M_wC.magcut -
@@ -470,7 +470,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
                      probarriba += vegas_integrate_STY_gmz_p_f_M_wC
                          (&G_num, xl_num, xu_num, dim_num, calls_num,
                           &errprobarriba);
-             }
+           }
         }
       }
       if(DEBUG2) printf(" Calculo arriba %g +- %g magn %g err %g magnl %g\n",probarriba,errprobarriba,_magDistn_i_STY_gmz_p_f_M_wC,_errmagDistn_i_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC.magcut);
