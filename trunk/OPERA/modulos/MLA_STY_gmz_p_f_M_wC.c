@@ -486,8 +486,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   } /* end of objects loop */
 
   /* Aqui viene la parte de la poissoniana de npob */
-  /* TODO: Change to Int_sch_f_M_wC (when done) */
-  /* TODO: Change integration method in Int_sch_f_M_wC */
   Ntot=Int_sch_f_M_wC(lfamo,_zlow_STY_gmz_p_f_M_wC,_zup_STY_gmz_p_f_M_wC,_color_mean_STY_gmz_p_f_M_wC,_color_stddev_STY_gmz_p_f_M_wC,_fsel_STY_gmz_p_f_M_wC,*_cosmo_STY_gmz_p_f_M_wC)*_strrad_STY_gmz_p_f_M_wC/4./M_PI; 
   logL-=    (_ndata_STY_gmz_p_f_M_wC*log(Ntot) - Ntot - gammln((double)_ndata_STY_gmz_p_f_M_wC+1.)); 
   
