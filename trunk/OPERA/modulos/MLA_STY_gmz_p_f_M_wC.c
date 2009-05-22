@@ -20,7 +20,7 @@
 #define DEBUG  1
 #define DEBUG2 1
 #define DEBUG3 1
-#define DEBUG4 1
+#define DEBUG4 0
 #define DEBUGPLOT 0
 #define TOLERR 0.07 
 
@@ -75,16 +75,8 @@ double _MLmax_STY_gmz_p_f_M_wC;
 double _zlow_STY_gmz_p_f_M_wC;
 double _zup_STY_gmz_p_f_M_wC;
 double _strrad_STY_gmz_p_f_M_wC;
-
-double _zstep;
-double _nRho=200.;
-double _rho_STY_gmz_p_f_M_wC[NRHO];
-double _zRho_STY_gmz_p_f_M_wC[NRHO];
-double _dVdz_STY_gmz_p_f_M_wC[NRHO];
-gsl_interp * _rho_interp_STY_gmz_p_f_M_wC;
-gsl_interp_accel * _rho_interp_accel_STY_gmz_p_f_M_wC;
-gsl_interp * _dVdz_interp_STY_gmz_p_f_M_wC;
-gsl_interp_accel * _dVdz_interp_accel_STY_gmz_p_f_M_wC;
+double _max_errmagDistn_STY_gmz_p_f_M_wC;
+double _min_MagAbsDist_STY_gmz_p_f_M_wC;
 gsl_rng * _random_gen_STY_gmz_p_f_M_wC;
 
 int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errmagDistn, double color_mean, double color_stddev, double *z, double *errz, struct fermifsel_M fsel, double strrad, double zlow, double zup, struct cosmo_param cosmo, struct Schlf_M *lf, struct MLProcessInfo *mlinfo)
@@ -99,6 +91,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   /* Variables to use for vvmax fitting */
   struct Steplf_M  lfvvmax;
   double minMabs, maxMabs;
+  double minErrMag, maxErrMag;
   double *Mabs;
   double chisq;
   struct Schlf_M  lffit;
@@ -132,7 +125,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   _iter_m_STY_gmz_p_f_M_wC=0;
 
   if(DEBUG3) {
-    for(i=0;i<n;i++) printf(" Entrada x %g\n",magDistn[i]);
+    for(i=0;i<n;i++) printf(" Entrada mag %g z%g\n",magDistn[i], z[i]);
   }
 
   /* VVmax computing as a first solution */
@@ -187,6 +180,14 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   printf(" STY -> Mstar: %g alpha: %g phistar: %g\n",lffit.Mstar,lffit.alfa,lffit.phistar); */
 
   printf(" Computing LF (method STY_gmz_p_f_m_wC)...\n");
+
+  /* Initialize brightest object and maximum error in mag */
+  
+  MinMax_d(n, errmagDistn, &minErrMag, &maxErrMag);
+  _max_errmagDistn_STY_gmz_p_f_M_wC = maxErrMag;
+  _min_MagAbsDist_STY_gmz_p_f_M_wC = minMabs;
+  if(DEBUG) printf(" brightest object %g\n",_min_MagAbsDist_STY_gmz_p_f_M_wC);
+  if(DEBUG) printf(" maximum mag error %g\n",_max_errmagDistn_STY_gmz_p_f_M_wC);
 
   iter_amo=0;
   while(iter_amo==0)
@@ -261,31 +262,19 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   double probabajo, errprobabajo;
 
   double colori;
-  double logColor=0.0;
+  double logColor;
 
-  double intsup;
 
-  size_t dim_den=4, dim_num=2;
-  double xl_den[4], xu_den[4];
+  size_t dim_den=3, dim_num=2;
+  double xl_den[3], xu_den[3];
   double xl_num[2], xu_num[2];
 
 
   gsl_monte_function G_den = { &vegas_funk_denominator_STY_gmz_p_f_M_wC, dim_den, 0 };
   gsl_monte_function G_num = { &vegas_funk_numerator_STY_gmz_p_f_M_wC, dim_num, 0 };
 
-//  too slow (test)
-//  size_t calls_den = 5000000;
-//  size_t calls_num = 50000;
-//  regular
   size_t calls_den = 500000;
   size_t calls_num = 5000;
-//  fast (test)
-//  size_t calls_den = 50000;
-//  size_t calls_num = 500;
-//  very fast (test)
-//  size_t calls_den = 500;
-//  size_t calls_num = 500;
-
 
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
@@ -300,7 +289,49 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   
   if(DEBUG3) printf(" Entra con  par0 %g par1 %g par2 %g\n",p[0],p[1],p[2]);
 
-  intsup=incom(1+lfamo.alfa,100.);
+  if(_color_stddev_STY_gmz_p_f_M_wC==0)
+  {
+    _color_stddev_STY_gmz_p_f_M_wC=GSL_DBL_EPSILON*1000;
+    if(DEBUG4) printf("Using 1000*GSL_DBL_EPSILON instead of 0 for errmag.\n");
+  }
+
+  /* DENOMINATOR */
+  /* It is the same for all the objects */
+  if(DEBUG) printf(" Computing denominator.\n");
+  /* compute limits */
+  xl_den[0]=_zlow_STY_gmz_p_f_M_wC;
+  if(_min_MagAbsDist_STY_gmz_p_f_M_wC > lfamo.Mstar - 5)
+    xl_den[1]= mag(_zlow_STY_gmz_p_f_M_wC,
+                 lfamo.Mstar - 5,
+                 *_cosmo_STY_gmz_p_f_M_wC)
+             -6*_max_errmagDistn_STY_gmz_p_f_M_wC;
+
+  else
+    xl_den[1]= mag(_zlow_STY_gmz_p_f_M_wC,
+                 _min_MagAbsDist_STY_gmz_p_f_M_wC,
+                 *_cosmo_STY_gmz_p_f_M_wC)
+             -6*_max_errmagDistn_STY_gmz_p_f_M_wC;
+  xl_den[2]=_color_mean_STY_gmz_p_f_M_wC -
+            6 * _color_stddev_STY_gmz_p_f_M_wC;
+  xu_den[0]=_zup_STY_gmz_p_f_M_wC;
+  xu_den[1]=_fsel_STY_gmz_p_f_M_wC.magcut
+            - _color_mean_STY_gmz_p_f_M_wC 
+            + 6 * _color_stddev_STY_gmz_p_f_M_wC
+            + 10 * _fsel_STY_gmz_p_f_M_wC.deltamag;
+  xu_den[2]=_color_mean_STY_gmz_p_f_M_wC +
+            6 * _color_stddev_STY_gmz_p_f_M_wC;
+  if(DEBUG) printf(" mag(bright, zlow) %g\n",mag(_zlow_STY_gmz_p_f_M_wC,
+                 _min_MagAbsDist_STY_gmz_p_f_M_wC,
+                 *_cosmo_STY_gmz_p_f_M_wC));
+  if(DEBUG) printf(" Limits xl: %g %g %g\n",xl_den[0],xl_den[1],xl_den[2]);
+  if(DEBUG) printf(" Limits xu: %g %g %g\n",xu_den[0],xu_den[1],xu_den[2]);
+  /* integration */
+  probabajo = vegas_integrate_STY_gmz_p_f_M_wC
+        (&G_den, xl_den, xu_den, dim_den, calls_den,
+         &errprobabajo);
+
+  if(DEBUG2) printf(" Abajo %g +- %g\n",probabajo,errprobabajo);
+
   for(i=0;i<_ndata_STY_gmz_p_f_M_wC;i++) 
   {
     /* Contribucion del color en el numerador */
@@ -340,28 +371,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
       x1=lfamo.Mstar-5; /* de dónde sale este 5??? */
       x2=Mag(y[i],_fsel_STY_gmz_p_f_M_wC.magcut+6*_errmagDistn_i_STY_gmz_p_f_M_wC,*_cosmo_STY_gmz_p_f_M_wC);
       if(DEBUG4) printf("x1 %g x2 %g y[i] %g _errmagDistn_i %g\n",x1,x2,y[i],_errmagDistn_i_STY_gmz_p_f_M_wC);
-
-      /* DENOMINATOR */
-      if(DEBUG3) printf(" Computing denominator.\n");
-      /* compute limits */
-      /* xl_den={_zlow_STY_gmz_p_f_M_wC,-6*_errz_i_STY_gmz_p_f_M_wC,x1,-6*_errmagDistn_i_STY_gmz_p_f_M_wC}; 
-      xu_den={_zup_STY_gmz_p_f_M_wC,6*_errz_i_STY_gmz_p_f_M_wC,x2,6*_errmagDistn_i_STY_gmz_p_f_M_wC}; */
-      xl_den[0]=_zlow_STY_gmz_p_f_M_wC;
-      xl_den[1]=-6*_errz_i_STY_gmz_p_f_M_wC;
-      xl_den[2]=x1;
-      xl_den[3]=-6*_errmagDistn_i_STY_gmz_p_f_M_wC; 
-      xu_den[0]=_zup_STY_gmz_p_f_M_wC;
-      xu_den[1]=6*_errz_i_STY_gmz_p_f_M_wC;
-      xu_den[2]=x2;
-      xu_den[3]=6*_errmagDistn_i_STY_gmz_p_f_M_wC;
-      if(DEBUG3) printf(" Limits xl: %g %g %g %g\n",xl_den[0],xl_den[1],xl_den[2],xl_den[3]);
-      if(DEBUG3) printf(" Limits xu: %g %g %g %g\n",xu_den[0],xu_den[1],xu_den[2],xu_den[3]);
-      /* integration */
-      probabajo = vegas_integrate_STY_gmz_p_f_M_wC
-            (&G_den, xl_den, xu_den, dim_den, calls_den,
-             &errprobabajo);
-
-      if(DEBUG2) printf(" Abajo %g +- %g\n",probabajo,errprobabajo);
 
       /* We have to compute them again because Funk? may have overriden them */
       _z_i_STY_gmz_p_f_M_wC=y[i];
@@ -564,52 +573,46 @@ double vegas_funk_denominator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *par
 {
   double res;
   double zreal;
-  double zobs;
-  double mreal;
-  double mobs;
+  double mDistreal;
+  double colorobs;
   double Mabs;
-  double logfacerrz;
-  double logfacerrm;
+  static double dMDistdmDist=1.;
   double logfacLF;
+  double logfacColor;
   double facsel;
-  double dVdzreal, rhoz;
+  double dVdzreal;
 
   if(DEBUG4) printf(" inside vegas_funk_denominator.\n");
 
-  zobs = x[0];
-  zreal = zobs + x[1];
-  mobs = mag(zreal, x[2],*_cosmo_STY_gmz_p_f_M_wC);
-  mreal = mobs + x[3];
-  Mabs = Mag(zreal,mreal,*_cosmo_STY_gmz_p_f_M_wC);
+  /*
+  x[0] -> zreal 
+  x[1] -> mreal
+  x[2] -> colorobs
+  */
+  zreal     = x[0];
+  mDistreal = x[1];
+  colorobs  = x[2];
 
-  if ( zreal < 0)
+  Mabs = Mag(zreal,mDistreal,*_cosmo_STY_gmz_p_f_M_wC);
+
+  if ( zreal < _zlow_STY_gmz_p_f_M_wC || zreal > _zup_STY_gmz_p_f_M_wC)
   {
-    if(DEBUG4) printf(" out petando zreal: zreal<0\n");
+    /* selection function in z */
+    if(DEBUG4) printf(" out petando zreal: zreal < zlow || zreal > zup\n");
     return(0);
   } 
 
-  if (mreal > _fsel_STY_gmz_p_f_M_wC.magcut+3*_fsel_STY_gmz_p_f_M_wC.deltamag)
-  {
-    if(DEBUG4) printf(" out petando mreal: mreal %g magcut %g\n",mreal,_fsel_STY_gmz_p_f_M_wC.magcut);
-    return(0);
-  } 
-
-  logfacLF = log(Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC));
-  logfacerrz = lngaussian(zobs, zreal, _errz_i_STY_gmz_p_f_M_wC);
-  logfacerrm = lngaussian(mobs, mreal, _errmagDistn_i_STY_gmz_p_f_M_wC);
-  //dVdz=Lagr2_d(_zRho_STY_gmz_p_f_M_wC,_dVdz_STY_gmz_p_f_M_wC,NRHO,zreal);
-  //rhoz=Lagr2_d(_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,NRHO,zreal);
-  //dVdz=gsl_interp_eval(_dVdz_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_dVdz_STY_gmz_p_f_M_wC,zreal,_dVdz_interp_accel_STY_gmz_p_f_M_wC);
+  //logfacLF = log(Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC));
+  logfacLF = lnSchechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC);
+  logfacColor = lngaussian(colorobs, _color_mean_STY_gmz_p_f_M_wC, _color_stddev_STY_gmz_p_f_M_wC);
   dVdzreal = dVdz(zreal,*_cosmo_STY_gmz_p_f_M_wC);
-  //rhoz=gsl_interp_eval(_rho_interp_STY_gmz_p_f_M_wC,_zRho_STY_gmz_p_f_M_wC,_rho_STY_gmz_p_f_M_wC,zreal,_rho_interp_accel_STY_gmz_p_f_M_wC);
-  facsel = Fermi(mreal,_fsel_STY_gmz_p_f_M_wC.magcut,_fsel_STY_gmz_p_f_M_wC.deltamag); /* TODO: seguro que no va colori? */
-  res=exp(logfacerrm+logfacerrz+logfacLF);
-  /* test without rhoz */
-  rhoz=1.0;
-  res=res*dVdzreal*rhoz*facsel;
-  if(DEBUG4) printf(" lasx: x[0] %g x[1] %g x[2] %g x[3] %g\n",x[0],x[1],x[2],x[3]);
-  if(DEBUG4) printf("Den todopati: zreal %10g zobs %10g mreal %10g mobs %10g Mabs %10g\n",zreal,zobs,mreal,mobs,Mabs);
-  if(DEBUG4) printf("Den morralla: logfacLF %g logfacerrz %g logfacerrm %g dVdzreal %g rhoz %g  facsel %g\n",logfacLF,logfacerrz,logfacerrm,dVdzreal,rhoz,facsel);
+  facsel = Fermi(mDistreal-colorobs,_fsel_STY_gmz_p_f_M_wC.magcut,_fsel_STY_gmz_p_f_M_wC.deltamag);
+  res=exp(logfacLF+logfacColor);
+  res=res*dVdzreal*facsel*dMDistdmDist;
+
+  if(DEBUG4) printf(" lasx: x[0] %g x[1] %g x[2] %g \n",x[0],x[1],x[2]);
+  if(DEBUG4) printf("Den todopati: zreal %10g  Mabs %10g\n",zreal,Mabs);
+  if(DEBUG4) printf("Den morralla: logfacLF %g dVdzreal %g facsel %g\n",logfacLF,dVdzreal,facsel);
   if(DEBUG4) printf("Den result: %g\n",res);
   return(res); 
 }
