@@ -27,6 +27,7 @@ import pexpect
 import signal
 import datetime
 import time
+import random
 
 def main():
 
@@ -72,7 +73,9 @@ def main():
    else:
       output=open(options.outfilename, "w")
    
-   for iter in range(nIter):
+   iterList = range(nIter)
+   random.shuffle(iterList)
+   for iter in iterList:
       if verbose: output.write('Dentro del bucle. '+str(datetime.datetime.today())+'\n')
       comando=scriptName+" -p "+parFile+" "+str(iter)
       if verbose: output.write("Antes del pexpect.spawn\n")
