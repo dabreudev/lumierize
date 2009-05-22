@@ -1,5 +1,6 @@
 #include "modulos.h"
 #include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_machine.h>
 
 #define NSTEP_LF 200
 //#define NSTEP_Z  500
@@ -109,7 +110,14 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
       Llow=pow(10.,-0.4*Mlow);
       Lup=pow(10.,-0.4*Mup);
       Lstar=pow(10.,-0.4*lf.Mstar);
-      sch_int = gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar);
+      if(Llow/Lstar > 0.25 && (lf.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
+      {
+        sch_int=GSL_DBL_MIN;
+      }
+      else
+      {
+        sch_int = gsl_sf_gamma_inc(1+lf.alfa,Llow/Lstar);
+      }
       //if(DEBUG) printf("zplot = %g sch_int = %g sch_int2 = %g\n",z,sch_int,sch_int2);
       //sch_int = sch_int2;
 
