@@ -130,6 +130,7 @@ int  MLA_STY_p_M(int n,double *magSeln, double *magDistn, double *z,double mlim,
   sigpar[1]=10.*lffit.errMstar;
   sigpar[2]=10.*lffit.errphistar/lffit.phistar;
 
+  printf("par0 %g par1 %g par2 %g\n",par[0],par[1],par[2]);
   printf(" Computing LF...\n");
 
   iter_amo=Amoeba_d(n,magDistn,z,3,par,sigpar,FTOL,MAXITER,Amoe_Funk_STY_p_M_main);
