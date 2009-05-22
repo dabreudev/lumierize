@@ -2857,7 +2857,7 @@ void Generate_Cat_M()
     while((merror[i] = merror_mean + Gasdev() * merror_stddev) < 0);
     mobserved[i] = msample[i] + Gasdev()*merror[i];
     while((zerror[i] = zerror_mean + Gasdev() * zerror_stddev) < 0);
-    zobserved[i] = zsample[i] + Gasdev()*zerror[i];
+    while((zobserved[i] = zsample[i] + Gasdev()*zerror[i]) < 0);
   }
   MinMax_d(nobj,msample,&mh1,&mh2);
   MinMax_d(nobj,Msample,&Mh1,&Mh2);
@@ -3038,7 +3038,7 @@ void Generate_Cat_M_C()
     while((merror[i] = merror_mean + Gasdev() * merror_stddev) < 0);
     mobserved[i] = msample[i] + Gasdev()*merror[i];
     while((zerror[i] = zerror_mean + Gasdev() * zerror_stddev) < 0);
-    zobserved[i] = zsample[i] + Gasdev()*zerror[i];
+    while((zobserved[i] = zsample[i] + Gasdev()*zerror[i]) < 0);
   }
   MinMax_d(nobj,msample,&mh1,&mh2);
   MinMax_d(nobj,Msample,&Mh1,&Mh2);
@@ -3399,7 +3399,7 @@ void Generate_Cat_M_wC()
     while((colorError[iobj] = colorError_mean + Gasdev() * colorError_stddev) < 0);
     colorObserved[iobj] = colorsample[iobj] + Gasdev()*colorError[iobj];
     while((zerror[iobj] = zerror_mean + Gasdev() * zerror_stddev) < 0);
-    zobserved[iobj] = zsample[iobj] + Gasdev()*zerror[iobj];
+    while((zobserved[iobj] = zsample[iobj] + Gasdev()*zerror[iobj]) < 0);
     mDistObserved[iobj] = mSelObserved[iobj] + colorObserved[iobj];
     if(DEBUG2) printf("z = %g\n", zsample[iobj]);
     ++iobj;
