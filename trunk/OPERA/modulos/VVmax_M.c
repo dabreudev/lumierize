@@ -33,7 +33,7 @@ int  VVmax_M(int n,double *mag_sel, double *mag_cal,double *z, double mlim_sel, 
       M_sel=Mag(z[j],mag_sel[j],cosmo);
       if(DEBUG) printf(" z  %g M_cal %g M_sel %g  %g - %g\n",
                        z[j],M_cal,M_sel,lf->magni[i],lf->magni[i+1]);
-      if(M_cal>lf->magni[i] && M_cal<lf->magni[i+1]) 
+      if(M_cal>=lf->magni[i] && M_cal<lf->magni[i+1]) 
       {
 	zmax=Z_m(mlim_sel,M_sel,cosmo);
 	if(DEBUG) printf(" zmax %f \n",zmax);
