@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include "cosmology.h"
 
 #define LSPEED 299792.46 /* LSPEED: light speed in km/sec */
@@ -20,8 +23,6 @@ void cosmo_init(struct cosmo_param *cosmo, double H0, double OM, double OL)
   double z,E;
   double min=0,max=0;
   double log10dlum=0.,log10dlum_step;
-
-  if(DEBUG1) printf("cosmo_init\n");
 
   zstep=ZMAX_CACHED/NUMZ_CACHED;
 
@@ -124,7 +125,6 @@ void cosmo_init(struct cosmo_param *cosmo, double H0, double OM, double OL)
 
 void cosmo_free(struct cosmo_param *cosmo)
 {
-  if(DEBUG1) printf("cosmo_free called\n");
   /* if you want to change your cosmology, first you must do a free */
   free(cosmo->cached.z);
   free(cosmo->cached.log10dlum);

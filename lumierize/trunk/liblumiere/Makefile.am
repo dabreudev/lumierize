@@ -25,13 +25,14 @@ DISTCLEANFILES = *~
 
 #SUBDIRS = tests
 
-include_HEADERS =  amoeba.h
+include_HEADERS =  
 
 noinst_HEADERS =  
 
 lib_LTLIBRARIES = liblumiere.la
 
-liblumiere_la_SOURCES =  alloc.c Amoe_Ini_d.c Amoe_Init.d Amoeba_d.c Amoeba.c
+liblumiere_la_SOURCES = alloc.c Amoe_Ini_d.c Amoe_Init.d Amoeba_d.c Amoeba.c \
+			cosmology.c functions.c schechter.c 
 liblumiere_la_LDFLAGS =
 liblumiere_la_LIBADD =  -lm
 liblumiere_la_DEPENDENCIES = 

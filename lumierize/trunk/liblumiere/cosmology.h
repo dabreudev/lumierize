@@ -6,6 +6,19 @@ extern "C" {
 #endif
 
 	/* cosmology */
+	struct cached_log10dlum_dVdz /* log10dlum and dVdz */
+	{
+		int N; /* Number of points */
+		double *log10dlum; /* log10 dlum values */
+		double *dVdz; /* dVdz values */
+		double *z;  /* z for the values */
+		double *invlog10dlum; /* dlum values sampled */
+		double *invz;    /* z values for inversedlum */
+		double maxlog10dlum; /* max of inversedlum */
+		double minlog10dlum; /* min of inversedlum */
+		double *DM; /* comoving distance (transverse) */
+	};
+
 	struct cosmo_param
 	{
 		double H0; /* Hubble constant */
