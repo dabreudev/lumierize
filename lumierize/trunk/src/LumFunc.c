@@ -1,7 +1,11 @@
-#include "amoeba.h"
-#include "cosmology.h"
+#include <math.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
+#include "alloc.h"
+#include "amoeba.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "functions.h"
 
 #define ZMIN 0.00001
 #define NSTEP_LF 200
