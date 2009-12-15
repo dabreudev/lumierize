@@ -1,0 +1,36 @@
+COMMENT  Parameter file for ExtractSpec                                        
+IMAGE   = '503.1.4.51.fits'                                  / Input FITS image
+ERRIMAGE= '503.1.4.51.e.fits'                                / Input Err. image
+CATFILE = '503.1.4.51.fits.usno'                             / Object catalog  
+XCOL    =                    3 / Columna de CATFILE con posicion X PO          
+YCOL    =                    4 / Columna de CATFILE con posicion Y PO          
+SKYFILE = 'sky503.1.4.51.fits'                               / Image with sky  
+ERRSKFIL= 'ersk503.1.4.51.fits'                              / Sky error image 
+RADEC-XY=                    1 / Are radec positions instead of x-y positions? 
+MULTSPEC=                    1 / Multispec format (all spectra in one file)?   
+SPAPIX  =                    5 / Half spatial direction to extract             
+SPECPIX =                   40 / Half dispersion directon to extract           
+DISPAXIS=                    1 / Eje de dispersion                             
+RAWSPEC = 'SP/503.1.4.51.sp'                                 / Raw spec        
+WCSPEC  = 'SP/503.1.4.51.wcsp'                               / Wavelenght calib
+FCSPEC  = 'SP/503.1.4.51.fcsp'                               / Flux+wave calib 
+ERRRAWSP= 'SP/err503.1.4.51.sp'                              / Err. raw        
+ERRWCSP = 'SP/err503.1.4.51.wcsp'                            / Err. wave       
+ERRFCSP = 'SP/err503.1.4.51.fcsp'                            / Err flux        
+A_DISP  =                 3420 / Constante A de la dispersion del prisma ======
+B_DISP  =              -153.e5 / Constante B de la dispersion del prisma ======
+C_DISP  =                 1499 / Constante C de la dispersion del prisma=======
+RESPFILE= 'NONE'               / Funcion respuesta (NONE= no calibrar en flujo)
+OUTFILE = '503.1.4.51.spec'                                  / Out file        
+DEVICE  = '/null'              / PGPLOT device=================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+END                                                                            

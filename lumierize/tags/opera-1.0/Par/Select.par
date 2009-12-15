@@ -1,0 +1,36 @@
+COMMENT  Parameter file for SearchLine                                         
+ELGFILE = '501.1.1.20.elg'                                   / File with spec  
+IMAGE   = '501.1.1.20.fits'                                  / File with spec  
+RESPFILE= 'response_Q1_C1_3.900-4.000.fits'                  / File with spec  
+SPECFILE= '501.1.1.20.spec'                                  / File with spec  
+CANDFILE= '501.1.1.20.candidate'                             / File with spec  
+NELGFILE= '501.1.1.20.goodelg'                               / File with spec  
+REPPREF = '../Reports/'                                      / File with spec  
+SEEING  =                 3.95 / Seeing for all the spectra                    
+SECPPIX =           1.02892400 / Plate scale "/pix                             
+A_DISP  =        3318.26342800 / A constant for prism dispersion               
+B_DISP  =   -14360420.00000000 / B constant for prism dispersion               
+C_DISP  =         1606.0000000 / C constant for prism dispersion               
+PIXSIZE =            15.000000 / Pixel size (microns)                          
+MINLDO  =                 6500 / Minimum selectable l.d.o for emission line    
+MAXLDO  =                 7300 / Minimum selectable l.d.o for emission line    
+INTERACT=                    1 / Columna de CATFILE con posicion X PO          
+COMMENT Blank lines to assure the last block of 2880 caracters is complete=====
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+END                                                                            
