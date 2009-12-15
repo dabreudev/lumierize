@@ -1,0 +1,36 @@
+COMMENT  Parameter file for PlateAstrom                                        
+IMAGE   = '503.1.4.25.fits'    / Nombre de la imagen FITS de entrada           
+ASTCAT  =               'USNO' / Nombre del catalogo a usar ACT,USNO,GSC,APM   
+SECCAT  =            'Tycho-2' / Nombre del catalogo a usar ACT,USNO,GSC,APM   
+OBJCAT  = '503.1.4.25.buho'    / No. de estrellas a matchear                   
+XCOL    =                   14 /                                               
+YCOL    =                   15 /                                               
+FLUXCOL =                    4 /                                               
+POLDEG  =                    7 / Polinomio a ajustar de la solucion astrom.    
+DEVICE  = '/xserve'                                          / Disp. grafico   
+NOBJ    =                  150 / No. de objetos detectados a matchear          
+NSTAR   =                  150 / No. de estrellas a matchear                   
+RA      =              8.78092 / RA del centro de la imagen (en horas)         
+DEC     =             -0.16900 / DEC del centro de la imagen (en grados)       
+EPOCH   =              2000.00 / Epoch of the observation                      
+SECPIX  =                1.033 / Escala de placa                               
+ROTANG  =                  -90 / Escala de placa                               
+FLIP    =                    0 / Escala de placa                               
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+COMMENT =======================================================================
+END                                                                            

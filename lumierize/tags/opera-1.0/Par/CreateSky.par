@@ -1,0 +1,40 @@
+COMMENT  Fichero de datos para SkyFits
+COMMENT  1         2         3         4         5         6         7         8
+COMMENT  01234567890123456789012345678901234567890123456789012345678901234567890
+COMMENT  
+COMMENT =======================================================================
+IMAGE   = 'big.fits'           / Nombre de la imagen FITS de entrada
+SKY     = 'bigsky.fits'        / Imagen FITS de salida con el fondo de cielo
+SIG     = 'big.sig.fits'       / Imagen FITS de salida con la sigma del cielo
+ERRSKY  = 'big.sig.fits'       / Imagen FITS de salida con la sigma del cielo
+XSCELL  =                   50 / Tamano X de la caja del calculo del cielo (pix)
+YSCELL  =                   50 / Tamano Y de la caja del calculo del cielo (pix)
+XMIN    =                    0 / **** 
+XMAX    =                    0 / Subcaja de la imagen a considerar 
+YMIN    =                    0 / en pixels (0,0,0,0) para toda la imagen.
+YMAX    =                    0 / ****
+IMAMIN  =                 0000 / Minimo valor para el hitograma (Ver nota)
+IMAMAX  =                  000 / Maximo valor para el hitograma (Ver nota)
+NBIN    =                  128 / No. de bins para el histograma
+FTOL    =                 5e-6 / Tolerancia para Amoeba (aprox 1e-6)
+DEVICE  = '/xserve'            / Dispositivo Grafico de salida
+PGASK   =                    1 / Valor para cpgask
+GRAPHMOD=                    F / Modo Grafico (Full, Compress, None)
+PGBEGX  =                   20 / No. Graficos X (para modo Compress)
+PGBEGY  =                   18 / No. Graficos Y (para modo Compress)
+END
+COMMENT =======================================================================
+COMMENT Los valores de IMAMIN e IMAMAX se utilizan como intervalo para 
+COMMENT calcular el histograma de los datos.
+COMMENT Si metemos los valores 0,0, el programa ajustara en cada momento
+COMMENT estos valores al maximo y minimo de la caja donde se calcula
+COMMENT el fondo de cielo.
+COMMENT No obstante, para imagenes originales, en las que los valores
+COMMENT estan cunatizados (BSCALE), los valores de IMAMIN, IMAMAX y 
+COMMENT NBIN deben tomarse de modo que dentro de cada intervalo caiga
+COMMENT un no. entero de datos. No debe tomarse un nbin demasiado
+COMMENT pequeno que haga que no haya posibilidad de datos dentro del bin
+COMMENT 
+COMMENT Para imagenes MAMA, IMAMIN=0, IMAMAX=3.6122639, NBIN=1024
+COMMENT 
+COMMENT 
