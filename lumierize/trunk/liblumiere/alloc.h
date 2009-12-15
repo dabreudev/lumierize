@@ -67,10 +67,6 @@ extern "C" {
 	void free_matrix_d(double **mat, int n1, int n2);
 	void free_matrix_i(int    **mat, int n1, int n2);
 	void free_vector_s(char **v, int n, int nchar);
-	void DeleteRecord_f(float *vec, int n, int irecord);
-	void DeleteRecord_i(int *vec, int n, int irecord);
-	void DeleteRecord_d(double *vec, int n, int irecord);
-	void DeleteRecord_s(char *vec, int n, int nrec, int irecord);
 
 #ifdef __cplusplus
 }
