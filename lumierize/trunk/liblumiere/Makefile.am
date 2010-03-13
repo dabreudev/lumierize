@@ -23,6 +23,8 @@ AUTOMAKE_OPTIONS = 1.8 foreign
 
 DISTCLEANFILES = *~
 
+AM_CPPFLAGS = $(GSL_CFLAGS)
+
 #SUBDIRS = tests
 
 include_HEADERS =  
@@ -32,7 +34,23 @@ noinst_HEADERS =
 lib_LTLIBRARIES = liblumiere.la
 
 liblumiere_la_SOURCES = alloc.c Amoe_Ini_d.c Amoe_Init.d Amoeba_d.c Amoeba.c \
-			cosmology.c functions.c schechter.c 
+            cosmology.c functions.c gaussint_d.c gaussj.c gaussj_d.c getline.c \
+            Gasdev.c hessian.c Histfunc.c \
+            Lagr2_d.c minmax.c MinMax_d.c MCElipN_d.c \
+            MLA_STY_L.c MLA_STY_p_M_wC.c MLA_SWML_L.c\
+            MLA_SWML_M.c MLA_g_g_d.c MLA_STY_M.c \
+            MLA_STY_s_p_f_PO.c MLA_SWML_p_L.c MLA_g_g_f_d.c \
+            MLA_STY_p_f_L.c MLA_SWML_p_M.c \
+            MLA_STY_gm_p_M.c MLA_STY_p_f_M.c \
+            MLA_STY_gmz_p_f_M_wC.c MLA_STY_gc_p_M_wC\
+            ML_g_g.c MLA_h_g_d.c MLA_STY_g_p_L.c \
+            MLA_STY_p_L.c ML_g_g_corr.c MLA_h_g_f_d.c MLA_ff_gg_d.c \
+            ML_g_g_corr_g.c MLA_hh_gg_d.c MLA_STY_gz_p_L.c MLA_STY_p_M.c \
+            ML_g_g_d.c \
+            Quartil_d.c ReadKbd.c ReadDoublecol.c \
+            schechter.c step.c StMedia_d.c StModa_d.c\
+            StErrWeightMedia_d.c StHisto2_d.c StHisto_d.c\
+            VVmax_M.c VVmax_L.c
 liblumiere_la_LDFLAGS =
-liblumiere_la_LIBADD =  -lm
+liblumiere_la_LIBADD =  -lm $(GSL_LIBS)
 liblumiere_la_DEPENDENCIES = 
