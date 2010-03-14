@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "elip.h"
 
 int ElipPar_d(double a, double b, double c, double d, double f, double e,
 	     double *x0, double *y0, double *semax, double *semin,

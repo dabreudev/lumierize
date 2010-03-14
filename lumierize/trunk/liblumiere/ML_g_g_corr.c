@@ -7,6 +7,9 @@
 #include "cosmology.h"
 #include "schechter.h"
 #include "minmax.h"
+#include "amoeba.h"
+#include "functions.h"
+#include "stmedia.h"
 
 /* #define FTOL 1e-14  */
 #define FTOL 1e-17
@@ -27,7 +30,7 @@ float Amoe_Funk(int n, float *x, float *y, float *p);
 void  Covars_g_g_corr(int n,float *x,float *errx,float mean,float sigma,float covar[2][2]);
 float *sig;
 int ndata;
-int iter;
+int iter_g_g_corr;
 int amoeba_use;
 float ML[NBOOT];
 float  m[NBOOT];
@@ -51,6 +54,9 @@ int ML_g_g_corr(int n,float *x,float *errx,float *mean,float *sigma,float *errme
   float *y;
   int i;
   float covar[2][2];
+  (void)covarmeansigma;
+  (void)errmean;
+  (void)errsigma;
 
 /*   printf(" Entra aqui\n"); */
 
@@ -77,7 +83,7 @@ int ML_g_g_corr(int n,float *x,float *errx,float *mean,float *sigma,float *errme
 /*   printf(" Lallmo ameoab\n");  */
   amoeba_use=1;
 /*   printf(" Auiqn\n"); */
-  iter=0;
+  iter_g_g_corr=0;
   Amoeba(n,x,y,2,par,sigpar,FTOL,MAXITER,Amoe_Funk);
   if(DEBUG) printf("Amoeba  Mean %14.10f Sigma %14.10f\n",par[0],par[1]); 
  
@@ -281,6 +287,8 @@ float Amoe_Funk(int n, float *x, float *y, float *p) {
 
   int i;
   double logL=0.;
+  (void)y;
+  (void)n;
 
   if(amoeba_use==1) {
   /* p[0] es h media */
@@ -294,10 +302,10 @@ float Amoe_Funk(int n, float *x, float *y, float *p) {
     }
     if(DEBUG2) printf(" logL %f p[0] %f p[1] %f\n",logL,p[0],p[1]);
 /*     printf(" logL %f p[0] %f p[1] %f\n",logL,p[0],p[1]);  */
-    ML[iter]=logL;
-    m[iter]=p[0];
-    s[iter]=p[1];
-    iter++;
+    ML[iter_g_g_corr]=logL;
+    m[iter_g_g_corr]=p[0];
+    s[iter_g_g_corr]=p[1];
+    iter_g_g_corr++;
     return(logL);
 
   }
@@ -333,6 +341,8 @@ float Amoe_Funk_d1(int n, float *x, float *y, float *p) {
 
   int i;
   double logL=0.;
+  (void)y;
+  (void)n;
   
   if(p[1]<=0) p[1]=-p[1]; 
   logL=0.;
@@ -340,10 +350,10 @@ float Amoe_Funk_d1(int n, float *x, float *y, float *p) {
     logL-=-0.5*log(sig[i]*sig[i]+p[1]*p[1]);
     logL-=-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1]);
   }
-  ML[iter]=logL;
-  m[iter]=p[0];
-  s[iter]=p[1];
-  iter++;
+  ML[iter_g_g_corr]=logL;
+  m[iter_g_g_corr]=p[0];
+  s[iter_g_g_corr]=p[1];
+  iter_g_g_corr++;
   return(logL);
 }
 
@@ -431,9 +441,9 @@ float Amoe_Funk_d3(int n, float *x, float *y, float *p) {
     logL-=log(conv);
 /*     printf("i %4d sig %10f x[i] %10f p[0] %10f p[1] %10f anal %10f int %10f diff %10g x1 %f x2 %f\n",i,sig[i],x[i],p[0],p[1],-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[1]*p[1])-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1]),log(conv),-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[1]*p[1])-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1])-log(conv),xmin,xmax);   */
   }
-  printf(" iter %d logL1 %f logL2 %f p0 %f p1 %f\n",iter,logL,logLb,p[0],p[1]);
+  printf(" iter %d logL1 %f logL2 %f p0 %f p1 %f\n",iter_g_g_corr,logL,logLb,p[0],p[1]);
   
-  iter++;
+  iter_g_g_corr++;
   return(logL);
 }
 

@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "elip.h"
 
 
 int  MCElip_d(int n, double *x, double *y, 

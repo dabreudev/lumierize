@@ -8,6 +8,8 @@
 #include "schechter.h"
 #include "alloc.h"
 #include "mlswml.h"
+#include "amoeba.h"
+
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
