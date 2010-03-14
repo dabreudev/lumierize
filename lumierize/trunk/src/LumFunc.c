@@ -20,6 +20,8 @@
 #include "step.h"
 #include "random.h"
 #include "vvmax.h"
+#include "filenlin.h"
+#include "readcol.h"
 
 #define ZMIN 0.00001
 #define NSTEP_LF 200
@@ -735,7 +737,7 @@ void STY_gmz_f_M_wC(void)
 {
   static struct lf_param sty;
   struct sample_data_gmz_wC sample;
-  struct fermifsel_M fsel;
+  struct fermifsel_M fsel = {0,0};
   double zlow;
 
   double color_mean=0.;
