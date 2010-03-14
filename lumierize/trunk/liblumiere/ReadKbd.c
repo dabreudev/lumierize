@@ -1,3 +1,4 @@
+#include "stdlib.h"
 #include "readkbd.h"
 
 #define  MAXSTR 1000

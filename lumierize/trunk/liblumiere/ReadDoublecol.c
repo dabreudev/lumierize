@@ -15,16 +15,17 @@
 */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "readcol.h"
 int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin)
 {
   
-  int i,j;
+  size_t i,j;
   int a;
   char c;
   char  word[200];
   char nul[1000];
-  int nl;
+  size_t nl;
   FILE *fp;
   nl=0;
   
@@ -40,8 +41,8 @@ int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin)
   fclose(fp);
   fp=fopen(file,"r");
   for (i=0;i<nl;i++) {
-/*     //    printf("ReadNumcol reading %d row",i); */
-    fgets(nul,1000,fp);
+    /*     //    printf("ReadNumcol reading %d row",i); */
+    char * temp = fgets(nul,1000,fp);
     c=nul[0];
     if(c=='#') {
       lvec[i]=0;
@@ -50,7 +51,7 @@ int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin)
     j=0;
     while(j<strlen(nul)) {
       if(nul[j]=='\t') {
-	nul[j]=' ';
+        nul[j]=' ';
       }
       j++;
     }

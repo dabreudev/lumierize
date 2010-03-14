@@ -3,9 +3,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_machine.h>
+#include <cpgplot.h>
 #include "alloc.h"
 #include "mlhist.h"
 #include "sthisto.h"
+#include "amoeba.h"
+
 
 /*#define FTOL  1e-12  <-- Valor anterior*/
 /*#define FTOL  1e-15  <-- Valos 2 */

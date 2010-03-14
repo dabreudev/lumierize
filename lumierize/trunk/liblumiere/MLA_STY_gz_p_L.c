@@ -8,6 +8,7 @@
 #include "schechter.h"
 #include "mlsty.h"
 #include "random.h"
+#include "amoeba.h"
 
 #define FTOL  1e-11
 #define FTOL2 1e-6

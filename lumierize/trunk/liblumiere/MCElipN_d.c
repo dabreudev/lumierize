@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #include "alloc.h"
 #include "elip.h"
+#include "gaussj.h"
 
 #define DEBUG  0
 #define DEBUG2 0

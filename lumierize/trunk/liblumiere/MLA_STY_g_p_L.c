@@ -7,6 +7,7 @@
 #include "cosmology.h"
 #include "schechter.h"
 #include "mlsty.h"
+#include "amoeba.h"
 
 #define FTOL  1e-13
 #define FTOL2 1e-6

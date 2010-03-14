@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "step.h"
+#include "alloc.h"
 
 #define NSTEP_LF 200
 #define NSTEP_Z  500

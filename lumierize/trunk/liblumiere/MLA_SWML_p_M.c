@@ -9,6 +9,16 @@
 #include "schechter.h"
 #include "mlswml.h"
 #include "sthisto.h"
+#include "step.h"
+#include "amoeba.h"
+#include "random.h"
+#include "minmax.h"
+#include "quartil.h"
+#include "gaussj.h"
+#include "functions.h"
+#include "elip.h"
+
+
 
 #define FTOL  1e-12
 //#define FTOL2 1e-6
@@ -50,7 +60,7 @@ double magl;
 int ndata;
 int iter_m;
 int iter_c;
-int nconfl;
+int nconfl_SWML_p_M;
 double conflim;
 double *pp;
 double MLmax;
@@ -233,7 +243,7 @@ double Amoe_Funk_SWML_p_M_main(int n, double *x, double *y, double *p) {
   double Mabs;
   double intsch;
   double Mlow;
-  double funl;
+  double funl = 0;
   double Ntot;
   struct Steplf_M lfamo;
 
@@ -338,6 +348,8 @@ void   EmpiricalCovars_SWML_p_M(int n,double *magn,double *z,double *par, double
   double first, median, third, *distmax;
 
   int nconfl,nconflini;
+  (void)cosmo;
+  (void)mlim;
 
   if(DEBUG3) printf(" n vale %d \n",n);
   nconfl=NCONFL*lf->nbin;

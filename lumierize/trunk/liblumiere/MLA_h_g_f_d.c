@@ -3,10 +3,19 @@
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_machine.h>
+#include <cpgplot.h>
 #include "alloc.h"
 #include "mlhist.h"
 #include "sthisto.h"
 #include "functions.h"
+#include "amoeba.h"
+#include "random.h"
+#include "gaussint.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "quartil.h"
+#include "stmedia.h"
+#include "elip.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6
@@ -368,6 +377,9 @@ void   EmpiricalCovars_h_g_f_d(int n,double *x,double *errx,int k,double *xk,dou
   
   int nconflini;
   double first, median, third, *distmax;
+  (void)xk;
+  (void)errx;
+
 
 /*   double a,b,c,d,f,e;  */
 /*   double xcelip,ycelip,elipa,elipb,elipt;  */

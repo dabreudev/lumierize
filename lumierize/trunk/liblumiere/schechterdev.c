@@ -20,7 +20,7 @@ double Schechterdev_M(struct Schlf_M lf, double Mlow,double Mup) {
   double ymin,ymax; /* ymin=ln(xmin) */
   double e;
   double xe;
-  double mag;
+  double magni;
   static long idum =-1;
   struct timeval tv;
   if(idum==-1) 
@@ -41,7 +41,7 @@ double Schechterdev_M(struct Schlf_M lf, double Mlow,double Mup) {
       } while (xe < xmin || xe > xmax);
       e=pow(xe,lf.alfa)/(pow(xmin,lf.alfa));
     } while (ran2(&idum) > e);
-    mag=lf.Mstar-2.5*log10(xe); /* Esta es la buena */
+    magni=lf.Mstar-2.5*log10(xe); /* Esta es la buena */
     return mag;
   }
   else return(0);
