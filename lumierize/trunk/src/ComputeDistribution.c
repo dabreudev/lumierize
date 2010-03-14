@@ -1,4 +1,18 @@
-#include "modulos.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <cpgplot.h>
+#include <math.h>
+#include "alloc.h"
+#include "readkbd.h"
+#include "mlhist.h"
+#include "functions.h"
+#include "minmax.h"
+#include "sthisto.h"
+#include "readcol.h"
+#include "filenlin.h"
+#include "readcol.h"
+#include "cpgdoble.h"
+
          
    
 struct gaussdist { 
@@ -33,7 +47,7 @@ struct histodist2D {
 };
 
 struct histodist2DFF {
-/*Creado para tener un histograma de dos dimensiones en el caso del cálculo de la fracción de fusiones*/
+/*Creado para tener un histograma de dos dimensiones en el caso del cï¿½lculo de la fracciï¿½n de fusiones*/
   int nbinx;
   double *p;
   double **covp;
@@ -62,28 +76,28 @@ struct sample2D {
 
                                  
  
-void ReadSample(); 
-void ReadSample2D();     
-void Compute_g_g();
-void Compute_h_g();
-void Compute_hh_gg();
-void Compute_ff_gg();
-void Generate_g_g();
-void Generate_h_g();
+void ReadSample(void);
+void ReadSample2D(void);
+void Compute_g_g(void);
+void Compute_h_g(void);
+void Compute_hh_gg(void);
+void Compute_ff_gg(void);
+void Generate_g_g(void);
+void Generate_h_g(void);
 void PlotHistogram(int nbin,float *xmin,float *xmax);
  
 struct sample Data;
 struct sample2D Data2D;
  
-int main() { 
+int main(void) {
 /* Modificado para tener en cuenta las dos variables de entrada. Terminado.*/
   
   char opt='E';
   Data.ndata = 0;
   Data2D.ndata = 0;
  
-  /* Se añade la opción D para leer los datos 2D y la opción K para obtener el histograma de 2D*/
-  /* Se añade la opción F para determinar directamente los valores de la fracción de fusiones */
+  /* Se aï¿½ade la opciï¿½n D para leer los datos 2D y la opciï¿½n K para obtener el histograma de 2D*/
+  /* Se aï¿½ade la opciï¿½n F para determinar directamente los valores de la fracciï¿½n de fusiones */
   do{
     printf("\n R Read sample\n"); 
     printf(" D Read sample for 2D histograms\n"); 
@@ -129,7 +143,7 @@ int main() {
 }
 
 
-void Compute_g_g() {
+void Compute_g_g(void) {
   
   int i;
   float x;
@@ -178,7 +192,7 @@ void Compute_g_g() {
   
 }
 
-void Compute_h_g() 
+void Compute_h_g(void)
 {
   
   int i;
@@ -252,13 +266,11 @@ void Compute_h_g()
 
 }
 
-void Compute_hh_gg() 
+void Compute_hh_gg(void)
 {
 /* Desarrollado para hacer el estudio en dos variables.*/
 
-  int i,j, toplot=0;  
-  float xmin=0,xmax=0;
-  float ymin=0,ymax=0; 
+  int i,j;
 
   static struct histodist2D HD;
   int mlstatus;
@@ -280,7 +292,7 @@ void Compute_hh_gg()
   printf(" Input number of bins in X for the distribution: ");
   HD.nbinx=readi(HD.nbinx);
   
-  /*Añadido para obtener los valores de y*/
+  /*Aï¿½adido para obtener los valores de y*/
   printf(" Input minimum y value for the distribution (no allowed values below this number for the original distribution): ");
   HD.ymin=(double)readf(HD.ymin);
   printf(" Input maximum y value for the distribution (no allowed values above this number for the original distribution): ");
@@ -304,7 +316,7 @@ void Compute_hh_gg()
        
   printf(" Computing (this may take a while depending on sample size)...\n");
   mlstatus=MLA_hh_gg_d(Data2D.ndata,Data2D.xdata,Data2D.errxdata,Data2D.ydata,Data2D.errydata,HD.nbinx,HD.nbiny,HD.xbin,HD.ybin,HD.p,HD.covp);
-  /* Añadido ydata, errydata, xbin e ybin*/ 
+  /* Aï¿½adido ydata, errydata, xbin e ybin*/ 
     
   if(mlstatus==0)     printf(" Computation exited normaly\n");           
   if(mlstatus==2) {                 
@@ -314,7 +326,7 @@ void Compute_hh_gg()
  
   printf("\n\n Given that the initial distribution was a step distribution\n with probability Pk in each interval, the best estimation is:\n");
  
-  /* Aqui van los resultados. Sale en forma de matriz kl... ¿estará todo ok? :-O */  
+  /* Aqui van los resultados. Sale en forma de matriz kl... ï¿½estarï¿½ todo ok? :-O */  
   
   for(j=0;j<HD.nbiny;j++)     
   {  
@@ -339,13 +351,11 @@ void Compute_hh_gg()
 
 }
 
-void Compute_ff_gg() 
+void Compute_ff_gg(void)
 {
-/* Desarrollado para hacer el estudio en dos variables y determinar directamente la fracción de fusiones*/
+/* Desarrollado para hacer el estudio en dos variables y determinar directamente la fracciï¿½n de fusiones*/
 
-  int i,j, toplot=0;  
-  float xmin=0,xmax=0;
-  float ymin=0,ymax=0; 
+  int i;
 
   static struct histodist2DFF HD;
   int mlstatus;
@@ -370,7 +380,7 @@ void Compute_ff_gg()
   HD.ymin=(double)readf(HD.ymin);
   printf(" Input maximum y value for the distribution (no allowed values above this number for the original distribution): ");
   HD.ymax=(double)readf(HD.ymax);
-  No me interesa, ya que solo es importante el límite para fusión y el tamaño del intervalo en asimetría*/
+  No me interesa, ya que solo es importante el lï¿½mite para fusiï¿½n y el tamaï¿½o del intervalo en asimetrï¿½a*/
   
   printf(" Input the limit in A that define a mayor merger: ");
   HD.yff=(double)readf(HD.yff);
@@ -388,7 +398,7 @@ void Compute_ff_gg()
        
   printf(" Computing (this may take a while depending on sample size)...\n");
   mlstatus=MLA_ff_gg_d(Data2D.ndata,Data2D.xdata,Data2D.errxdata,Data2D.ydata,Data2D.errydata,HD.nbinx,HD.xbin,HD.yff,HD.yinter,HD.p,HD.covp);
-  /* Añadido ydata, errydata, yff y yinter*/
+  /* Aï¿½adido ydata, errydata, yff y yinter*/
  
   if(mlstatus==0)     printf(" Computation exited normaly\n");   
   if(mlstatus==2) { 
@@ -403,12 +413,12 @@ void Compute_ff_gg()
  for (i=0;i<HD.nbinx;i++)      
  {     
       printf("element %3d  Pk  %-17.15f +/- %-17.15f (N=%6d) in interval  x = [%g-%g] \n",i,(HD).p[i],sqrt((HD).covp[i][i]),(int)(exp((HD).p[i])*(float)Data2D.ndata*(HD.xbin[i+1]-HD.xbin[i])),HD.xbin[i],HD.xbin[i+1]);
-      printf("element %3d  FFk %-17.15f +/- %-17.15f\n", i,(HD).p[HD.nbinx+i],sqrt((HD).covp[HD.nbinx+i][HD.nbinx+i]),HD.xbin[i],HD.xbin[i+1]);       
+      printf("element %3d  FFk %-17.15f +/- %-17.15f\n", i,(HD).p[HD.nbinx+i],sqrt((HD).covp[HD.nbinx+i][HD.nbinx+i]));
  }
 
     
   
-  /* No me parece útil
+  /* No me parece ï¿½til
   printf("\n The same distribution as above but in histogram format, instead of probabilities is:\n");
   for(j=0;j<HD.nbiny;j++) 
   {
@@ -425,7 +435,7 @@ void Compute_ff_gg()
 
 } 
 
-void ReadSample()
+void ReadSample(void)
 {
   static char datafile[100]="";
   static int colx=1,colerrx=2;
@@ -472,7 +482,7 @@ void ReadSample()
   free(logerrx);
 }
 
-void ReadSample2D()
+void ReadSample2D(void)
 {
 
   static char datafile[100]="";
@@ -545,7 +555,7 @@ void ReadSample2D()
 void PlotHistogram(int nbin,float *xmin,float *xmax) 
 {
   
-  int i;
+  size_t i;
 
   int *histo;
   float *fhisto;
@@ -605,7 +615,8 @@ void PlotHistogram(int nbin,float *xmin,float *xmax)
   cpgswin(xhmin,xhmax,0.,yhmax);
   cpgbox("BCTNS",0,0,"BCTNS",0,0);
   if((x   =malloc(Data.ndata*sizeof(float)))==NULL) { printf("I cannot dimension x    of %d bytes",Data.ndata*sizeof(float));exit(1);} 
-  for(i=0;i<Data.ndata;i++) x[i]=Data.xdata[i];
+  for(i=0;i<Data.ndata;i++)
+    x[i]=Data.xdata[i];
   cpgsci(pgcolor);
   cpgsls(pgstyle);
   cpghist(Data.ndata,x,xhmin,xhmax,nbin,1);
