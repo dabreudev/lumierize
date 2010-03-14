@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "readcol.h"
 
 void LeeWord(char a[],int nw,char word[])
 {

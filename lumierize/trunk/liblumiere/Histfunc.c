@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "histdist.h"
 #define DEBUG 0
 
 
