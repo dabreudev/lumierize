@@ -13,6 +13,10 @@
 #include "gaussj.h"
 #include "sthisto.h"
 #include "amoeba.h"
+#include "step.h"
+#include "minmax.h"
+#include "elip.h"
+
 
 
 #define FTOL  1e-12
@@ -235,6 +239,7 @@ double Amoe_Funk_SWML_M_main(int n, double *x, double *y, double *p) {
   double funl=0;
 
   int jbin;
+  (void)n;
 
 /*   for(j=0;j<nbin;j++) printf(" EN %f \n ",p[j]); */
 
@@ -330,6 +335,9 @@ void   EmpiricalCovars_SWML_M(int n,double *magn,double *z,double *par, double *
   double first, median, third, *distmax;
 
   int nconfl,nconflini;
+  (void)cosmo;
+  (void)mlim;
+
 
   if(DEBUG3) printf(" n vale %d \n",n);
   nconfl=NCONFL*lf->nbin;

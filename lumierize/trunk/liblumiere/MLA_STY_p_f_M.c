@@ -15,6 +15,7 @@
 #include "quartil.h"
 #include "step.h"
 #include "gaussj.h"
+#include "elip.h"
 
 #define FTOL  1e-9
 #define FTOL2 1e-6

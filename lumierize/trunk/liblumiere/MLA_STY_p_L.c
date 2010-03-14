@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_machine.h>
-#include <gsl/gsl_sf_gamma.h>>
+#include <gsl/gsl_sf_gamma.h>
 #include "alloc.h"
 #include "cosmology.h"
 #include "schechter.h"
@@ -17,6 +17,7 @@
 #include "elip.h"
 #include "quartil.h"
 #include "stmedia.h"
+#include "vvmax.h"
 
 #define ZMIN 0.00001
 #define FTOL  1e-13
@@ -79,6 +80,8 @@ int  MLA_STY_p_L   (int n,double *flux,double *z,double flim, double strrad, dou
   double *lumi;
   double chisq;
   struct Schlf_L  lffit;
+  (void)mlinfo;
+
 
   lumi=vector_d(n);
 
@@ -237,6 +240,7 @@ double Amoe_Funk_STY_p_L_main(int n, double *x, double *y, double *p)
 /*   double Lup; */
   double intsup;
   double Ntot;
+  (void)n;
 
 
   lfamo.alfa=p[0];
@@ -306,6 +310,8 @@ void   EmpiricalCovars_STY_p_L(int n,double *flux,double *z,double *par, double 
   double **bb;
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)cosmo;
+  (void)flim;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

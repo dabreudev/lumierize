@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include "mrqmin.h"
+#include "alloc.h"
 #define DEBUG 0
 #define MAXALAMDA 1e6
 
