@@ -1,4 +1,7 @@
-#include "modulos.h"
+#include <stdlib.h>
+#include "mlhist.h"
+#include "alloc.h"
+
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -114,7 +117,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
            else
 	        par[kx + jx]= (double)histo[jx][1] / (xk[jx+1]-xk[jx]) / yinter / par[jx];
   }
-  /* Valores muy cercanos a cero producen errores. Se adopta un valor inicial mínimo del 0.1% */
+  /* Valores muy cercanos a cero producen errores. Se adopta un valor inicial mï¿½nimo del 0.1% */
   for(jx=0;jx<kx;jx++)
   {
       if (par[kx + jx] < 0.001)
@@ -131,7 +134,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
   }
 
   /* Paso a bidimensional, teniendo en cuenta que las cosas que dependen de las probabilidadades son un vector, no una matriz como el histograma */   
-  /* Ejemplo de las sigmas del método bidimensional puro  
+  /* Ejemplo de las sigmas del mï¿½todo bidimensional puro  
   for(jx=0;jx!=kx;++jx)
   {
     for(jy=0;jy!=ky;++jy)
@@ -142,7 +145,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
   }
   */
   
-  /* Definición de las sigmas iniciales. Esto le da una idea de por donde empezar al método */
+  /* Definiciï¿½n de las sigmas iniciales. Esto le da una idea de por donde empezar al mï¿½todo */
   for(jx=0;jx!=kx;++jx)
   {
        if((histo[jx][0]+histo[jx][1])==0) 
@@ -181,7 +184,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
   }   while(iter_amo>= MAXITER && tries <=MAXTRIES );
 
 
-  /* Aunque la hemos impuesto dentro de Anoeb_funk, volvemos a normalizar. La normalización se impone sobre las p originales, no sobre p' */
+  /* Aunque la hemos impuesto dentro de Anoeb_funk, volvemos a normalizar. La normalizaciï¿½n se impone sobre las p originales, no sobre p' */
   
   norm=0;    
   for(jx=0;jx!=kx;++jx)
@@ -195,7 +198,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
 
   _MLmax_MLA_ff_gg_d=Amoe_Funk_ff_gg_d_main(n,x,y,par);
   
-  /* Guardo la solución "par" en "Pk"*/
+  /* Guardo la soluciï¿½n "par" en "Pk"*/
   for(j=0;j<_kpar_MLA_ff_gg_d;j++)
   {
     Pk[j] = par[j];	
@@ -217,7 +220,7 @@ int  MLA_ff_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
     }
   }
 
-  /* Paso del cálculo empírico 
+  /* Paso del cï¿½lculo empï¿½rico 
   if(TRYEMPIRICAL) 
   {
     _conflim=exp(-.5/10.);
@@ -273,10 +276,10 @@ double Amoe_Funk_ff_gg_d_main(int n, double *x, double *y, double *p)
     priori=1;
     for(jx=0;jx<_kx_MLA_ff_gg_d;jx++) 
     {
-        /* Método 1 para la función ML. Redefino el histograma y tomo como +/- inf los límites en A */
+        /* Mï¿½todo 1 para la funciï¿½n ML. Redefino el histograma y tomo como +/- inf los lï¿½mites en A */
 	tmp1 =  -exp(p[jx])/4. * (erf((x[i]-_xk_MLA_ff_gg_d[jx+1]) / _errx_MLA_ff_gg_d[i]/sqrt(2.)) - erf((x[i]-_xk_MLA_ff_gg_d[jx]) / _errx_MLA_ff_gg_d[i]/sqrt(2.))) * (1 + (2*exp(p[_kx_MLA_ff_gg_d+jx])-1)*erf((y[i]-_yff_MLA_ff_gg_d)/_erry_MLA_ff_gg_d[i]/sqrt(2.))); 
 	
-	/* Método 2. Solo redefino el histograma */
+	/* Mï¿½todo 2. Solo redefino el histograma */
 	/* tmp1 = exp(p[jx])/4. * (erf((x[i]-_xk_MLA_ff_gg_d[jx+1]) / _errx_MLA_ff_gg_d[i] / sqrt(2.)) - erf((x[i]-_xk_MLA_ff_gg_d[jx]) / _errx_MLA_ff_gg_d[i] / sqrt(2.))) * (exp(p[_kx_MLA_ff_gg_d+jx]) * (erf((y[i]-_yff_MLA_ff_gg_d-_yinter_MLA_ff_gg_d) / _erry_MLA_ff_gg_d[i] / sqrt(2.)) - erf((y[i]-_yff_MLA_ff_gg_d) / _erry_MLA_ff_gg_d[i] / sqrt(2.))) + (1 - exp(p[_kx_MLA_ff_gg_d+jx])) * (erf((y[i]-_yff_MLA_ff_gg_d) / _erry_MLA_ff_gg_d[i] / sqrt(2.)) - erf((y[i]-_yff_MLA_ff_gg_d+_yinter_MLA_ff_gg_d) / _erry_MLA_ff_gg_d[i] / sqrt(2.)))); */
         ltmp+=tmp1;  /* Pasando de cambiar los DEBUG, al menos de momento. */
     }
@@ -362,8 +365,8 @@ void TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
   hessian=matrix_d(_kpar_MLA_ff_gg_d+1,_kpar_MLA_ff_gg_d+1);
   b=matrix_d(_kpar_MLA_ff_gg_d+1,1);
 
-  /* Definimos el hessiano de la función minimizada y tenemos en cuenta la normalización */
-  /* Definición de los elementos del Hessiano correspondientes a las pk - pk */ 
+  /* Definimos el hessiano de la funciï¿½n minimizada y tenemos en cuenta la normalizaciï¿½n */
+  /* Definiciï¿½n de los elementos del Hessiano correspondientes a las pk - pk */ 
   for(lx=0;lx<kx;lx++) 
   {
      for(mx=0;mx<kx;mx++)
@@ -379,7 +382,7 @@ void TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
 	   tmp3 = exp(Pk[lx])/4. * (erf((x[i] - xk[lx+1])/ errx[i]/sqrt(2.)) - erf((x[i] - xk[lx]) / errx[i]/sqrt(2.))) * (1 + (2*exp(Pk[kx+lx])-1) * erf((y[i]- yff) / erry[i] / sqrt(2.)));
 	   tmp4 = exp(Pk[mx])/4. * (erf((x[i] - xk[mx+1])/ errx[i]/sqrt(2.)) - erf((x[i] - xk[mx]) / errx[i]/sqrt(2.))) * (1 + (2*exp(Pk[kx+mx])-1) * erf((y[i]- yff) / erry[i] / sqrt(2.)));
 	   if (lx == mx)
-	        /* ¡ Tengo un término libre que depende de lamnda en esté caso ! Lo escojo de forma que anule el primer término (prueba)
+	        /* ï¿½ Tengo un tï¿½rmino libre que depende de lamnda en estï¿½ caso ! Lo escojo de forma que anule el primer tï¿½rmino (prueba)
 	        tmp1 += (-tmp3*tmp2 - tmp3*tmp4)/(tmp2*tmp2);*/
 		tmp1 += (-tmp3*tmp4)/(tmp2*tmp2);
 	   else
@@ -389,7 +392,7 @@ void TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
      }
   }
    
-   /* Definición de los elementos del Hessiano correspondientes a las pk - ffk*/
+   /* Definiciï¿½n de los elementos del Hessiano correspondientes a las pk - ffk*/
   for(lx=0;lx<kx;lx++) 
   {
      for(mx=0;mx<kx;mx++)
@@ -414,7 +417,7 @@ void TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
       }
    }
    
-  /* Definición de los elementos del Hessiano correspondientes a las ffk - ffk*/
+  /* Definiciï¿½n de los elementos del Hessiano correspondientes a las ffk - ffk*/
   for(lx=0;lx<kx;lx++) 
   {
      for(mx=0;mx<kx;mx++)
@@ -439,7 +442,7 @@ void TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
       }
    }
   
-  /* Definición de los elementos del Hessiano correspondientes a las pk - lamda; ffk - lambda y lamda - lambda*/ 
+  /* Definiciï¿½n de los elementos del Hessiano correspondientes a las pk - lamda; ffk - lambda y lamda - lambda*/ 
    for(lx=0;lx<kx;lx++) 
   {
       hessian[_kpar_MLA_ff_gg_d][lx]=(xk[lx+1] - xk[lx])*exp(Pk[lx]);

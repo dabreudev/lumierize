@@ -1,7 +1,23 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include <cpgplot.h>
+#include "alloc.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "mlsty.h"
+#include "vvmax.h"
+#include "amoeba.h"
+#include "functions.h"
+#include "random.h"
+#include "minmax.h"
+#include "quartil.h"
 
 /* Esta subrutina no esta completa Ni empeza!! */
 
-#include "modulos.h"
+#include "mlsty.h"
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -54,7 +70,7 @@ int nbin;
 double zlow_g,zup_g,strrad_g;
 
 
-int  MLA_SWML_g_p_L(int n,double *flux,double *errflux, double *z,double *errz,double flim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Steplf_L *lf) {
+int  MLA_SWML_gf_p_L(int n,double *flux,double *errflux, double *z,double *errz,double flim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Steplf_L *lf) {
   double *y;
   double *par;
   double *sigpar;
@@ -210,7 +226,7 @@ int  MLA_SWML_g_p_L(int n,double *flux,double *errflux, double *z,double *errz,d
 /*     EmpiricalCovars_SWML_g_p_L(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 
@@ -344,12 +360,15 @@ void   EmpiricalCovars_SWML_g_p_L(int n,double *flux,double *errflux, double *z,
 
   double **bb;
 
-  
-
 
   double first, median, third, *distmax;
 
   int nconfl,nconflini;
+  (void)cosmo;
+  (void)errz;
+  (void)flim;
+  (void)errflux;
+
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL*lf->nbin;

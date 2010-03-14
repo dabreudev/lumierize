@@ -1,4 +1,14 @@
- #include "modulos.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <cpgplot.h>
+#include "alloc.h"
+#include "mlswml.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "quartil.h"
+#include "step.h"
+
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -149,7 +159,7 @@ int  MLA_SWML_L(int n,double *flux,double *z,double flim, double strrad, double 
 /*     EmpiricalCovars_SWML_L(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 
@@ -176,7 +186,7 @@ double Amoe_Funk_SWML_L_main(int n, double *x, double *y, double *p) {
   double intstep;
   double Llow;
   double norm;
-  double funl;
+  double funl = 0;
 
 /*   for(j=0;j<nbin;j++) printf(" EN %f \n ",p[j]); */
 
@@ -212,16 +222,16 @@ double Amoe_Funk_SWML_L_main(int n, double *x, double *y, double *p) {
     if(log(Lumabs)>lumbin[nbin] || log(Lumabs)<lumbin[0]);
     else 
     {
-      for(j=0;j<nbin;j++) {
-	if(DEBUG3) printf(" Comp j %d  %f  %f  %f \n",j,lumbin[j],log(Lumabs),lumbin[j+1]);
-	if(lumbin[j]<log(Lumabs) && log(Lumabs)<lumbin[j+1]) {
-	  funl=exp(p[j]);
-	  if(DEBUG3) printf(" Es sta %f %g    %f %f %f \n",p[j],funl,lumbin[j],log(Lumabs),lumbin[j+1]);
-	  break;
-	}
-      }
-      logL-= log(funl/intstep); 
-/*       logL-= log(funl); */
+    	for(j=0;j<nbin;j++) {
+    		if(DEBUG3) printf(" Comp j %d  %f  %f  %f \n",j,lumbin[j],log(Lumabs),lumbin[j+1]);
+    		if(lumbin[j]<log(Lumabs) && log(Lumabs)<lumbin[j+1]) {
+    			funl=exp(p[j]);
+    			if(DEBUG3) printf(" Es sta %f %g    %f %f %f \n",p[j],funl,lumbin[j],log(Lumabs),lumbin[j+1]);
+    			break;
+    		}
+    	}
+    	logL-= log(funl/intstep);
+    	/*       logL-= log(funl); */
     }
     if(DEBUG3) printf(" ndata %d  logL %g x %f  y %f Lumabs %g  Llow %g funl %g int %g\n",i,logL,log10(x[i]),y[i],Lumabs,Llow,funl,intstep);
 /*     printf(" LF: lfamo.Mstar %g lfamo.phistar %f lf.alfa  %f\n",lfamo.Mstar,lfamo.phistar,lfamo.alfa); */

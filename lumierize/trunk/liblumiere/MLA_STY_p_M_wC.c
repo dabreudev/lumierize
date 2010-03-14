@@ -1,5 +1,3 @@
-#include "modulos.h"
-#include "gsl_hessian.h"
 #include <gsl/gsl_machine.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_deriv.h>
@@ -7,6 +5,15 @@
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_monte_vegas.h>
+#include "gsl_hessian.h"
+#include "mlsty.h"
+#include "alloc.h"
+#include "step.h"
+#include "functions.h"
+#include "amoeba.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "vvmax.h"
 
 #define ZMIN 0.00001
 #define FTOL  1e-12
@@ -20,7 +27,7 @@
 #define DEBUGPLOT 0
 #define MAXITERVEGAS 10
 
-/* Estructura para contener los parámetros */
+/* Estructura para contener los parï¿½metros */
 struct Amoe_Funk_gsl_param_STY_p_M_wC
 {
   int nData;
@@ -41,7 +48,7 @@ double vegas_integrate_STY_p_M_wC(gsl_monte_function * f,
 struct cosmo_param *_cosmo_STY_p_M_wC;
 double _mlim_STY_p_M_wC;
 
-int _ndata_STY_p_M_wC;
+size_t _ndata_STY_p_M_wC;
 int _iter_m_STY_p_M_wC;
 int _iter_c_STY_p_M_wC;
 double *_pp_STY_p_M_wC;
@@ -103,7 +110,7 @@ int MLA_STY_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, d
 
   iter_amo=MAXITER+1;
 
-  /* Los límites en z se reajustan */
+  /* Los lï¿½mites en z se reajustan */
   _zlow_STY_p_M_wC = (_zlow_STY_p_M_wC < ZMIN ? ZMIN : _zlow_STY_p_M_wC);
 
   if(DEBUG3) printf(" iter_amo %d\n",iter_amo);
@@ -192,7 +199,7 @@ void prepareGlobalVars_STY_p_M_wC(double *z, double *magn)
 
 double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
 {
-  int i;
+  size_t i;
   double logL=0.;
   struct Schlf_M lfamo;
   double Mabs;
@@ -213,6 +220,8 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
   
   gsl_monte_function G_den = 
     {&vegas_funk_denominator_STY_p_M_wC, dim_den, 0};
+  (void)x;
+  (void)n;
   
 
   lfamo.alfa=p[0];
@@ -243,15 +252,15 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
 
     /* debido a un underflow, tuvimos que poner este if
        El 0.25 es debido a que gsl_sfi_gamma_inc llama a gsl_sf_gamma_inc_CF
-       para x > 0.25 y nos devolvía un underflow cuando se cumplía la segunda
-       condición -> los fuentes de gsl están en:
+       para x > 0.25 y nos devolvï¿½a un underflow cuando se cumplï¿½a la segunda
+       condiciï¿½n -> los fuentes de gsl estï¿½n en:
        /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/exp.c
        /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/gamma_inc.c
     */
     if(Llow/Lstar > 0.25 && (lfamo.alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
     {
       log_gamma_int=GSL_LOG_DBL_MIN;
-      if(DEBUG2) printf("log_gamma_int podía petar así que GSL_LOG_DBL_MIN\n");
+      if(DEBUG2) printf("log_gamma_int podï¿½a petar asï¿½ que GSL_LOG_DBL_MIN\n");
     }
     else
     {
@@ -265,7 +274,7 @@ double Amoe_Funk_STY_p_M_wC_main(int n, double *x, double *y, double *p)
     xu_den[0]=_color_mean_STY_p_M_wC+6*_color_stddev_STY_p_M_wC;
     probabajo = vegas_integrate_STY_p_M_wC
         (&G_den, xl_den, xu_den, dim_den, calls_den, &errprobabajo);
-    /* log(lfamo.phistar) + log_gamma_int -> integral de la función de Schecter
+    /* log(lfamo.phistar) + log_gamma_int -> integral de la funciï¿½n de Schecter
     entre Llow e inf */
     if (DEBUG2) printf("logColor: %g  colori: %g\n",logColor,colori);
     if (DEBUG2) printf("logSch %g log(phistar) %g loggamm %g\n",log(Schechter_M(Mabs,lfamo)),log(lfamo.phistar),log_gamma_int);
@@ -311,6 +320,8 @@ double vegas_funk_denominator_STY_p_M_wC (double *x, size_t dim, void *params)
   double logfacColor;
   double Mlow, Llow, Lstar;
   double log_gamma_int;
+  (void)params;
+  (void)dim;
 
   if(DEBUG3) printf(" inside vegas_funk_denominator.\n");
 
@@ -328,7 +339,7 @@ double vegas_funk_denominator_STY_p_M_wC (double *x, size_t dim, void *params)
   if(Llow/Lstar > 0.25 && (_lf_STY_p_M_wC->alfa*log(Llow/Lstar) - Llow/Lstar) <= GSL_LOG_DBL_MIN)
   {
     log_gamma_int=GSL_LOG_DBL_MIN;
-    if(DEBUG2) printf("log_gamma_int podía petar así que GSL_LOG_DBL_MIN\n");
+    if(DEBUG2) printf("log_gamma_int podï¿½a petar asï¿½ que GSL_LOG_DBL_MIN\n");
   }
   else
   {
@@ -347,7 +358,7 @@ double vegas_funk_denominator_STY_p_M_wC (double *x, size_t dim, void *params)
 
 
 
-/* Errores utilizando derivadas numéricas con GSL */
+/* Errores utilizando derivadas numï¿½ricas con GSL */
 void NumericalHessianCovars_STY_p_M_wC(int n,double *magn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
 {
   gsl_matrix *gsl_hessian;
@@ -357,6 +368,13 @@ void NumericalHessianCovars_STY_p_M_wC(int n,double *magn,double *z,double *par,
   size_t i,j;
 
   double hessianStep;
+  struct Amoe_Funk_gsl_param_STY_p_M_wC deriv_param;
+  gsl_multimin_function LogLFunction;
+
+  (void)n;
+  (void)sigpar;
+  (void)mlim;
+  (void)cosmo;
   hessianStep = GSL_ROOT4_DBL_EPSILON;
   /* derivStep = 0.01; */
 
@@ -369,13 +387,11 @@ void NumericalHessianCovars_STY_p_M_wC(int n,double *magn,double *z,double *par,
   covar=matrix_d(3 ,3 );
   bb=matrix_d(3,1);
 
-  struct Amoe_Funk_gsl_param_STY_p_M_wC deriv_param;
   
   deriv_param.nData = _ndata_STY_p_M_wC;
   deriv_param.magn = magn;
   deriv_param.z = z;
 
-  gsl_multimin_function LogLFunction;
   LogLFunction.f = &Amoe_Funk_STY_p_M_wC_main_gsl_multimin;
   LogLFunction.params = &deriv_param;
   LogLFunction.n = 3;
@@ -429,6 +445,7 @@ double vegas_integrate_STY_p_M_wC(gsl_monte_function * f,
   int itervegas = 0;
   double result, abserr;
   gsl_monte_vegas_state *state = gsl_monte_vegas_alloc (dim);
+  (void)error;
   /* Warm-up */
   gsl_monte_vegas_integrate (f, xl, xu, dim, calls/MAXITERVEGAS/5, 
                              _random_gen_STY_gmz_p_f_M_wC, 

@@ -1,4 +1,11 @@
-#include "modulos.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "mlhist.h"
+
 /*#define FTOL  1e-12  <-- Valor anterior*/
 /*#define FTOL  1e-15  <-- Valos 2 */
 /*#define FTOL  1e-17  <-- Valos 3 */
@@ -148,7 +155,7 @@ int  MLA_hh_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
   }   while(iter_amo>= MAXITER && tries <=MAXTRIES );
 
 
-  /* Aunque la hemos impuesto dentro de Anoeb_funk, volvemos a normalizar. La normalización se impone sobre las p originales, no sobre p' */
+  /* Aunque la hemos impuesto dentro de Anoeb_funk, volvemos a normalizar. La normalizaciï¿½n se impone sobre las p originales, no sobre p' */
   
   norm=0;    
   for(jx=0;jx!=kx;++jx)  
@@ -158,7 +165,7 @@ int  MLA_hh_gg_d(int n,double *x,double *errx, double *y, double *erry, int kx, 
 
   _MLmax=Amoe_Funk_hh_gg_d_main(n,x,y,par);
   
-  /* Nueva solución con el cambio de variable */
+  /* Nueva soluciï¿½n con el cambio de variable */
   for(j=0;j<_kpar;j++)
   {
     Pk[j] = exp(par[j]);
@@ -263,9 +270,14 @@ double Amoe_Funk_hh_gg_d_main(int n, double *x, double *y, double *p)
 }
 
 
- double Amoe_Funk_hh_gg_d_conf(int n, double *x, double *y, double *p)
+double Amoe_Funk_hh_gg_d_conf(int n, double *x, double *y, double *p)
 {
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+  (void)x;
+  (void)p;
    
+
 /*   int i,j;
   double logL=0.;
   double ltmp;
@@ -328,7 +340,7 @@ void TeorCovars_hh_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
   hessian=matrix_d(_kpar+1,_kpar+1);
   b=matrix_d(_kpar+1,1);
 
-  /* Definimos el hessiano de la función minimizada y tenemos en cuenta la normalización */
+  /* Definimos el hessiano de la funciï¿½n minimizada y tenemos en cuenta la normalizaciï¿½n */
   tmp2=0;
   for(ly=0;ly<ky;ly++) 
   {

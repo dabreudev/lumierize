@@ -1,4 +1,13 @@
-#include "modulos.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "mlsty.h"
+
 #define FTOL  1e-12
 //#define FTOL2 1e-6
 #define FTOL2 1e-4
@@ -187,13 +196,13 @@ int  MLA_SWML_g_p_M(int n,double *magn,double *errmag,double *z, double *errz,do
 /*     EmpiricalCovars_SWML_g_p_M(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 
   if(DEBUG) {
     printf(" Solution before norm:\n");
-    /* dabreu: no sé porqué me da error al compilar */
+    /* dabreu: no sï¿½ porquï¿½ me da error al compilar */
     /* PrintStepLF_M(lf); */
     for(j=0;j<nbin;j++)  printf(" %d par %f sig %f hisot %d magni %f - %f\n",j,par[j],sigpar[j],histo[j],magbin[j],magbin[j+1]);
   }

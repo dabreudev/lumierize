@@ -1,4 +1,12 @@
-#include "modulos.h"
+#include "string.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "math.h"
+#include <gsl/gsl_machine.h>
+#include "mlsty.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "alloc.h"
 #define FTOL  1e-13
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -198,7 +206,7 @@ int  MLA_STY_p_PO(int n,double *magn,double *ew,double *z,char photband[51], flo
 /*     EmpiricalCovars_STY_p_PO(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 
@@ -282,7 +290,7 @@ double Amoe_Funk_STY_p_PO_main(int n, double *x, double *y, double *p) {
       probabajo*=(ewd_STY_p_PO->xk[ewd_STY_p_PO->k]-ewl_STY_p_PO)/nEW;
 
       if(DEBUG2) printf(" ew %f Hist %f\n",ew,Histfunc(ew,*ewd_STY_p_PO));
-      dLdm=ew/(Kcoc_STY_p_PO+gamma_STY_p_PO/delta_STY_p_PO*ew);   /* Esto no es así exactamente, pero es proporcional con factores que solo dependen de z. Es importante este factor!!  */
+      dLdm=ew/(Kcoc_STY_p_PO+gamma_STY_p_PO/delta_STY_p_PO*ew);   /* Esto no es asï¿½ exactamente, pero es proporcional con factores que solo dependen de z. Es importante este factor!!  */
       logprobarriba=Schechter_L(Lumi,lfamo)+log(Histfunc(ew,*ewd_STY_p_PO))+log(dLdm);
       
       flim=Flux_ew_mag(ewl_STY_p_PO,magl_STY_p_PO,photband_STY_p_PO,gamma_STY_p_PO,delta_STY_p_PO,Kcoc_STY_p_PO);

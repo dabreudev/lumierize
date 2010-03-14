@@ -1,5 +1,3 @@
-#include "modulos.h"
-#include "gsl_hessian.h"
 #include <gsl/gsl_machine.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_deriv.h>
@@ -9,6 +7,9 @@
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_interp.h>
+#include "alloc.h"
+#include "gsl_hessian.h"
+#include "mlsty.h"
 //#define FTOL  1e-10
 #define FTOL  1e-9
 #define FTOL2 1e-6
@@ -30,7 +31,7 @@
 /* too much output for DEBUG4 (> 1Gb) */
 
 /* #define TOLERR 0.0001 */
-/* Estructura para contener los parámetros de Amo..main_gsl_multimin */
+/* Estructura para contener los parï¿½metros de Amo..main_gsl_multimin */
 struct Amoe_Funk_gsl_param_STY_gmz_p_f_M_wC
 {
   int nData;
@@ -151,7 +152,7 @@ int  MLA_STY_gmz_p_f_M_wC(int n,double *magSeln, double *magDistn, double *errma
   if(DEBUG) for(i=0;i<lfvvmax.nbin;i++) printf(" Mabs %g - %g LF %g\n",lfvvmax.magni[i],lfvvmax.magni[i+1],lfvvmax.lnlf[i]/log(10));
   FitSch2StepLF_M(lfvvmax,&lffit, &chisq);
   if(DEBUG) {
-    printf(" Después ajuste MRQ\n");
+    printf(" Despuï¿½s ajuste MRQ\n");
     printf(" Schechter FIT\n");
     printf(" Mstar (:  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",lffit.Mstar,lffit.alfa,lffit.phistar,log10(lffit.phistar));
     printf(" E_Mstar:    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lffit.errMstar,lffit.erralfa,lffit.errphistar,lffit.errphistar/lffit.phistar/log(10.));
@@ -368,7 +369,7 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
     }
     else 
     {
-      x1=lfamo.Mstar-5; /* de dónde sale este 5??? */
+      x1=lfamo.Mstar-5; /* de dï¿½nde sale este 5??? */
       x2=Mag(y[i],_fsel_STY_gmz_p_f_M_wC.magcut+6*_errmagDistn_i_STY_gmz_p_f_M_wC,*_cosmo_STY_gmz_p_f_M_wC);
       if(DEBUG4) printf("x1 %g x2 %g y[i] %g _errmagDistn_i %g\n",x1,x2,y[i],_errmagDistn_i_STY_gmz_p_f_M_wC);
 
@@ -541,7 +542,7 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   {
     if(DEBUG4) printf(" out petando mreal: mreal %g magcut %g\n",mreal,_fsel_STY_gmz_p_f_M_wC.magcut);
     return(0);
-  } Pertenece a los límites */
+  } Pertenece a los lï¿½mites */
 
   //logfacLF = log(Schechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC));
   logfacLF = lnSchechter_M(Mabs,*_lf_STY_gmz_p_f_M_wC);
@@ -617,7 +618,7 @@ double vegas_funk_denominator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *par
   return(res); 
 }
 
-/* Errores utilizando derivadas numéricas con GSL */
+/* Errores utilizando derivadas numï¿½ricas con GSL */
 
 void NumericalHessianCovars_STY_gmz_p_f_M_wC(int n,double *magn,double *errmagn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
 {

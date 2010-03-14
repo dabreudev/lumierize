@@ -1,4 +1,13 @@
-#include "modulos.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "mlsty.h"
+
 #define ZMIN 0.00001
 #define FTOL  1e-13
 #define FTOL2 1e-6
@@ -74,7 +83,7 @@ int  MLA_STY_p_L   (int n,double *flux,double *z,double flim, double strrad, dou
   y=vector_d(n);
   _iter_m_STY_p_L=0;
 
-  /* Los límites en z se reajustan */
+  /* Los lï¿½mites en z se reajustan */
   _zlow_STY_p_L = (_zlow_STY_p_L < ZMIN ? ZMIN : _zlow_STY_p_L);
 
 
@@ -183,7 +192,7 @@ int  MLA_STY_p_L   (int n,double *flux,double *z,double flim, double strrad, dou
 /*     EmpiricalCovars_STY_p_L(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 

@@ -1,4 +1,19 @@
-#include "modulos.h"
+#include "string.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "math.h"
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "mlhist.h"
+#include "amoeba.h"
+#include "minmax.h"
+#include "quartil.h"
+#include "random.h"
+#include "stmedia.h"
+#include "gaussint.h"
+#include "functions.h"
+
+
 #define FTOL  1e-10
 #define FTOL2 5e-6
 #define MAXITER  300
@@ -114,13 +129,16 @@ double Amoe_Funk_g_g_f_d_main(int n, double *x, double *y, double *p) {
   double pi=4*atan(1.); 
   int i;
   double logL=0.,logLb;
-  double conv;
+  double conv = 0;
   int nstep=15;
-  double norm;
+  double norm = 0;
   int nstepnorm=15;
   double gauss,scale,offset;
   int nul2=0;
 /*   double xdum; */
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+
   
 
   if((p[1])<0) p[1]=-p[1];  
@@ -173,7 +191,7 @@ double Amoe_Funk_g_g_f_d_main(int n, double *x, double *y, double *p) {
     xtmp=x[i];
     conv=gaussinther_d(Funk2_norm_g_g_f_d,offset,scale,nstep)/norm;
 
-    if(DEBUG3) printf(" obj %d conv %.10f gauss %.10f loglbstep %.10f f %f norm %f cc %f xi %f\n",i,conv,gauss,exp(-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[1]*p[1])-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1])),(0.5*(erf((xf-p[0])/sqrt(2)/p[1])+1)),norm,pow(conv,1./Fermi(x[i],xf,Tf)),x[i]);
+    //if(DEBUG3) printf(" obj %d conv %.10f gauss %.10f loglbstep %.10f f %f norm %f cc %f xi %f\n",i,conv,gauss,exp(-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[1]*p[1])-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1])),(0.5*(erf((xf-p[0])/sqrt(2)/p[1])+1)),norm,pow(conv,1./Fermi(x[i],xf,Tf)),x[i]);
     if(conv==0) {
       logL-=32;
       nul2++;
@@ -202,6 +220,9 @@ double Amoe_Funk_g_g_f_d_conf(int n, double *x, double *y, double *p) {
   int nstepnorm=15;
   double gauss,scale,offset;
   int nul2=0;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+
 
   if((p[1])<0) p[1]=-p[1];  
 
@@ -229,7 +250,7 @@ double Amoe_Funk_g_g_f_d_conf(int n, double *x, double *y, double *p) {
     xtmp=x[i];
     conv=gaussinther_d(Funk2_norm_g_g_f_d,offset,scale,nstep)/norm;
 
-    if(DEBUG3) printf(" obj %d conv %.10f gauss %.10f loglbstep %.10f f %f norm %f cc %f xi %f\n",i,conv,gauss,exp(-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[1]*p[1])-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1])),(0.5*(erf((xf-p[0])/sqrt(2)/p[1])+1)),norm,pow(conv,1./Fermi(x[i],xf,Tf)),x[i]);
+    //if(DEBUG3) printf(" obj %d conv %.10f gauss %.10f loglbstep %.10f f %f norm %f cc %f xi %f\n",i,conv,gauss,exp(-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[1]*p[1])-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1])),(0.5*(erf((xf-p[0])/sqrt(2)/p[1])+1)),norm,pow(conv,1./Fermi(x[i],xf,Tf)),x[i]);
     if(conv==0) {
       logL-=32;
       nul2++;
@@ -259,6 +280,11 @@ void   EmpiricalCovars_g_g_f_d(int n,double *x,double *errx,double *par,double *
   int nconfl,nconflini;
   int i,j;
   double first, median, third, *distmax;
+  (void)sigma;
+  (void)Tfermi;
+  (void)xfermi;
+  (void)errx;
+  (void)mean;
 
   nconfl=NCONFL;
   nconflini=nconfl;
@@ -360,11 +386,11 @@ double Funk1_norm_g_g_f_d(double x) {
 /*   offset=x; */
 
   firstsum=gaussinther_d(Funk2_norm_g_g_f_d,offset,scale,ng);
-  if(DEBUG3) printf(" First %f xtmp %f p0 %f teor %f \n",firstsum,x,p0,gaussian(x,p0,sqrt(sigi*sigi+p1*p1)));
+  //if(DEBUG3) printf(" First %f xtmp %f p0 %f teor %f \n",firstsum,x,p0,gaussian(x,p0,sqrt(sigi*sigi+p1*p1)));
   return(firstsum);
 }
 
 double Funk2_norm_g_g_f_d(double x) {
-  if(DEBUG3) printf("Ret %f  p0 %f p1 %f x %f xtmp %f sigi %f\n",gaussian(x,p0,p1)*Fermi(x,xf,Tf)*gaussian(xtmp,x,sigi),p0,p1,x,xtmp,sigi);
+  //if(DEBUG3) printf("Ret %f  p0 %f p1 %f x %f xtmp %f sigi %f\n",gaussian(x,p0,p1)*Fermi(x,xf,Tf)*gaussian(xtmp,x,sigi),p0,p1,x,xtmp,sigi);
   return(gaussian(x,p0,p1)*Fermi(x,xf,Tf)*gaussian(xtmp,x,sigi));
 }

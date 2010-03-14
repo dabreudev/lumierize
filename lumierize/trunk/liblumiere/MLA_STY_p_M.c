@@ -1,10 +1,16 @@
-#include "modulos.h"
-#include "gsl_hessian.h"
 #include <gsl/gsl_machine.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multimin.h>
+#include "alloc.h"
+#include "gsl_hessian.h"
+#include "vvmax.h"
+#include "mlsty.h"
+#include "minmax.h"
+#include "cosmology.h"
+#include "amoeba.h"
+#include "functions.h"
 
 #define ZMIN 0.00001
 #define FTOL  1e-12
@@ -17,7 +23,7 @@
 #define DEBUG3 0
 #define DEBUGPLOT 0
 
-/* Estructura para contener los parámetros */
+/* Estructura para contener los parï¿½metros */
 struct Amoe_Funk_gsl_param_STY_p_M
 {
   int nData;
@@ -33,7 +39,7 @@ void   NumericalHessianCovars_STY_p_M(int n,double *magn,double *z,double *par, 
 struct cosmo_param *_cosmo_STY_p_M;
 double _mlim_STY_p_M;
 
-int _ndata_STY_p_M;
+size_t _ndata_STY_p_M;
 int _iter_m_STY_p_M;
 int _iter_c_STY_p_M;
 int _nconfl_STY_p_M;
@@ -75,7 +81,7 @@ int  MLA_STY_p_M(int n,double *magSeln, double *magDistn, double *z,double mlim,
 
   iter_amo=MAXITER+1;
 
-  /* Los límites en z se reajustan */
+  /* Los lï¿½mites en z se reajustan */
   _zlow_STY_p_M = (_zlow_STY_p_M < ZMIN ? ZMIN : _zlow_STY_p_M);
 
   if(DEBUG3) printf(" iter_amo %d\n",iter_amo);
@@ -178,7 +184,7 @@ void prepareGlobalVars_STY_p_M(double *z, double *magn)
 
 double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
 {
-  int i;
+  size_t i;
   double logL=0.;
   struct Schlf_M lfamo;
   double Mabs;
@@ -189,6 +195,8 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
   double Ntot;
 
   double colori;
+  (void)x; //To avoid warning of unused
+  (void)n;//To avoid warning of unused
 
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
@@ -207,8 +215,8 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
 
     /* debido a un underflow, tuvimos que poner este if
        El 0.25 es debido a que gsl_sfi_gamma_inc llama a gsl_sf_gamma_inc_CF
-       para x > 0.25 y nos devolvía un underflow cuando se cumplía la segunda
-       condición -> los fuentes de gsl están en:
+       para x > 0.25 y nos devolvï¿½a un underflow cuando se cumplï¿½a la segunda
+       condiciï¿½n -> los fuentes de gsl estï¿½n en:
        /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/exp.c
        /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/gamma_inc.c
     */
@@ -220,7 +228,7 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
     {
       log_gamma_int=log(gsl_sf_gamma_inc(1+lfamo.alfa,Llow/Lstar));
     }
-    /* log(lfamo.phistar) + log_gamma_int -> integral de la función de Schecter
+    /* log(lfamo.phistar) + log_gamma_int -> integral de la funciï¿½n de Schecter
     entre Llow e inf */
     logL-= log(Schechter_M(Mabs,lfamo)) - log(lfamo.phistar) - log_gamma_int;
     
@@ -240,7 +248,7 @@ double Amoe_Funk_STY_p_M_main(int n, double *x, double *y, double *p)
   return(logL);
 }
 
-/* Errores utilizando derivadas numéricas con GSL */
+/* Errores utilizando derivadas numï¿½ricas con GSL */
 
 void NumericalHessianCovars_STY_p_M(int n,double *magn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
 {
@@ -251,6 +259,15 @@ void NumericalHessianCovars_STY_p_M(int n,double *magn,double *z,double *par, do
   size_t i,j;
 
   double hessianStep;
+  struct Amoe_Funk_gsl_param_STY_p_M deriv_param;
+  gsl_multimin_function LogLFunction;
+
+  (void)cosmo; //To avoid warning
+  (void)mlim; //To avoid warning
+  (void)sigpar; //To avoid warning
+  (void)n; //To avoid warning
+
+
   hessianStep = GSL_ROOT4_DBL_EPSILON;
   /* derivStep = 0.01; */
 
@@ -263,13 +280,11 @@ void NumericalHessianCovars_STY_p_M(int n,double *magn,double *z,double *par, do
   covar=matrix_d(3 ,3 );
   bb=matrix_d(3,1);
 
-  struct Amoe_Funk_gsl_param_STY_p_M deriv_param;
   
   deriv_param.nData = _ndata_STY_p_M;
   deriv_param.magn = magn;
   deriv_param.z = z;
 
-  gsl_multimin_function LogLFunction;
   LogLFunction.f = &Amoe_Funk_STY_p_M_main_gsl_multimin;
   LogLFunction.params = &deriv_param;
   LogLFunction.n = 3;

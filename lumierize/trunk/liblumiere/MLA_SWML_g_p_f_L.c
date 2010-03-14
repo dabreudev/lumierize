@@ -1,6 +1,14 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "mlswml.h"
 /* Creo que no esta probada esta subrutina */
 
-#include "modulos.h"
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -209,7 +217,7 @@ int  MLA_SWML_g_p_L(int n,double *flux,double *errflux, double *z,double *errz,d
 /*     EmpiricalCovars_SWML_g_p_L(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 

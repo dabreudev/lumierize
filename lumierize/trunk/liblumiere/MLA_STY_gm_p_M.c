@@ -1,10 +1,19 @@
-#include "modulos.h"
-#include "gsl_hessian.h"
 #include <gsl/gsl_machine.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multimin.h>
+#include "alloc.h"
+#include "mlsty.h"
+#include "gsl_hessian.h"
+#include "gaussint.h"
+#include "amoeba.h"
+#include "minmax.h"
+#include "vvmax.h"
+#include "step.h"
+#include "functions.h"
+#include "gaussj.h"
+
 #define FTOL  1e-10
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -18,7 +27,7 @@
 #define TOLERR 0.07 
 
 /* #define TOLERR 0.0001 */
-/* Estructura para contener los parámetros de Amo..main_gsl_multimin */
+/* Estructura para contener los parï¿½metros de Amo..main_gsl_multimin */
 struct Amoe_Funk_gsl_param_STY_gm_p_M
 {
   int nData;
@@ -106,7 +115,7 @@ int  MLA_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double mlim, do
   if(DEBUG) for(i=0;i<lfvvmax.nbin;i++) printf(" Mabs %g - %g LF %g\n",lfvvmax.magni[i],lfvvmax.magni[i+1],lfvvmax.lnlf[i]/log(10));
   FitSch2StepLF_M(lfvvmax,&lffit, &chisq);
   if(DEBUG) {
-    printf(" Después ajuste MRQ\n");
+    printf(" Despuï¿½s ajuste MRQ\n");
     printf(" Schechter FIT\n");
     printf(" Mstar (:  %g   alpha:    %g  Phistar  :  %g (log=%g)\n",lffit.Mstar,lffit.alfa,lffit.phistar,log10(lffit.phistar));
     printf(" E_Mstar:    %g   E_alpha:  %g  E_Phistar:  %g (log=%g) \n",lffit.errMstar,lffit.erralfa,lffit.errphistar,lffit.errphistar/lffit.phistar/log(10.));
@@ -208,6 +217,7 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
   double probabajo;
 
   double intsup;
+  (void)n;
 
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
@@ -242,7 +252,7 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
     }
     else 
     {
-      x1=lfamo.Mstar-5; /* de dónde sale este 5??? */
+      x1=lfamo.Mstar-5; /* de dï¿½nde sale este 5??? */
       x2=Mag(y[i],_mlim_STY_gm_p_M-6*_errmagn_i_STY_gm_p_M,*_cosmo_STY_gm_p_M);
       probabajo=gaussintleg_d(Funk1_intMag_STY_gm_p_M,x1,x2,npb);
       if(DEBUG2) printf(" Primer abajo %g con 1000 %g x1 %f x2 %f\n",probabajo,gaussintleg_d(Funk1_intMag_STY_gm_p_M,x1-10,x2,1000),x1,x2);
@@ -306,8 +316,8 @@ double Amoe_Funk_STY_gm_p_M_main(int n, double *x, double *y, double *p) {
 double Funk1_intMag_STY_gm_p_M(double Mabs) 
 {
   /* Lo suyo es que sea en magnitudes absolutas, ya que 
-     la FL está expresada en intervalos de Mabs. 
-     Si no, tendría que multiplicar por dMabs/dmag */
+     la FL estï¿½ expresada en intervalos de Mabs. 
+     Si no, tendrï¿½a que multiplicar por dMabs/dmag */
 
   int npa=21;
 /*   double scale,offset; */
@@ -347,7 +357,7 @@ double Funk2_intmag_STY_gm_p_M(double magnreal)
   }
 }
 
-/* Errores utilizando derivadas numéricas con GSL */
+/* Errores utilizando derivadas numï¿½ricas con GSL */
 
 void NumericalHessianCovars_STY_gm_p_M(int n,double *magn,double *errmagn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
 {
@@ -356,9 +366,16 @@ void NumericalHessianCovars_STY_gm_p_M(int n,double *magn,double *errmagn,double
   double **covar;
   double **bb;
   size_t i,j;
+  struct Amoe_Funk_gsl_param_STY_gm_p_M deriv_param;
+  gsl_multimin_function LogLFunction;
 
   double hessianStep = GSL_ROOT4_DBL_EPSILON;
   /* derivStep = 0.01; */
+  (void)cosmo;
+  (void)errmagn;
+  (void)n;
+  (void)mlim;
+  (void)sigpar;
 
   gsl_hessian=gsl_matrix_alloc(3,3);
   param=gsl_vector_alloc(3);
@@ -369,13 +386,11 @@ void NumericalHessianCovars_STY_gm_p_M(int n,double *magn,double *errmagn,double
   covar=matrix_d(3 ,3 );
   bb=matrix_d(3,1);
 
-  struct Amoe_Funk_gsl_param_STY_gm_p_M deriv_param;
 
   deriv_param.nData = _ndata_STY_gm_p_M;
   deriv_param.magn = magn;
   deriv_param.z = z;
 
-  gsl_multimin_function LogLFunction;
   LogLFunction.f = &Amoe_Funk_STY_gm_p_M_main_gsl_multimin;
   LogLFunction.params = &deriv_param;
   LogLFunction.n = 3;

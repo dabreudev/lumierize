@@ -1,5 +1,12 @@
-#include "modulos.h"
+#include "string.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "math.h"
 #include <gsl/gsl_machine.h>
+#include "mlsty.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "alloc.h"
 #define FTOL  1e-11
 #define FTOL2 1e-6
 #define FTOL3 1e-7
