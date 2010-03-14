@@ -13,6 +13,9 @@
 #include "functions.h"
 #include "random.h"
 #include "quartil.h"
+#include "step.h"
+#include "gaussj.h"
+#include "elip.h"
 
 
 #define FTOL  1e-11

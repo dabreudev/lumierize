@@ -1,4 +1,9 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include "alloc.h"
 #include "sthisto.h"
+#include "minmax.h"
+
 
 int **StHisto2DFF_d(int n, double *x, double *y, int nbinx, double *xmin, double *xmax, double yff)
 

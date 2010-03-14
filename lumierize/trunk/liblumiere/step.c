@@ -1,6 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+#include <cpgplot.h>
 #include "step.h"
 #include "alloc.h"
+#include "functions.h"
+#include "stmedia.h"
 
 #define NSTEP_LF 200
 #define NSTEP_Z  500
@@ -474,7 +481,7 @@ double Int_step_L
 
 void PrintStepLF_L(struct Steplf_L lf) 
 {
-  unsigned int i;
+  int i;
   for(i=0;i<lf.nbin;i++) 
   {
     printf(" log(Lum) %11g  LF %11g (log=%9g) Err_LF %11g (log=%9g)\n",
@@ -485,7 +492,7 @@ void PrintStepLF_L(struct Steplf_L lf)
 
 void PrintStepLF_M(struct Steplf_M lf) 
 {
-  unsigned int i;
+  int i;
   for(i=0;i<lf.nbin;i++) 
   {
     printf(" Mag %11g - %11g    LF %11g (log=%9g) Err_LF %11g (log=%9g) Ngal %d\n",

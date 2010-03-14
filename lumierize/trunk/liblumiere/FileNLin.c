@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "filenlin.h
 
 
 int FileNLin(char *file)

@@ -10,6 +10,9 @@
 #include "amoeba.h"
 #include "gaussj.h"
 #include "minmax.h"
+#include "random.h"
+#include "elip.h"
+#include "quartil.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6
@@ -575,6 +578,8 @@ void   EmpiricalCovars_h_g_d(int n,double *x,double *errx,int k,double *xk,doubl
   
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)errx;
+  (void)xk;
 
 /*   double a,b,c,d,f,e;  */
 /*   double xcelip,ycelip,elipa,elipb,elipt;  */

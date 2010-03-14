@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <malloc.h>
+#include <math.h>
 #include "gaussj.h"
 
 #define DEBUG 0

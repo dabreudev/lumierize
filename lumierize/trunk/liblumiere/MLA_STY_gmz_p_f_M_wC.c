@@ -11,6 +11,13 @@
 #include "gsl_hessian.h"
 #include "amoeba.h"
 #include "mlsty.h"
+#include "fermisel.h"
+#include "functions.h"
+#include "step.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "vvmax.h"
+
 //#define FTOL  1e-10
 #define FTOL  1e-9
 #define FTOL2 1e-6
@@ -630,6 +637,8 @@ void NumericalHessianCovars_STY_gmz_p_f_M_wC(int n,double *magn,double *errmagn,
   size_t i,j;
 
   double hessianStep = GSL_ROOT4_DBL_EPSILON;
+  struct Amoe_Funk_gsl_param_STY_gmz_p_f_M_wC deriv_param;
+  gsl_multimin_function LogLFunction;
   /* derivStep = 0.01; */
 
   gsl_hessian=gsl_matrix_alloc(3,3);
@@ -641,13 +650,11 @@ void NumericalHessianCovars_STY_gmz_p_f_M_wC(int n,double *magn,double *errmagn,
   covar=matrix_d(3 ,3 );
   bb=matrix_d(3,1);
 
-  struct Amoe_Funk_gsl_param_STY_gmz_p_f_M_wC deriv_param;
 
   deriv_param.nData = _ndata_STY_gmz_p_f_M_wC;
   deriv_param.magn = magn;
   deriv_param.z = z;
 
-  gsl_multimin_function LogLFunction;
   LogLFunction.f = &Amoe_Funk_STY_gmz_p_f_M_wC_main_gsl_multimin;
   LogLFunction.params = &deriv_param;
   LogLFunction.n = 3;
@@ -702,6 +709,7 @@ double vegas_integrate_STY_gmz_p_f_M_wC(gsl_monte_function * f,
   int itervegas = 0;
   double result, abserr;
   gsl_monte_vegas_state *state = gsl_monte_vegas_alloc (dim);
+  (void)error;
   /* Warm-up */
   gsl_monte_vegas_integrate (f, xl, xu, dim, calls/MAXITERVEGAS/5, 
                              _random_gen_STY_gmz_p_f_M_wC, 

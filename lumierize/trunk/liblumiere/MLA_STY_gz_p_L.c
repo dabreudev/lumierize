@@ -9,6 +9,14 @@
 #include "mlsty.h"
 #include "random.h"
 #include "amoeba.h"
+#include "step.h"
+#include "functions.h"
+#include "gaussint.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "elip.h"
+#include "quartil.h"
+#include "stmedia.h"
 
 #define FTOL  1e-11
 #define FTOL2 1e-6

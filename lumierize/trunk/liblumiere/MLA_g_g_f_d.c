@@ -12,6 +12,8 @@
 #include "stmedia.h"
 #include "gaussint.h"
 #include "functions.h"
+#include "elip.h"
+#include "gaussj.h"
 
 
 #define FTOL  1e-10

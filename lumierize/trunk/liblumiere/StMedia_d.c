@@ -1,3 +1,4 @@
+#include <math.h>
 #include "stmedia.h"
 
 double StMedia_d(int n, double *x, double *sigma)

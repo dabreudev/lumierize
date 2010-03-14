@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "stmedia.h"
 
 /* //De Javier Gorgas */
 

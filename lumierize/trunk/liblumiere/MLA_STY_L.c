@@ -14,6 +14,9 @@
 #include "random.h"
 #include "quartil.h"
 #include "stmedia.h"
+#include "step.h"
+#include "elip.h"
+#include "gaussj.h"
 
 #define FTOL  1e-13
 #define FTOL2 1e-6
@@ -82,6 +85,7 @@ int  MLA_STY_L(int n,double *flux,double *z,double flim, double strrad, double z
   double *lumi;
   double chisq;
   struct Schlf_L  lffit;
+  (void)mlinfo;
 
   lumi=vector_d(n);
 
@@ -207,6 +211,7 @@ double Amoe_Funk_STY_L_main(int n, double *x, double *y, double *p) {
 /*   double Mup=-30; */
 /*   double Lup; */
   double intsup;
+  (void)n;
 
   lfamo.alfa=p[0];
   lfamo.phistar=1;
@@ -267,6 +272,8 @@ void   EmpiricalCovars_STY_L(int n,double *flux,double *z,double *par, double *s
   double **bb;
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)flim;
+  (void)cosmo;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

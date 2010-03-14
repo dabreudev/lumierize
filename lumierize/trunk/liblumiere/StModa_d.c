@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "stmoda.h"
 #include "sthisto.h"
 
