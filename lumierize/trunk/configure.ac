@@ -32,4 +32,10 @@ AC_CONFIG_FILES([Makefile
                  liblumiere/Makefile
                  src/Makefile])
 
+#Check for libraries
+PKG_CHECK_MODULES([GSL], [gsl],
+                  AC_DEFINE([HAVE_LIBGSL], [1], [1 if GSL present]),
+                  AC_MSG_ERROR([No GSL available]))
+
+
 AC_OUTPUT
