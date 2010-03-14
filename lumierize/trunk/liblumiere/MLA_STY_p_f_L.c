@@ -1,5 +1,20 @@
-#include "modulos.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "mlsty.h"
+#include "vvmax.h"
+#include "minmax.h"
+#include "amoeba.h"
+#include "functions.h"
+#include "random.h"
+#include "quartil.h"
+
+
 #define FTOL  1e-11
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -46,7 +61,7 @@ struct fermifsel_L fsel_STY_p_f_L;
 int ndata;
 int iter_m;
 int iter_c;
-int nconfl;
+int nconfl_p_f_L;
 double conflim;
 /* double ML[5*MAXTRIES*MAXITER]; */
 double *pp;
