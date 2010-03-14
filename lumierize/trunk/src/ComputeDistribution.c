@@ -606,7 +606,8 @@ void PlotHistogram(int nbin,float *xmin,float *xmax)
   
 
   if((fhisto   =malloc(nbin*sizeof(float)))==NULL) { printf("I cannot dimension fhisto    of %d bytes",nbin*sizeof(float));exit(1);} 
-  for(i=0;i<nbin;i++)   fhisto[i]=(float)histo[i];
+  for(i=0;i<(size_t)nbin;i++)
+    fhisto[i]=(float)histo[i];
 
   MinMax(nbin,fhisto,&yhmin,&yhmax);
   
