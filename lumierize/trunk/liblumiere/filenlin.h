@@ -1,5 +1,5 @@
-#ifndef READKBD_H
-#define READKBD_H
+#ifndef FILENLIN_H
+#define FILENLIN_H
 
 #include <stdio.h>
 
