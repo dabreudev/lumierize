@@ -1,4 +1,21 @@
-#include "modulos.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "mlsty.h"
+#include "vvmax.h"
+#include "minmax.h"
+#include "amoeba.h"
+#include "functions.h"
+#include "random.h"
+#include "quartil.h"
+#include "step.h"
+#include "gaussj.h"
+
 #define FTOL  1e-9
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -42,7 +59,7 @@ struct fermifsel_M fsel_STY_p_f_M;
 int ndata;
 int iter_m;
 int iter_c;
-int nconfl;
+int nconfl_STY_p_f_M;
 double conflim;
 /* double ML[5*MAXTRIES*MAXITER]; */
 double *pp;
@@ -208,6 +225,7 @@ double Amoe_Funk_STY_p_f_M_main(int n, double *x, double *y, double *p) {
   double intsup;
   int j;
   int nM_fs=200;
+  (void)n;//To avoid warn
 
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
@@ -317,6 +335,8 @@ void   EmpiricalCovars_STY_p_f_M(int n,double *magn,double *z,double *par, doubl
   double **bb;
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)cosmo;
+  (void)fsel;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

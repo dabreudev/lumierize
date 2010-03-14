@@ -1,6 +1,21 @@
-#include "modulos.h"
+#include "string.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "math.h"
 #include <gsl/gsl_machine.h>
+#include "mlsty.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "alloc.h"
+#include "mlsty.h"
 #include <gsl/gsl_sf_gamma.h>
+#include "vvmax.h"
+#include "minmax.h"
+#include "amoeba.h"
+#include "functions.h"
+#include "random.h"
+#include "quartil.h"
+
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -167,7 +182,7 @@ int  MLA_STY_M(int n,double *magn,double *z,double mlim, double strrad, double z
 /*     EmpiricalCovars_STY_M(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 
@@ -210,8 +225,8 @@ double Amoe_Funk_STY_M_main(int n, double *x, double *y, double *p) {
     Llow=pow(10.,-0.4*Mlow);
     /* debido a un underflow, tuvimos que poner este if
        El 0.25 es debido a que gsl_sfi_gamma_inc llama a gsl_sf_gamma_inc_CF
-       para x > 0.25 y nos devolvía un underflow cuando se cumplía la segunda
-       condición -> los fuentes de gsl están en:
+       para x > 0.25 y nos devolvï¿½a un underflow cuando se cumplï¿½a la segunda
+       condiciï¿½n -> los fuentes de gsl estï¿½n en:
        /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/exp.c
        /net/gladiolo/scratch/dabreu/local/SOURCES/gsl-1.8/specfunc/gamma_inc.c
     */
