@@ -13,7 +13,9 @@
   Para compilar: 
   cc -c   $s2/Proced/C/modulos/ReadNumcol.c 
 */
-#include  "modulos.h"
+#include <string.h>
+#include <stdio.h>
+#include "readcol.h"
 int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin)
 {
   
