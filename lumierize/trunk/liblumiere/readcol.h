@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
   int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin);
+  int ReadNumcol(char file[],int col,float *vector,int *lvec,int *nlin);
   void LeeWord(char a[],int nw,char word[]);
 
 #ifdef __cplusplus
