@@ -1,11 +1,25 @@
+#include <sys/time.h>
+#include <string.h>
 #include <math.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
+#include <cpgplot.h>
 #include "alloc.h"
 #include "amoeba.h"
 #include "cosmology.h"
 #include "schechter.h"
 #include "functions.h"
+#include "mlprocess.h"
+#include "mlsty.h"
+#include "mlswml.h"
+#include "stmedia.h"
+#include "minmax.h"
+#include "readkbd.h"
+#include "sthisto.h"
+#include "lagr.h"
+#include "step.h"
+#include "random.h"
+#include "vvmax.h"
 
 #define ZMIN 0.00001
 #define NSTEP_LF 200
@@ -103,22 +117,23 @@ void get_sample_gmz_wC(struct sample_data_gmz_wC *sample);
 void get_sample_ceg(struct sample_data *sample);
 void set_lf_parameters(struct lf_param *lf);
 void set_lf_ceg(struct lum_func_ceg *lf);
-void set_cosmology();
-void VVmax(); 
-void STY();
-void STY_MAG_ERR();
-void STY_wC();
-void STY_wC_errColor();
-void STY_gmz_f_M_wC();
-void SWML();
-void CEG();
-void Calc_Num();
-void Calc_Num_wC();
-void Generate_Cat_M();
-void Generate_Cat_M_wC();
-void Generate_Cat_L();
-void set_Schechter_M();
-void set_Schechter_L();
+void set_cosmology(void);
+void VVmax(void);
+void STY(void);
+void STY_MAG_ERR(void);
+void STY_wC(void);
+void STY_wC_errColor(void);
+void STY_gmz_f_M_wC(void);
+void SWML(void);
+void CEG(void);
+void Calc_Num(void);
+void Calc_Num_wC(void);
+void Generate_Cat_M(void);
+void Generate_Cat_M_wC(void);
+void Generate_Cat_M_C(void);
+void Generate_Cat_L(void);
+void set_Schechter_M(void);
+void set_Schechter_L(void);
 
 
 
@@ -133,7 +148,7 @@ struct Schlf_L schlf_L={-1.3,0.0,0.0033,0.0,144543977.0745928,0.0,0.0,0.0,0.0};
 
 double fglobal;
 
-int main()
+int main(void)
 {
   char opt='E';
 
@@ -236,7 +251,7 @@ int main()
   return(0);
 }
 
-void STY() 
+void STY(void)
 {
   static struct lf_param sty;
   struct sample_data_sel_dist sample;
@@ -399,7 +414,7 @@ void STY()
   }
 }
 
-void STY_wC() 
+void STY_wC(void)
 {
   static struct lf_param sty;
   struct sample_data_sel_dist sample;
@@ -562,7 +577,7 @@ void STY_wC()
 }
 
 /* Estamos trabajando en ellou */
-void STY_wC_errColor() 
+void STY_wC_errColor(void)
 {
   static struct lf_param sty;
   struct sample_data_wC_errColor sample;
@@ -716,7 +731,7 @@ void STY_wC_errColor()
 }
 
 /* Ya tenemos un nuevo miembro en la casa */
-void STY_gmz_f_M_wC() 
+void STY_gmz_f_M_wC(void)
 {
   static struct lf_param sty;
   struct sample_data_gmz_wC sample;
@@ -869,7 +884,7 @@ void STY_gmz_f_M_wC()
   }
 }
 
-void CEG() 
+void CEG(void)
 {
 /*   struct lum_func sty; */
 
@@ -983,7 +998,7 @@ void CEG()
    
 }
 
-void STY_MAG_ERR() 
+void STY_MAG_ERR(void)
 {
 /* dabreu */
 /* STY utilizando los errores en la magnitud */
@@ -1097,7 +1112,7 @@ void STY_MAG_ERR()
 }
 
 
-void SWML() 
+void SWML(void)
 {
 /*   struct lum_func sty; */
   struct sample_data sample;
@@ -1218,7 +1233,7 @@ void SWML()
 }
 
 
-void VVmax()
+void VVmax(void)
 {
   int i,j;
   
@@ -1750,7 +1765,7 @@ void VVmax()
   free_matrix_d(lf_vvmax_L.covarlnlf, lf_vvmax_L.nbin,lf_vvmax_L.nbin);
 }
 
-void Calc_Num()
+void Calc_Num(void)
 { 
 
 
@@ -1935,7 +1950,7 @@ void Calc_Num()
 }
 
 
-void Calc_Num_wC()
+void Calc_Num_wC(void)
 { 
   /* like Calc_Num but using Int_sch_M_wC instead of Int_sch_M */
   static double zup=0.5;
@@ -2202,8 +2217,8 @@ void get_sample(struct sample_data *sample)
   char opt;
   static char datafile[300]="";
   static int colz=2,collum=3,colmag=4;
-  double *z,*mag,*lum;
-  int *log1,*log2,*log3;
+  double *z,*magni,*lum;
+  int *logic1,*logic2,*logic3;
   int ndat;
   int i,j=0;
 
@@ -2227,21 +2242,21 @@ void get_sample(struct sample_data *sample)
     ndat=FileNLin(datafile);
     z  =malloc(ndat*sizeof(double));
     lum=malloc(ndat*sizeof(double));
-    mag=malloc(ndat*sizeof(double));
-    log1=malloc(ndat*sizeof(int));
-    log2=malloc(ndat*sizeof(int));
-    log3=malloc(ndat*sizeof(int));
+    magni=malloc(ndat*sizeof(double));
+    logic1=malloc(ndat*sizeof(int));
+    logic2=malloc(ndat*sizeof(int));
+    logic3=malloc(ndat*sizeof(int));
     sample->mag=malloc(ndat*sizeof(double));
     sample->lum=malloc(ndat*sizeof(double));
     sample->z  =malloc(ndat*sizeof(double));
-    ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colmag,mag,log2,&ndat);
-    ReadDoublecol(datafile,collum,lum,log3,&ndat);
+    ReadDoublecol(datafile,colz  ,z  ,logic1,&ndat);
+    ReadDoublecol(datafile,colmag,magni,logic2,&ndat);
+    ReadDoublecol(datafile,collum,lum,logic3,&ndat);
     for(i=0;i<ndat;i++) {
 /*       //printf(" z %f log %d\n",z[i],log[i]); */
-      if(log1[i] && log2[i] && log3[i]) {
+      if(logic1[i] && logic2[i] && logic3[i]) {
 /* 	//printf(" YESSS\n"); */
-	sample->mag[j]=(double)mag[i];
+	sample->mag[j]=(double)magni[i];
 	sample->lum[j]=(double)lum[i];
 	sample->z[j]  =(double)z[i];
 /* 	//printf(" Por aqui %d %f %f \n",j,sample->mag[j],sample->z[j]); */
@@ -2285,7 +2300,7 @@ void get_sample_sel_dist(struct sample_data_sel_dist *sample)
   static char datafile[300]="";
   static int colz=3,collum_sel=1,collum_dist=2,colmag_sel=1,colmag_dist=2;
   double *z,*magSel,*magDist,*lumSel,*lumDist;
-  int *log1,*log2,*log3,*log4,*log5;
+  int *logic1,*logic2,*logic3,*logic4,*logic5;
   int ndat;
   int i,j=0;
 
@@ -2317,32 +2332,32 @@ void get_sample_sel_dist(struct sample_data_sel_dist *sample)
     magSel=malloc(ndat*sizeof(double));
     lumDist=malloc(ndat*sizeof(double));
     magDist=malloc(ndat*sizeof(double));
-    log1=malloc(ndat*sizeof(int));
-    log2=malloc(ndat*sizeof(int));
-    log3=malloc(ndat*sizeof(int));
-    log4=malloc(ndat*sizeof(int));
-    log5=malloc(ndat*sizeof(int));
+    logic1=malloc(ndat*sizeof(int));
+    logic2=malloc(ndat*sizeof(int));
+    logic3=malloc(ndat*sizeof(int));
+    logic4=malloc(ndat*sizeof(int));
+    logic5=malloc(ndat*sizeof(int));
     sample->magSel=malloc(ndat*sizeof(double));
     sample->lumSel=malloc(ndat*sizeof(double));
     sample->magDist=malloc(ndat*sizeof(double));
     sample->lumDist=malloc(ndat*sizeof(double));
     sample->z  =malloc(ndat*sizeof(double));
-    ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colmag_sel,magSel,log2,&ndat);
-    ReadDoublecol(datafile,collum_sel,lumSel,log3,&ndat);
-    ReadDoublecol(datafile,colmag_dist,magDist,log4,&ndat);
-    ReadDoublecol(datafile,collum_dist,lumDist,log5,&ndat);
+    ReadDoublecol(datafile,colz  ,z  ,logic1,&ndat);
+    ReadDoublecol(datafile,colmag_sel,magSel,logic2,&ndat);
+    ReadDoublecol(datafile,collum_sel,lumSel,logic3,&ndat);
+    ReadDoublecol(datafile,colmag_dist,magDist,logic4,&ndat);
+    ReadDoublecol(datafile,collum_dist,lumDist,logic5,&ndat);
     for(i=0;i<ndat;i++) { 
-/*       //printf(" z %f log %d\n",z[i],log[i]); */
-      if(log1[i] && log2[i] && log3[i] && log4[i] && log5[i]) {
-/* 	//printf(" YESSS\n"); */
-	sample->magSel[j]=(double)magSel[i];
-	sample->lumSel[j]=(double)lumSel[i];
-	sample->magDist[j]=(double)magDist[i];
-	sample->lumDist[j]=(double)lumDist[i];
-	sample->z[j]  =(double)z[i];
-/* 	//printf(" Por aqui %d %f %f \n",j,sample->mag[j],sample->z[j]); */
-	j++;
+      /*       //printf(" z %f log %d\n",z[i],log[i]); */
+      if(logic1[i] && logic2[i] && logic3[i] && logic4[i] && logic5[i]) {
+        /* 	//printf(" YESSS\n"); */
+        sample->magSel[j]=(double)magSel[i];
+        sample->lumSel[j]=(double)lumSel[i];
+        sample->magDist[j]=(double)magDist[i];
+        sample->lumDist[j]=(double)lumDist[i];
+        sample->z[j]  =(double)z[i];
+        /* 	//printf(" Por aqui %d %f %f \n",j,sample->mag[j],sample->z[j]); */
+        j++;
       }
     }
     sample->ngalax=j;
@@ -2390,7 +2405,8 @@ void get_sample_wC_errColor(struct sample_data_wC_errColor *sample)
   static char datafile[300]="";
   static int colz=2,colmag_sel=1,colmag_dist=2,colerrColor=3;
   double *z,*magSel,*magDist,*errColor;
-  int *log1,*log2,*log3,*log4;
+  int *logic1,*logic2,*logic3,*logic4;
+
   int ndat;
   int i,j=0;
 
@@ -2415,21 +2431,21 @@ void get_sample_wC_errColor(struct sample_data_wC_errColor *sample)
     magSel=malloc(ndat*sizeof(double));
     magDist=malloc(ndat*sizeof(double));
     errColor=malloc(ndat*sizeof(double));
-    log1=malloc(ndat*sizeof(int));
-    log2=malloc(ndat*sizeof(int));
-    log3=malloc(ndat*sizeof(int));
-    log4=malloc(ndat*sizeof(int));
+    logic1=malloc(ndat*sizeof(int));
+    logic2=malloc(ndat*sizeof(int));
+    logic3=malloc(ndat*sizeof(int));
+    logic4=malloc(ndat*sizeof(int));
     sample->magSel  =malloc(ndat*sizeof(double));
     sample->magDist =malloc(ndat*sizeof(double));
     sample->z       =malloc(ndat*sizeof(double));
     sample->errColor=malloc(ndat*sizeof(double));
-    ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colmag_sel,magSel,log2,&ndat);
-    ReadDoublecol(datafile,colmag_dist,magDist,log3,&ndat);
-    ReadDoublecol(datafile,colerrColor,errColor,log4,&ndat);
+    ReadDoublecol(datafile,colz  ,z  ,logic1,&ndat);
+    ReadDoublecol(datafile,colmag_sel,magSel,logic2,&ndat);
+    ReadDoublecol(datafile,colmag_dist,magDist,logic3,&ndat);
+    ReadDoublecol(datafile,colerrColor,errColor,logic4,&ndat);
     for(i=0;i<ndat;i++) { 
 /*       //printf(" z %f log %d\n",z[i],log[i]); */
-      if(log1[i] && log2[i] && log3[i] && log4[i]) {
+      if(logic1[i] && logic2[i] && logic3[i] && logic4[i]) {
 /* 	//printf(" YESSS\n"); */
 	sample->magSel[j]  =(double)magSel[i];
 	sample->magDist[j] =(double)magDist[i];
@@ -2457,8 +2473,8 @@ void get_sample_mag_err(struct sample_data_mag_err *sample)
   char opt;
   static char datafile[300]="";
   static int colz=2,colmag=3,colmagerr=4;
-  double *z,*mag,*magerr;
-  int *log1,*log2,*log3;
+  double *z,*magni,*magerr;
+  int *logic1,*logic2,*logic3;
   int ndat;
   int i,j=0;
 
@@ -2479,20 +2495,20 @@ void get_sample_mag_err(struct sample_data_mag_err *sample)
     
     ndat=FileNLin(datafile);
     z  =malloc(ndat*sizeof(double));
-    mag=malloc(ndat*sizeof(double));
+    magni=malloc(ndat*sizeof(double));
     magerr=malloc(ndat*sizeof(double));
-    log1=malloc(ndat*sizeof(int));
-    log2=malloc(ndat*sizeof(int));
-    log3=malloc(ndat*sizeof(int));
+    logic1=malloc(ndat*sizeof(int));
+    logic2=malloc(ndat*sizeof(int));
+    logic3=malloc(ndat*sizeof(int));
     sample->mag=malloc(ndat*sizeof(double));
     sample->z  =malloc(ndat*sizeof(double));
     sample->mag_err=malloc(ndat*sizeof(double));
-    ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colmag,mag,log2,&ndat);
-    ReadDoublecol(datafile,colmagerr,magerr,log3,&ndat);
+    ReadDoublecol(datafile,colz  ,z  ,logic1,&ndat);
+    ReadDoublecol(datafile,colmag,magni,logic2,&ndat);
+    ReadDoublecol(datafile,colmagerr,magerr,logic3,&ndat);
     for(i=0;i<ndat;i++) {
-      if(log1[i] && log2[i] && log3[i]) {
-	sample->mag[j]=(double)mag[i];
+      if(logic1[i] && logic2[i] && logic3[i]) {
+	sample->mag[j]=(double)magni[i];
 	sample->z[j]  =(double)z[i];
 	sample->mag_err[j]  =(double)magerr[i];
 	j++;
@@ -2536,7 +2552,8 @@ void get_sample_gmz_wC (struct sample_data_gmz_wC *sample)
   static char datafile[300]="";
   static int colz=2, colerrz=3,colmagSel=4,colmagDist=5,colerrMagDist=6;
   double *z,*errz,*magSel,*magDist,*errMagDist;
-  int *log1,*log2,*log3,*log4,*log5;
+  int *logic1,*logic2,*logic3,*logic4,*logic5;
+
   int ndat;
   int i,j=0;
 
@@ -2566,24 +2583,24 @@ void get_sample_gmz_wC (struct sample_data_gmz_wC *sample)
     magSel     =malloc(ndat*sizeof(double));
     magDist    =malloc(ndat*sizeof(double));
     errMagDist =malloc(ndat*sizeof(double));
-    log1=malloc(ndat*sizeof(int));
-    log2=malloc(ndat*sizeof(int));
-    log3=malloc(ndat*sizeof(int));
-    log4=malloc(ndat*sizeof(int));
-    log5=malloc(ndat*sizeof(int));
+    logic1=malloc(ndat*sizeof(int));
+    logic2=malloc(ndat*sizeof(int));
+    logic3=malloc(ndat*sizeof(int));
+    logic4=malloc(ndat*sizeof(int));
+    logic5=malloc(ndat*sizeof(int));
     sample->magSel=malloc(ndat*sizeof(double));
     sample->magDist=malloc(ndat*sizeof(double));
     sample->z  =malloc(ndat*sizeof(double));
     sample->errz  =malloc(ndat*sizeof(double));
     sample->errMagDist=malloc(ndat*sizeof(double));
-    ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colerrz,errz,log2,&ndat);
-    ReadDoublecol(datafile,colmagSel,magSel,log3,&ndat);
-    ReadDoublecol(datafile,colmagDist,magDist,log4,&ndat);
-    ReadDoublecol(datafile,colerrMagDist,errMagDist,log5,&ndat);
+    ReadDoublecol(datafile,colz  ,z  ,logic1,&ndat);
+    ReadDoublecol(datafile,colerrz,errz,logic2,&ndat);
+    ReadDoublecol(datafile,colmagSel,magSel,logic3,&ndat);
+    ReadDoublecol(datafile,colmagDist,magDist,logic4,&ndat);
+    ReadDoublecol(datafile,colerrMagDist,errMagDist,logic5,&ndat);
     for(i=0;i<ndat;i++)
     {
-      if(log1[i] && log2[i] && log3[i] && log4[i] && log5[i])
+      if(logic1[i] && logic2[i] && logic3[i] && logic4[i] && logic5[i])
       {
         sample->z[j]=(double)z[i];
         sample->errz[j]=(double)errz[i];
@@ -2631,9 +2648,9 @@ void get_sample_ceg(struct sample_data *sample)
   char opt;
   static char datafile[100]="";
   static int colz=2,collum=3,colmag=4,colew=5,colimage=6;
-  double *z,*mag,*lum,*ew;
+  double *z,*magni,*lum,*ew;
   char *image;
-  int *log1,*log2,*log3,*log4,*log5;
+  int *logic1,*logic2,*logic3,*logic4,*logic5;
   int ndat;
   int i,j=0;
 
@@ -2657,35 +2674,35 @@ void get_sample_ceg(struct sample_data *sample)
     ndat=FileNLin(datafile);
     z    =malloc(ndat*sizeof(double));
     lum  =malloc(ndat*sizeof(double));
-    mag  =malloc(ndat*sizeof(double));
+    magni  =malloc(ndat*sizeof(double));
     ew   =malloc(ndat*sizeof(double));
     image=malloc(ndat*51*sizeof(char));
-    log1=malloc(ndat*sizeof(int));
-    log2=malloc(ndat*sizeof(int));
-    log3=malloc(ndat*sizeof(int));
-    log4=malloc(ndat*sizeof(int));
-    log5=malloc(ndat*sizeof(int));
+    logic1=malloc(ndat*sizeof(int));
+    logic2=malloc(ndat*sizeof(int));
+    logic3=malloc(ndat*sizeof(int));
+    logic4=malloc(ndat*sizeof(int));
+    logic5=malloc(ndat*sizeof(int));
     sample->mag=malloc(ndat*sizeof(double));
     sample->lum=malloc(ndat*sizeof(double));
     sample->z  =malloc(ndat*sizeof(double));
     sample->ew =malloc(ndat*sizeof(double));
     sample->image=vector_s(ndat,51);
-    ReadDoublecol(datafile,colz  ,z  ,log1,&ndat);
-    ReadDoublecol(datafile,colmag,mag,log2,&ndat);
-    ReadDoublecol(datafile,collum,lum,log3,&ndat);
-    ReadDoublecol(datafile,colew ,ew ,log4,&ndat);
-    ReadCharcol  (datafile,colimage ,image ,log5,51,&ndat);
+    ReadDoublecol(datafile,colz  ,z  ,logic1,&ndat);
+    ReadDoublecol(datafile,colmag,mag,logic2,&ndat);
+    ReadDoublecol(datafile,collum,lum,logic3,&ndat);
+    ReadDoublecol(datafile,colew ,ew ,logic4,&ndat);
+    ReadCharcol  (datafile,colimage ,image ,logic5,51,&ndat);
     for(i=0;i<ndat;i++) {
-/*       //printf(" z %f log %d\n",z[i],log[i]); */
-      if(log1[i] && log2[i] && log3[i] && log4[i]) {
-/* 	//printf(" YESSS\n"); */
-	sample->mag[j]=(double)mag[i]; 
-	sample->lum[j]=(double)lum[i];
-	sample->z[j]  =(double)z[i];
-	sample->ew[j]  =(double)ew[i]; 
-	strcpy(sample->image[j],image+i*51);
-/* 	//printf(" Por aqui %d %f %f \n",j,sample->mag[j],sample->z[j]); */
-	j++;
+      /*       //printf(" z %f log %d\n",z[i],log[i]); */
+      if(logic1[i] && logic2[i] && logic3[i] && logic4[i]) {
+        /* 	//printf(" YESSS\n"); */
+        sample->mag[j]=(double)magni[i];
+        sample->lum[j]=(double)lum[i];
+        sample->z[j]  =(double)z[i];
+        sample->ew[j]  =(double)ew[i];
+        strcpy(sample->image[j],image+i*51);
+        /* 	//printf(" Por aqui %d %f %f \n",j,sample->mag[j],sample->z[j]); */
+        j++;
       }
     }
     sample->ngalax=j;
@@ -2722,7 +2739,7 @@ void get_sample_ceg(struct sample_data *sample)
 }
 
 
-void set_cosmology()
+void set_cosmology(void)
 {
   static double H0=70;
   static double OM=0.3;
@@ -2736,7 +2753,7 @@ void set_cosmology()
   cosmo_init(&cosmo, H0, OM, OL);
 }
 
-void set_Schechter_M() 
+void set_Schechter_M(void)
 {
   printf(" Schechter parameters function: \n");
   printf(" M star: ");
@@ -2748,7 +2765,7 @@ void set_Schechter_M()
 
 }
 
-void set_Schechter_L() 
+void set_Schechter_L(void)
 {
 
   printf(" Schechter parameters function: \n");
@@ -2762,7 +2779,7 @@ void set_Schechter_L()
   schlf_L.alfa=readf(schlf_L.alfa);
 }
 
-void Generate_Cat_M()
+void Generate_Cat_M(void)
 {
   static double mlow=0,mup=0,merror_mean=0,merror_stddev=0;
   double Mlow,Mup;
@@ -2941,7 +2958,7 @@ void Generate_Cat_M()
 
 
 /* es una copia de Generate_Cat_M ? */
-void Generate_Cat_M_C()
+void Generate_Cat_M_C(void)
 {
   static double mlow=0,mup=0,merror_mean=0,merror_stddev=0;
   double Mlow,Mup;
@@ -2956,7 +2973,7 @@ void Generate_Cat_M_C()
   unsigned int i;
 /*   double xx[1000],yy[1000]; */
   double nobjAllSky, nobjMean;
-  int nobj;
+  unsigned int nobj;
 /*   char cnul; */
 /*   double kkk=1.1; */
 /*   double fnul; */
@@ -3122,13 +3139,13 @@ void Generate_Cat_M_C()
 /* dabreu */
 /* toda la funci�n Generate_Cat_L() es una adaptaci�n de Generate_Cat() */
 
-void Generate_Cat_L()
+void Generate_Cat_L(void)
 {
   static double fluxlow=0.,fluxup=0.,fluxerr_mean=0.,fluxerr_stddev=0.;
   double Flow,Fup;
   static double zlow=0,zup=0.5;
   static double area=41252.;
-  double *Lsample,*zsample,*fsample,*ferror,*fobserved; 
+  double *Lsample,*zsample,*fluxsample,*fluxerror,*fluxobserved;
   static int plots=0; /* para no hacer las gr�ficas */
 
   unsigned int i;
@@ -3182,10 +3199,10 @@ void Generate_Cat_L()
 
   zsample=malloc(nobj*sizeof(double));
   Lsample=malloc(nobj*sizeof(double));
-  fsample=malloc(nobj*sizeof(double));
+  fluxsample=malloc(nobj*sizeof(double));
 
-  ferror=malloc(nobj*sizeof(double));
-  fobserved=malloc(nobj*sizeof(double));
+  fluxerror=malloc(nobj*sizeof(double));
+  fluxobserved=malloc(nobj*sizeof(double));
 
   printf(" Number of galaxies generated: %d\n",nobj);
 
@@ -3197,14 +3214,14 @@ void Generate_Cat_L()
     Flow=Lum(zsample[i],fluxlow,cosmo);
     Fup=Lum(zsample[i],fluxup,cosmo);
     Lsample[i]= Schechterdev_L(schlf_L,Flow,Fup);
-    fsample[i]=Flux(zsample[i],Lsample[i],cosmo);
+    fluxsample[i]=Flux(zsample[i],Lsample[i],cosmo);
 
 /*    printf("fluxerr_mean = %g\n",fluxerr_mean); */
 
-    while((ferror[i] = fluxerr_mean + Gasdev() * fluxerr_stddev) < 0);
-    while((fobserved[i] = fsample[i] + Gasdev()*ferror[i]) < 0);
+    while((fluxerror[i] = fluxerr_mean + Gasdev() * fluxerr_stddev) < 0);
+    while((fluxobserved[i] = fluxsample[i] + Gasdev()*fluxerror[i]) < 0);
   }
-  MinMax_d(nobj,fsample,&fh1,&fh2);
+  MinMax_d(nobj,fluxsample,&fh1,&fh2);
   MinMax_d(nobj,Lsample,&Fh1,&Fh2);
   
   if(plots) {
@@ -3217,7 +3234,7 @@ void Generate_Cat_L()
      cpgpanl(2,1);
      cpgswin(fh1-1.,fh2+1.,0.,nobj/2);
      cpgbox("BCTNS",0,0,"BCTNS",0,0);
-     cpghist_d(nobj,fsample,fh1-1.,fh2+1.,20,1); 
+     cpghist_d(nobj,fluxsample,fh1-1.,fh2+1.,20,1);
      cpglab("Apparent magnitude","Number of galaxies"," Apparente magnitude distribution");
      cpgpanl(1,2);
      cpgswin(Fh1-1.,Fh2+1.,0.,nobj/2);
@@ -3242,8 +3259,8 @@ void Generate_Cat_L()
           "3 L_ABS (absolute luminosity)\n# 4 F_ERR (error in apparent flux)\n# "
           "5 F_OBS (observed flux taking into account observational errors\n"); 
   for(i=0;i<nobj;i++) {
-    fprintf(fout," %8.6f  %10.5g %10.5g",zsample[i],fsample[i],Lsample[i]);
-    fprintf(fout," %10.5g  %10.5g\n",ferror[i],fobserved[i]);
+    fprintf(fout," %8.6f  %10.5g %10.5g",zsample[i],fluxsample[i],Lsample[i]);
+    fprintf(fout," %10.5g  %10.5g\n",fluxerror[i],fluxobserved[i]);
   }
   fclose(fout);
 
@@ -3254,7 +3271,7 @@ void Generate_Cat_L()
 
 /* Generate_Cat_M_wC -> generate catalogs in two bands for selection using Color distribution */
 
-void Generate_Cat_M_wC()
+void Generate_Cat_M_wC(void)
 {
   static double mSelUp=0;
   static double mSelError_mean=0, mSelError_stddev=0;
