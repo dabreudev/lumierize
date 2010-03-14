@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "sthisto.h"
 
 int **StHisto2D_d(int n, double *x, double *y, int nbinx, double *xmin, double *xmax, int nbiny, double *ymin, double *ymax)
 

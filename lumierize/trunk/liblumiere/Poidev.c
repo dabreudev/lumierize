@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "random.h"
 
 
 /* La siguiente subrutina parece que hace tonterias para xm>1e7. Las desviaciones

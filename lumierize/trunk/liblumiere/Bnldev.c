@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "random.h"
 /* Subrutina de desviaciones binomiales. Cogida del Numerical Recipes.
    Suficientemente testada en todos los casos */
 
