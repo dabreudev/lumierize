@@ -1,5 +1,18 @@
-#include "modulos.h"
+#include "string.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "math.h"
 #include <gsl/gsl_machine.h>
+#include "mlsty.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "alloc.h"
+#include "minmax.h"
+#include "amoeba.h"
+#include "vvmax.h"
+#include "step.h"
+#include "functions.h"
+
 #define FTOL  1e-10
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -42,7 +55,7 @@ struct poselfunc *fsel_STY_s_p_f_PO;
 struct SurveyDB *sdb_STY_s_p_f_PO;
 
 int ndata;
-int nconfl;
+int nconfl_STY_s_p_f_PO;
 double conflim;
 double *pp;
 int iter_m,iter_c;
@@ -53,7 +66,7 @@ char photband_STY_s_p_f_PO[51];
 double gamma_STY_s_p_f_PO,delta_STY_s_p_f_PO,Kcoc_STY_s_p_f_PO;
 
 
-int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,char photband[51], float gamma, float delta, float Kcoc, struct poselfunc fsel, struct SurveyDB sdb,  double ewlim, struct Histdist ewd, struct cosmo_param cosmo, struct Schlf_L *lf) {
+int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,char photband[51], float gamma_f, float delta, float Kcoc, struct poselfunc fsel, struct SurveyDB sdb,  double ewlim, struct Histdist ewd, struct cosmo_param cosmo, struct Schlf_L *lf) {
 
 
   double *y;
@@ -90,7 +103,7 @@ int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,cha
   ew_STY_s_p_f_PO=ew;
   isur_STY_s_p_f_PO=isurvey;
   strcpy(photband_STY_s_p_f_PO,photband);
-  gamma_STY_s_p_f_PO=gamma;
+  gamma_STY_s_p_f_PO=gamma_f;
   delta_STY_s_p_f_PO=delta;
   Kcoc_STY_s_p_f_PO=Kcoc;
 
@@ -108,7 +121,7 @@ int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,cha
   lfvvmax.covarlnlf =matrix_d(lfvvmax.nbin,lfvvmax.nbin);
 
   for(i=0;i<n;i++)   {
-    flux[i]=Flux_ew_mag(ew[i],magn[i],photband,gamma,delta,Kcoc);
+    flux[i]=Flux_ew_mag(ew[i],magn[i],photband,gamma_f,delta,Kcoc);
     lumi[i]=log(Lum(z[i],flux[i],cosmo));
     printf(" Objeto %d flux %g \n",i,flux[i]);
   }
@@ -131,7 +144,7 @@ int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,cha
 
   MinMax_d(n,lumi,&minlum,&maxlum);
   for(i=0;i<=lfvvmax.nbin;i++) lfvvmax.lumi[i]=minlum+i*(maxlum-minlum)/lfvvmax.nbin;
-  flim=Flux_ew_mag(ewmoda,magnlim,photband,gamma,delta,Kcoc);
+  flim=Flux_ew_mag(ewmoda,magnlim,photband,gamma_f,delta,Kcoc);
 /*   strrad=Surveyrad(sdb); */
   strrad=319./180./180.*M_PI*M_PI;
   VVmax_L(n,flux,flux,z,flim,strrad,fsel.zbin[0],fsel.zbin[fsel.nz-1],cosmo,&lfvvmax);
@@ -213,7 +226,7 @@ int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,cha
   if(TRYEMPIRICAL) {
     if(DEBUG) printf(" llamantry \n");
     conflim=exp(-.5/10.);
-    EmpiricalCovars_STY_s_p_f_PO(n,magn,ew,z,isurvey,par,sigpar,photband,gamma,delta,Kcoc,fsel,sdb,ewlim,ewd,cosmo,lf); 
+    EmpiricalCovars_STY_s_p_f_PO(n,magn,ew,z,isurvey,par,sigpar,photband,gamma_f,delta,Kcoc,fsel,sdb,ewlim,ewd,cosmo,lf);
     if(DEBUG) printf(" sale \n");
 
     if(DEBUG) printf(" Solucion final: Lstar %.15g +/- %.15g alpha %.4g +/- %.4g\n",lf->Lstar,lf->errLstar,lf->alfa,lf->erralfa);
@@ -237,7 +250,7 @@ int  MLA_STY_s_p_f_PO  (int n,double *magn,double *ew,double *z,int *isurvey,cha
 /*     EmpiricalCovars_STY_s_p_f_PO(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 
@@ -285,6 +298,7 @@ double Amoe_Funk_STY_s_p_f_PO_main(int n, double *x, double *y, double *p) {
   int isurvey;
   double area;
   double ewhis;
+  (void)n;
 
   lfamo.alfa=p[0];
   lfamo.Lstar=pow(10.,p[1]);
@@ -363,7 +377,7 @@ double Amoe_Funk_STY_s_p_f_PO_conf(int n, double *x, double *y, double *p) {
 
 
 
-void   EmpiricalCovars_STY_s_p_f_PO(int n,double *magn,double *ew, double *z,int *isurvey,double *par, double *sigpar,char photband[51], float gamma, float delta, float Kcoc, struct poselfunc fsel, struct SurveyDB sdb, double ewlim, struct Histdist ewd, struct cosmo_param cosmo,struct Schlf_L *lf) {
+void   EmpiricalCovars_STY_s_p_f_PO(int n,double *magn,double *ew, double *z,int *isurvey,double *par, double *sigpar,char photband[51], float gamma_f, float delta, float Kcoc, struct poselfunc fsel, struct SurveyDB sdb, double ewlim, struct Histdist ewd, struct cosmo_param cosmo,struct Schlf_L *lf) {
 
   int i,j;  
   double *parconf; 
@@ -376,6 +390,17 @@ void   EmpiricalCovars_STY_s_p_f_PO(int n,double *magn,double *ew, double *z,int
   double **bb;
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)gamma;
+  (void)delta;
+  (void)isurvey;
+  (void)photband;
+  (void)sdb;
+  (void)ewlim;
+  (void)Kcoc;
+  (void)fsel;
+  (void)ewd;
+  (void)cosmo;
+  (void)ew;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

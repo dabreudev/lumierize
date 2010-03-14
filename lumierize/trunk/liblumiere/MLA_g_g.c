@@ -1,4 +1,9 @@
-#include "modulos.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <malloc.h>
+#include <cpgplot.h>
+#include "mlhist.h"
 #define FTOL  1e-12
 #define FTOL2 5e-6
 #define MAXITER  300
@@ -16,19 +21,19 @@ float Amoe_Funk_confp1(int n, float *x, float *y, float *p);
 void   DebugPlot(int n,float *x,float *errx); 
 
 
-float *sig;
-int ndata;
-int iter_m;
-int iter_c;
-int amoeba_use; 
-float ML[10*MAXITER];
-float  m[10*MAXITER];
-float  s[10*MAXITER];
-float conflim;
-float parconf0;
-float parconf1;
-float meanerrx,stderrx;
-float wmean,wsigma;
+float *sig_g_g;
+int ndata_g_g;
+int iter_m_g_g;
+int iter_c_g_g;
+int amoeba_use_g_g;
+float MLVal_g_g[10*MAXITER];
+float  m_g_g[10*MAXITER];
+float  s_g_g[10*MAXITER];
+float conflim_g_g;
+float parconf0_g_g;
+float parconf1_g_g;
+float meanerrx_g_g,stderrx_g_g;
+float wmean_g_g,wsigma_g_g;
 
 
 int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,float *errsigma,float *covarmeansigma) {
@@ -45,8 +50,8 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
   
   float par0_conf_min;
   float par0_conf_max;
-  float par1_conf_min;
-  float par1_conf_max;
+  float par1_conf_min = 0;
+  float par1_conf_max = 0;
 
   float *y;
   int i;
@@ -66,8 +71,8 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
 
 /*   printf(" Entra aqui\n"); */
 
-  sig=errx;
-  ndata=n;
+  sig_g_g=errx;
+  ndata_g_g=n;
 
 
 
@@ -82,11 +87,11 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
 
 
 
-  iter_m=0;
+  iter_m_g_g=0;
 
-  meanerrx=StMedia(n,errx,&stderrx);
+  meanerrx_g_g=StMedia(n,errx,&stderrx_g_g);
 
-  if(DEBUG) printf(" meanerrx %g /500 %g\n",meanerrx,meanerrx/500.);
+  if(DEBUG) printf(" meanerrx %g /500 %g\n",meanerrx_g_g,meanerrx_g_g/500.);
 
   if(DEBUG3) {
     for(i=0;i<n;i++) printf(" Entrada x %g errx %g\n",x[i],errx[i]);
@@ -98,9 +103,9 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
 
 
   while(iter_amo>= MAXITER) {
-    wmean=StErrWeightMedia(n,x,errx,&wsigma); 
-    par[0]=wmean;
-    par[1]=wsigma;
+    wmean_g_g=StErrWeightMedia(n,x,errx,&wsigma_g_g);
+    par[0]=wmean_g_g;
+    par[1]=wsigma_g_g;
     sigpar[0]=par[1]/sqrt(n);
     sigpar[1]=par[1]/sqrt(n)/10.;
     if(DEBUG2) printf(" INI    par0 %f    par1 %f\n",   par[0],   par[1]); 
@@ -118,16 +123,16 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
   pargood[0]=16.5;
   pargood[1]=3.;
   
-  conflim=exp(-.5/100.);             //Los puntos corresponderan a 1 sigma entre 10 de desviacion para dist. normal en par
+  conflim_g_g=exp(-.5/100.);             //Los puntos corresponderan a 1 sigma entre 10 de desviacion para dist. normal en par
 
   parconf[0]=par[0]-5*par[0]/sqrt(n);
   sigparconf[0]=par[0]/sqrt(n);
-  parconf1=par[1];
-  iter_c=0;
-  if(DEBUG) printf(" ml[iter_m-1] %.8g\n",ML[iter_m-1]);
+  parconf1_g_g=par[1];
+  iter_c_g_g=0;
+  if(DEBUG) printf(" ml[iter_m-1] %.8g\n",MLVal_g_g[iter_m_g_g-1]);
   Amoeba(n,x,y,1,parconf,sigparconf,FTOL2,MAXITER2,Amoe_Funk_confp0);
   par0elip[0]=parconf[0];
-  par1elip[0]=parconf1;
+  par1elip[0]=parconf1_g_g;
   if(DEBUG) printf("Amoeba  Mean-sigma(mean) %14.10f \n",parconf[0]);
 /*   cpgpt1(parconf[0],parconf1,3);  */
 
@@ -140,10 +145,10 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
     parconf[0]=par[0]+(par[0]-par0_conf_max);
   }
   if(DEBUG) printf(" par_conf_min %g  par_conf_max %g parconf[0] %g \n",par0_conf_min,par0_conf_max,parconf[0]);
-  iter_c=0;
+  iter_c_g_g=0;
   Amoeba(n,x,y,1,parconf,sigparconf,FTOL2,MAXITER2,Amoe_Funk_confp0);
   par0elip[1]=parconf[0];
-  par1elip[1]=parconf1;
+  par1elip[1]=parconf1_g_g;
   if(DEBUG) printf("Amoeba  Mean+sigma(mean) %14.10f \n",parconf[0]);
 /*   cpgpt1(parconf[0],parconf1,3);  */
   if(parconf[0]<par[0])  {
@@ -159,11 +164,11 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
 
   parconf[1]=par[1]-5*par[1]/sqrt(n);
   sigparconf[1]=par[1]/sqrt(n);
-  parconf0=par[0];
-  iter_c=0;
-  if(DEBUG) printf(" ml[iter_m-1] %.8g\n",ML[iter_m-1]);
+  parconf0_g_g=par[0];
+  iter_c_g_g=0;
+  if(DEBUG) printf(" ml[iter_m-1] %.8g\n",MLVal_g_g[iter_m_g_g-1]);
   Amoeba(n,x,y,1,parconf,sigparconf,FTOL2,MAXITER2,Amoe_Funk_confp1);
-  par0elip[2]=parconf0;
+  par0elip[2]=parconf0_g_g;
   par1elip[2]=parconf[0];
   if(DEBUG) printf("Amoeba  Sgigma-sigma(sigma) %14.10f \n",parconf[0]);
 /*   cpgpt1(parconf[0],parconf1,3);  */
@@ -177,9 +182,9 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
     parconf[0]=par[1]+(par[1]-par1_conf_max);
   }
   if(DEBUG) printf(" par_conf_min %g  par_conf_max %g parconf[1] %g \n",par1_conf_min,par1_conf_max,parconf[0]);
-  iter_c=0;
+  iter_c_g_g=0;
   Amoeba(n,x,y,1,parconf,sigparconf,FTOL2,MAXITER2,Amoe_Funk_confp1);
-  par0elip[3]=parconf0;
+  par0elip[3]=parconf0_g_g;
   par1elip[3]=parconf[0];
   if(DEBUG) printf("Amoeba  Sigma+sigma(sigma) %14.10f \n",parconf[0]);
 /*   cpgpt1(parconf[0],parconf1,3);  */
@@ -195,11 +200,11 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
 
   for(i=4;i<NCONFL;i++) {
     parconf[0]=par[0]+par[1]*Gasdev();
-    parconf1=par1_conf_min+(par1_conf_max-par1_conf_min)*i/(NCONFL-1.);
-    iter_c=0;
+    parconf1_g_g=par1_conf_min+(par1_conf_max-par1_conf_min)*i/(NCONFL-1.);
+    iter_c_g_g=0;
     iter_amo=Amoeba(n,x,y,1,parconf,sigparconf,FTOL2,MAXITER2,Amoe_Funk_confp0);
     par0elip[i]=parconf[0];
-    par1elip[i]=parconf1;
+    par1elip[i]=parconf1_g_g;
     if(DEBUG) printf(" i %d par0 %g par1 %g\n",i,par0elip[i],par1elip[i]);
     if(iter_amo==MAXITER2) i--;
     /*     cpgpt1(parconf0,parconf[0],3);  */
@@ -212,8 +217,8 @@ int MLA_g_g(int n,float *x,float *errx,float *mean,float *sigma,float *errmean,f
 
   /* Para deshacer el asunto de que haya escogido un limite de confidencia diferente */
   for(i=0;i<NCONFL;i++) {
-    par0elip[i]/=sqrt(-2*log(conflim));
-    par1elip[i]/=sqrt(-2*log(conflim));
+    par0elip[i]/=sqrt(-2*log(conflim_g_g));
+    par1elip[i]/=sqrt(-2*log(conflim_g_g));
   }
 
 
@@ -286,20 +291,23 @@ float Amoe_Funk_main(int n, float *x, float *y, float *p) {
   float pi=4*atan(1.); 
   int i;
   double logL=0.;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+
 
 /*   if((p[1])<=meanerrx/500.) p[1]=wsigma;  */
   logL=0.;
-  for(i=0;i<ndata;i++) {
-    if(DEBUG3) printf(" a ame_main le llega x %g errx %g\n",x[i],sig[i]);
-    logL-=-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[1]*p[1]);
-    logL-=-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+p[1]*p[1]);
+  for(i=0;i<ndata_g_g;i++) {
+    if(DEBUG3) printf(" a ame_main le llega x %g errx %g\n",x[i],sig_g_g[i]);
+    logL-=-log(sqrt(2.*pi))-0.5*log(sig_g_g[i]*sig_g_g[i]+p[1]*p[1]);
+    logL-=-(x[i]-p[0])*(x[i]-p[0])/2./(sig_g_g[i]*sig_g_g[i]+p[1]*p[1]);
   }
-  if(DEBUG2) printf(" mlF iter %3d logL %15g  p0 %f p1 %f ndata %d\n",iter_m,logL,p[0],p[1],ndata);
+  if(DEBUG2) printf(" mlF iter %3d logL %15g  p0 %f p1 %f ndata %d\n",iter_m_g_g,logL,p[0],p[1],ndata_g_g);
 
-  ML[iter_m]=logL; 
-  m[iter_m]=p[0]; 
-  s[iter_m]=p[1]; 
-  iter_m++;
+  MLVal_g_g[iter_m_g_g]=logL;
+  m_g_g[iter_m_g_g]=p[0];
+  s_g_g[iter_m_g_g]=p[1];
+  iter_m_g_g++;
   return((float)logL);
 }
 
@@ -312,16 +320,19 @@ float Amoe_Funk_confp0(int n, float *x, float *y, float *p) {
   float pi=4*atan(1.); 
   int i;
   double logL=0.;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+
   
   logL=0.;
-  for(i=0;i<ndata;i++) {
-    logL-=-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+parconf1*parconf1);
-    logL-=-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+parconf1*parconf1);
+  for(i=0;i<ndata_g_g;i++) {
+    logL-=-log(sqrt(2.*pi))-0.5*log(sig_g_g[i]*sig_g_g[i]+parconf1_g_g*parconf1_g_g);
+    logL-=-(x[i]-p[0])*(x[i]-p[0])/2./(sig_g_g[i]*sig_g_g[i]+parconf1_g_g*parconf1_g_g);
   }
-  if(DEBUG2) printf(" iter %d logL %g log(conlim) %g p0 %f p1 %f\n",iter_c,fabs(logL-(ML[iter_m-1]-log(conflim))),log(conflim),p[0],parconf1);
-  if(DEBUG2 && log(conflim)==0 ) printf(" mlF2 iter %3d logL %15g  p0 %f p1 %f\n",iter_c,logL,p[0],parconf1);
-  iter_c++;
-  return(fabs(logL-(ML[iter_m-1]-log(conflim)))); 
+  if(DEBUG2) printf(" iter %d logL %g log(conlim_g_g) %g p0 %f p1 %f\n",iter_c_g_g,fabs(logL-(MLVal_g_g[iter_m_g_g-1]-log(conflim_g_g))),log(conflim_g_g),p[0],parconf1_g_g);
+  if(DEBUG2 && log(conflim_g_g)==0 ) printf(" mlF2 iter %3d logL %15g  p0 %f p1 %f\n",iter_c_g_g,logL,p[0],parconf1_g_g);
+  iter_c_g_g++;
+  return(fabs(logL-(MLVal_g_g[iter_m_g_g-1]-log(conflim_g_g))));
 /*   return(fabs(logL-log(conflim))); */
 }
 
@@ -332,17 +343,19 @@ float Amoe_Funk_confp1(int n, float *x, float *y, float *p) {
   float pi=4*atan(1.); 
   int i;
   double logL=0.;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
 
   if(p[0]<=0) p[0]=-p[0]; 
   logL=0.;
-  for(i=0;i<ndata;i++) {
-    logL-=-log(sqrt(2.*pi))-0.5*log(sig[i]*sig[i]+p[0]*p[0]); 
-    logL-=-(x[i]-parconf0)*(x[i]-parconf0)/2./(sig[i]*sig[i]+p[0]*p[0]); 
+  for(i=0;i<ndata_g_g;i++) {
+    logL-=-log(sqrt(2.*pi))-0.5*log(sig_g_g[i]*sig_g_g[i]+p[0]*p[0]);
+    logL-=-(x[i]-parconf0_g_g)*(x[i]-parconf0_g_g)/2./(sig_g_g[i]*sig_g_g[i]+p[0]*p[0]);
   }
-  if(DEBUG2) printf(" iter %d logL %g p0 %f p1 %f\n",iter_c,fabs(logL-(ML[iter_m-1]-log(conflim))),parconf0,p[0]);
-  if(DEBUG2) printf(" mlF3 iter %3d logL %15g  p0 %f p1 %f\n",iter_c,logL,p[0],p[1]);
-  iter_c++;
-  return(fabs(logL-(ML[iter_m-1]-log(conflim)))); 
+  if(DEBUG2) printf(" iter %d logL %g p0 %f p1 %f\n",iter_c_g_g,fabs(logL-(MLVal_g_g[iter_m_g_g-1]-log(conflim_g_g))),parconf0_g_g,p[0]);
+  if(DEBUG2) printf(" mlF3 iter %3d logL %15g  p0 %f p1 %f\n",iter_c_g_g,logL,p[0],p[1]);
+  iter_c_g_g++;
+  return(fabs(logL-(MLVal_g_g[iter_m_g_g-1]-log(conflim_g_g))));
 /*   return(fabs(logL-log(conflim))); */
   
 }
@@ -383,7 +396,7 @@ void DebugPlot(int n,float *x,float *errx) {
       ppar[0]=m;
       ppar[1]=s;
       fprintf(fp," %.20g %g %g\n",Amoe_Funk_main(n,x,y,ppar),ppar[0],ppar[1]);
-      iter_m=0;
+      iter_m_g_g=0;
     }
   }
   

@@ -1,4 +1,17 @@
-#include "modulos.h"
+#include "string.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "math.h"
+#include <gsl/gsl_machine.h>
+#include <cpgplot.h>
+#include "cosmology.h"
+#include "schechter.h"
+#include "quartil.h"
+#include "alloc.h"
+#include "mlswml.h"
+#include "random.h"
+#include "gaussj.h"
+
 #define FTOL  1e-12
 //#define FTOL2 1e-6
 #define FTOL2 1e-4
@@ -37,7 +50,7 @@ double magl;
 int ndata;
 int iter_m;
 int iter_c;
-int nconfl;
+int nconfl_SWML_M;
 double conflim;
 double *pp;
 double MLmax;
@@ -178,7 +191,7 @@ int  MLA_SWML_M(int n,double *magn,double *z,double mlim, double strrad, double 
 /*     EmpiricalCovars_SWML_M(n,x,errx,k,xk,Pk,sigpar,covar);  */
 /*     nemp_f++; */
 /*     cpgsci(1); */
-/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza"); */
+/*     cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza"); */
   }
   if(DEBUG) printf(" Calculo empirico\n");
 
@@ -210,13 +223,13 @@ int  MLA_SWML_M(int n,double *magn,double *z,double mlim, double strrad, double 
 double Amoe_Funk_SWML_M_main(int n, double *x, double *y, double *p) {
 
   int i,j; 
-  int jend;
+  int jend = 0;
   double logL=0.;
   double Mabs;
   double intsch;
   double Mlow;
   double norm;
-  double funl;
+  double funl=0;
 
   int jbin;
 

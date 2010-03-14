@@ -1,4 +1,14 @@
-#include "modulos.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "cosmology.h"
+#include "schechter.h"
+#include "minmax.h"
+#include "mlhist.h"
+
 #define FTOL  1e-12
 #define FTOL2 5e-6
 #define MAXITER  300
@@ -101,7 +111,7 @@ double Amoe_Funk_g_n_f_d_main(int n, double *x, double *y, double *p) {
 
   int i,j;
   double logL=0.,logLb;
-  double conv;
+  double conv=0;
   double norm;
   int nstepnorm=1000;
   double xminnorm,xmaxnorm;
@@ -111,6 +121,9 @@ double Amoe_Funk_g_n_f_d_main(int n, double *x, double *y, double *p) {
   
   int nul=0;
   int nul2=0;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+
 
   if((p[1])<0) p[1]=-p[1];  
 
@@ -188,6 +201,8 @@ double Amoe_Funk_g_n_f_d_conf(int n, double *x, double *y, double *p) {
   
   int nul=0;
   int nul2=0;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
 
   if((p[1])<0) p[1]=-p[1];  
 

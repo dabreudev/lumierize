@@ -1,4 +1,6 @@
-#include "modulos.h"
+#include <math.h>
+#include <stdlib.h>
+#include "mlsty.h"
 #define FTOL  1e-13
 #define MAXITER  600
 #define FTOL2  1e-12

@@ -1,4 +1,12 @@
-#include "modulos.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include "alloc.h"
+#include "mlhist.h"
+#include "sthisto.h"
+
 #define FTOL  1e-12
 #define FTOL2 1e-6
 #define FTOL3 1e-7
@@ -185,7 +193,7 @@ int  MLA_h_g_f_d(int n,double *x,double *errx,double xfermi, double Tfermi, int 
     EmpiricalCovars_h_g_f_d(n,x,errx,k,xk,Pk,sigpar,covar); 
     nemp_f++;
     cpgsci(1);
-    cpglab("P\\d1\\u","P\\d3\\u","Contornos de límites de confianza");
+    cpglab("P\\d1\\u","P\\d3\\u","Contornos de lï¿½mites de confianza");
   }
   if(DEBUG) printf(" Calculo empirico\n");
   for(i=0;i<k;i++) {
@@ -230,6 +238,9 @@ double Amoe_Funk_h_g_f_d_main(int n, double *x, double *y, double *p) {
   double meanx,stdx;
   int    nstepnorm=20;
   int    nstep=20;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+
 
   logL=0.;
 
@@ -293,6 +304,9 @@ double Amoe_Funk_h_g_f_d_conf(int n, double *x, double *y, double *p) {
   double ltmp;
   double tmp1,priori;
   double norm=0;
+  (void)y;/* To avoid warning */
+  (void)n;/* To avoid warning */
+
 
   logL=0.;
 
