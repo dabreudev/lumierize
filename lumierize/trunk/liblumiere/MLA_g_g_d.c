@@ -9,6 +9,7 @@
 #include "amoeba.h"
 #include "random.h"
 #include "cpgplot.h"
+#include "elip.h"
 
 #define FTOL  1e-12
 #define FTOL2 5e-6

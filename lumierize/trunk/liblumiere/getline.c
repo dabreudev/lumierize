@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "readkbd.h"
 
@@ -11,20 +13,6 @@ int getstrline(char s[], int lim)
   setvbuf(stdin,"",_IOLBF,0);
 
   for(i=0;i<lim-1 && (c=getchar())!=EOF && c!='\n';++i) {
-    s[i]=c;
-  }
-  s[i]='\0';
-  return(i);
-}
-
-
-/* //Esta es igual pero hecha por mi. Es para leer de un fichero una linea */
-int fgetline(FILE *stream, char s[], int lim)
-{
-  int c,i;
-  setvbuf(stream,"",_IOLBF,0);
-
-  for(i=0;i< (c=fgetc(stream))!=EOF && c!='\n';++i) {
     s[i]=c;
   }
   s[i]='\0';

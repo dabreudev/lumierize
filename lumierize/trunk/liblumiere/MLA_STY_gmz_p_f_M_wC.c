@@ -9,6 +9,7 @@
 #include <gsl/gsl_interp.h>
 #include "alloc.h"
 #include "gsl_hessian.h"
+#include "amoeba.h"
 #include "mlsty.h"
 //#define FTOL  1e-10
 #define FTOL  1e-9

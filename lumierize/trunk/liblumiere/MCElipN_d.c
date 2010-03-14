@@ -1,3 +1,4 @@
+#include "alloc.h"
 #include "elip.h"
 
 #define DEBUG  0

@@ -1,8 +1,9 @@
-#include "string.h"
-#include "stdlib.h"
-#include "stdio.h"
-#include "math.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include <gsl/gsl_machine.h>
+#include <cpgplot.h>
 #include "cosmology.h"
 #include "schechter.h"
 #include "alloc.h"
@@ -45,7 +46,7 @@ double fluxl;
 int ndata;
 int iter_m;
 int iter_c;
-int nconfl;
+int nconfl_SWML_p_L;
 double conflim;
 double *pp;
 double MLmax;
@@ -202,12 +203,12 @@ int  MLA_SWML_p_L(int n,double *flux,double *z,double flim, double strrad, doubl
 double Amoe_Funk_SWML_p_L_main(int n, double *x, double *y, double *p) {
 
   int i,j; 
-  int jini;
+  int jini = 0;
   double logL=0.;
   double Lumabs;
   double intstep;
   double Llow;
-  double funl;
+  double funl = 0;
   double Ntot;
   struct Steplf_L lfamo;
 

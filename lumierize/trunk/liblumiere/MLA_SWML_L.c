@@ -45,7 +45,7 @@ double fluxl;
 int ndata;
 int iter_m;
 int iter_c;
-int nconfl;
+int nconfl_SWML_L;
 double conflim;
 double *pp;
 double MLmax;

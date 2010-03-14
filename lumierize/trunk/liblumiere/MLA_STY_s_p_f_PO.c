@@ -12,6 +12,7 @@
 #include "vvmax.h"
 #include "step.h"
 #include "functions.h"
+#include "random.h"
 
 #define FTOL  1e-10
 #define FTOL2 1e-6

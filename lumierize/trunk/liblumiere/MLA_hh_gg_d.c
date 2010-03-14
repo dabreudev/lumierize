@@ -5,6 +5,7 @@
 #include <gsl/gsl_machine.h>
 #include "alloc.h"
 #include "mlhist.h"
+#include "sthisto.h"
 
 /*#define FTOL  1e-12  <-- Valor anterior*/
 /*#define FTOL  1e-15  <-- Valos 2 */

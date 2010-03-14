@@ -51,7 +51,7 @@ double fluxl;
 int ndata;
 int iter_m;
 int iter_c;
-int nconfl;
+int nconfl_STY_g_p_L;
 double conflim;
 /* double ML[5*MAXTRIES*MAXITER]; */
 double *pp;

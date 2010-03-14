@@ -6,6 +6,7 @@
 #include "alloc.h"
 #include "mlhist.h"
 #include "sthisto.h"
+#include "functions.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6

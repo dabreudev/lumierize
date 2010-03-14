@@ -53,7 +53,7 @@ int ndata;
 int iter_m;
 int iter_c;
 int kpar;
-int nconfl;
+int nconfl_h_g_d;
 double conflim;
 /* double ML[5*MAXTRIES*MAXITER]; */
 double MLmax;

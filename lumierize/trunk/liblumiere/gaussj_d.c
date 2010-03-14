@@ -1,7 +1,10 @@
+#include <stdlib.h>
+#include <math.h>
 #include <malloc.h>
 #include "gaussj.h"
 
 #define DEBUG 0
+#define SWAP_D(a,b) {double swap_temp=(a);(a)=(b);(b)=swap_temp;}
 
 /* a[][] debe ser una matriz de dimension n x n */
 

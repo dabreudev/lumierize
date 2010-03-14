@@ -1,4 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
+#include <math.h>
+#include "alloc.h"
+#include "gaussint.h"
+#include "functions.h"
 
 
 #define EPS 3.0e-14
@@ -25,7 +31,7 @@ double gaussintleg_d(double (*funk)(double), double x1, double x2, int n) {
   double sum;
 
   if(DEBUG) gettimeofday(&tv,&tz);
-  if(DEBUG) printf(" Entro con %ld %ld \n",tv.tv_sec,tv.tv_usec);
+  //if(DEBUG) printf(" Entro con %ld %ld \n",tv.tv_sec,tv.tv_usec);
 
   x=vector_d(n);
   w=vector_d(n);
@@ -99,7 +105,7 @@ double gaussinther_d(double (*funk)(double), double offset, double scale, int n)
   sum=0;
   for(i=0;i<n;i++) {
     sum+=w[i]*(*funk)(x[i]*scale+offset)/exp(-x[i]*x[i]);
-    if(DEBUG) printf(" i %d x %f w %f scale %g offset %g \n",i,x[i],w[i],scale,offset);
+    //if(DEBUG) printf(" i %d x %f w %f scale %g offset %g \n",i,x[i],w[i],scale,offset);
   }
   sum*=scale;
   
