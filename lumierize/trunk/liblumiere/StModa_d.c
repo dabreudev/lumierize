@@ -1,4 +1,5 @@
-#include "modulos.h"
+#include "stmoda.h"
+#include "sthisto.h"
 
 double StModa_d(int n, double *a, int nbin, double *amin, double *amax)
 
