@@ -1,6 +1,7 @@
 #include <cpgplot.h>
 #include <stdlib.h>
 #include "cpgdoble.h""
+#include "alloc.h"
 
 
 void cpgline_d(int n, const double *xpts, const double *ypts) {

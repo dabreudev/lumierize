@@ -1,7 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include "mrqmin.h"
+#include "alloc.h"
+#include "gaussj.h"
+
 #define DEBUG 0
 #define DEBUG2 0
 #define MAXALAMDA 1e6
+#define SWAP_D(a,b) {double swap_temp=(a);(a)=(b);(b)=swap_temp;}
+
+
+void mrqmin_d(double  x[],double y[],double sig[],int ndata,double a[],int ia[],int ma, double **covar,double **alpha, double *chisq, void (*funcs)(double, double [], double *, double [],int), double *alamda);
+void mrqcof_d(double x[],double y[],double sig[],int ndata,double a[],int ia[],int ma,double **alpha,double beta[],double *chisq,void (*funcs)(double ,double [],double *,double [],int));
+void covsrt_d(double **covar,int ma,int ia[],int mfit);
 
 
 int Mrq_d(double  x[],double y[],double sig[],int ndata,double a[],int ia[],int ma, double **covar, double *chisq, void (*funcs)(double, double [], double *, double [],int)) {

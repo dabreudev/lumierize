@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "random.h"
 /*Subrutinas de numeros aleatorios sacadas de Numerical Recipes in C
  Se deben llamar con un numero negativo para inicializar.
  Y luego, no cambiar la semilla idum entre llamadas.

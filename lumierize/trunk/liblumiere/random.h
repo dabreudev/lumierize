@@ -7,6 +7,8 @@ extern "C" {
 
   /* Funciones de numeros aleatorios */
 
+  float ran1(long *idum);
+  float ran2(long *idum);
   int    Pdev(double prob);
   double Poidev(double xm);
   double Expdev(void);

@@ -15,6 +15,8 @@
 #include "random.h"
 #include "gaussj.h"
 #include "elip.h"
+#include "quartil.h"
+#include "stmoda.h"
 
 #define FTOL  1e-10
 #define FTOL2 1e-6

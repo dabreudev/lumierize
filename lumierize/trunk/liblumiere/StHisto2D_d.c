@@ -1,6 +1,8 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "sthisto.h"
 #include "alloc.h"
+#include "minmax.h"
 
 int **StHisto2D_d(int n, double *x, double *y, int nbinx, double *xmin, double *xmax, int nbiny, double *ymin, double *ymax)
 
