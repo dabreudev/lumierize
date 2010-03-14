@@ -1,4 +1,6 @@
-#include "modulos.h"
+#include <malloc.h>
+#include "gaussj.h"
+
 #define DEBUG 0
 
 /* a[][] debe ser una matriz de dimension n x n */

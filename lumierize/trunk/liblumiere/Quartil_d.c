@@ -1,4 +1,5 @@
-#include "modulos.h"
+#include <stdlib.h>
+#include "quartil.h"
 
 int compare_quartil_d(const void *X1,const void *X2);
 

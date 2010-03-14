@@ -1,4 +1,5 @@
-#include "modulos.h"
+#include <stdio.h>
+#include "step.h"
 
 #define NSTEP_LF 200
 #define NSTEP_Z  500

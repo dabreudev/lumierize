@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "minmax.h"
 
 
 float minf(float x1,float x2) {

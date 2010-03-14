@@ -1,4 +1,7 @@
-#include "modulos.h"
+#include <stdlib.h>
+#include <math.h>
+#include "vvmax.h"
+#include "alloc.h"
 
 #define DEBUG 0
 
