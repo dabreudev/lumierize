@@ -8,6 +8,7 @@
 #include "cosmology.h"
 #include "schechter.h"
 #include "mlswml.h"
+#include "sthisto.h"
 
 #define FTOL  1e-12
 //#define FTOL2 1e-6

@@ -11,6 +11,7 @@
 #include "mlswml.h"
 #include "random.h"
 #include "gaussj.h"
+#include "sthisto.h"
 
 #define FTOL  1e-12
 //#define FTOL2 1e-6

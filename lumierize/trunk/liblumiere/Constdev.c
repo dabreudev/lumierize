@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <sys/time.h>
+#include <math.h>
 #include "random.h"
 
 double Constdev(double xmin, double xmax) {

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "histdist.h"
 #define DEBUG 0
 

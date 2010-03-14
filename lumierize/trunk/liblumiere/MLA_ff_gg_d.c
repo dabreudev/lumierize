@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "mlhist.h"
 #include "alloc.h"
+#include "amoeba.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6

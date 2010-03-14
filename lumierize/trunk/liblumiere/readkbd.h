@@ -14,7 +14,6 @@ extern "C" {
   int readi(int n);
   void kbdpause(void);
   int getstrline(char s[], int lim);
-  int fgetline(FILE *stream, char s[], int lim);
 
 
 #ifdef __cplusplus

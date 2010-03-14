@@ -1,4 +1,7 @@
-#include "modulos.h"
+#include <math.h>
+#include "amoeba.h"
+#include "mlerramoeba.h"
+#include "alloc.h"
 
 #define DEBUG 0
 #define DEBUG2 0 

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "quartil.h"
+#include "alloc.h"
 
 int compare_quartil_d(const void *X1,const void *X2);
 

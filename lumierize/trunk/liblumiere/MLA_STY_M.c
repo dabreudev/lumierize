@@ -15,6 +15,7 @@
 #include "functions.h"
 #include "random.h"
 #include "quartil.h"
+#include "step.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6

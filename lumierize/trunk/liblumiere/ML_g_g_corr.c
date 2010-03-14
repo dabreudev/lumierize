@@ -358,6 +358,8 @@ float Amoe_Funk_d2(int n, float *x, float *y, float *p) {
   double logL=0.,logLb=0.;
   int nstep=1000;
   double conv,xint,xmin,xmax;
+  (void)y;
+  (void)n;
 
   if(p[1]<=0) p[1]=-p[1]; 
   logL=0.;

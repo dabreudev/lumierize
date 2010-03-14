@@ -1,4 +1,10 @@
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <math.h>
+#include "alloc.h"
 #include "random.h"
+
 #define DEBUG 0
 
 /* Pk debe estar dimensionado como k y xk como k+1 */

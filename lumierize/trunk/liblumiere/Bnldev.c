@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <sys/time.h>
+#include <math.h>
 #include "random.h"
 /* Subrutina de desviaciones binomiales. Cogida del Numerical Recipes.
    Suficientemente testada en todos los casos */

@@ -199,7 +199,7 @@ double Amoe_Funk_STY_p_f_L_main(int n, double *x, double *y, double *p) {
   struct Schlf_L lfamo;
   double Lumi;
   double L;
-  double fluxtmp,fmin;
+  double fluxtmp,fluxmin;
   double Lleft,Lright;
   double xleft,xright;
 /*   double Mup=-30; */
@@ -229,9 +229,9 @@ double Amoe_Funk_STY_p_f_L_main(int n, double *x, double *y, double *p) {
     z_STY_p_f_L=y[i];
     flux_STY_p_f_L=x[i];
     Lumi=Lum(y[i],x[i],*co_STY_p_f_L);
-    fmin=fsel_STY_p_f_L.fluxcut-5*fsel_STY_p_f_L.deltaflux;
-    if(fmin<=0) fmin=fsel_STY_p_f_L.fluxcut/20;
-    Lleft=Lum(z_STY_p_f_L,fmin,*co_STY_p_f_L);
+    fluxmin=fsel_STY_p_f_L.fluxcut-5*fsel_STY_p_f_L.deltaflux;
+    if(fluxmin<=0) fluxmin=fsel_STY_p_f_L.fluxcut/20;
+    Lleft=Lum(z_STY_p_f_L,fluxmin,*co_STY_p_f_L);
     if(Lleft<0) Lleft=0;
     Lright=Lum(z_STY_p_f_L,fsel_STY_p_f_L.fluxcut+5*fsel_STY_p_f_L.deltaflux,*co_STY_p_f_L);
     xright=Lright/lfamo.Lstar;
@@ -245,22 +245,22 @@ double Amoe_Funk_STY_p_f_L_main(int n, double *x, double *y, double *p) {
       intabajo=0;
       /* Primero la integral a pelo de Lleft a Lright */
       for(j=0;j<nL_fs;j++) {
-	L=Lleft+j*(Lright-Lleft)/(nL_fs-1.);
-	fluxtmp=Flux(z_STY_p_f_L,L,*co_STY_p_f_L);
-	intabajo=intabajo+exp(Schechter_L(L,lfamo))*Fermi(fluxtmp,fsel_STY_p_f_L.fluxcut,-fsel_STY_p_f_L.deltaflux);
+        L=Lleft+j*(Lright-Lleft)/(nL_fs-1.);
+        fluxtmp=Flux(z_STY_p_f_L,L,*co_STY_p_f_L);
+        intabajo=intabajo+exp(Schechter_L(L,lfamo))*Fermi(fluxtmp,fsel_STY_p_f_L.fluxcut,-fsel_STY_p_f_L.deltaflux);
       }
       intabajo=intabajo/nL_fs*(Lright-Lleft);  
       /* Ahora la integral desde Lright a inf */
       intabajo+=lfamo.phistar*(intsup-incom(1+lfamo.alfa,xright));
       probabajo=intabajo;
-      
+
       logprobarriba=Schechter_L(Lumi,lfamo) + log(Fermi(flux_STY_p_f_L,fsel_STY_p_f_L.fluxcut,-fsel_STY_p_f_L.deltaflux));
-      
+
 
       if(Fermi(flux_STY_p_f_L,fsel_STY_p_f_L.fluxcut,-fsel_STY_p_f_L.deltaflux)==0 || probabajo==0) logL+=GSL_LOG_DBL_MAX;
       else logL-= logprobarriba  - log(probabajo);   /* Perfectamente testado */
-/*       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g flux %g err %g\n",i,logL,logLold,Schechter_L(Lumi,lfamo),log(probarriba),log(probabajo),probabajo,xmin,xleft,xright,flux_STY_p_f_L,errflux_STY_p_f_L); */
-/*       printf(" iobj %d logL %f loglold %f      sch %g int %g (%g)   pa %g pb %g (%g)  xmin %g x1 %f x2 %f\n",i,logL,logLold,Schechter_L(Lumi,lfamo),log(intsch),intsch,log(probarriba),log(probabajo),probabajo,xmin,x1,x2); */
+      /*       if(DEBUG3) printf(" iobj %d logL %f loglold %f      sch %g    pa %g pb %g (%g)  xmin %g x1 %g x2 %g flux %g err %g\n",i,logL,logLold,Schechter_L(Lumi,lfamo),log(probarriba),log(probabajo),probabajo,xmin,xleft,xright,flux_STY_p_f_L,errflux_STY_p_f_L); */
+      /*       printf(" iobj %d logL %f loglold %f      sch %g int %g (%g)   pa %g pb %g (%g)  xmin %g x1 %f x2 %f\n",i,logL,logLold,Schechter_L(Lumi,lfamo),log(intsch),intsch,log(probarriba),log(probabajo),probabajo,xmin,x1,x2); */
     }
   }
   /* Aqui viene la parte de la poissoniana de npob */
