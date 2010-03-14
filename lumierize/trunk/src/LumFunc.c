@@ -22,6 +22,7 @@
 #include "vvmax.h"
 #include "filenlin.h"
 #include "readcol.h"
+#include "cpgdoble.h"
 
 #define ZMIN 0.00001
 #define NSTEP_LF 200
@@ -2690,7 +2691,7 @@ void get_sample_ceg(struct sample_data *sample)
     sample->ew =malloc(ndat*sizeof(double));
     sample->image=vector_s(ndat,51);
     ReadDoublecol(datafile,colz  ,z  ,logic1,&ndat);
-    ReadDoublecol(datafile,colmag,mag,logic2,&ndat);
+    ReadDoublecol(datafile,colmag,magni,logic2,&ndat);
     ReadDoublecol(datafile,collum,lum,logic3,&ndat);
     ReadDoublecol(datafile,colew ,ew ,logic4,&ndat);
     ReadCharcol  (datafile,colimage ,image ,logic5,51,&ndat);

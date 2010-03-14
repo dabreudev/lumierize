@@ -27,12 +27,12 @@ DISTCLEANFILES = *~
 
 bin_PROGRAMS = LumFunc ComputeDistribution
 
-LumFunc_LDADD = $(LUMIERE_LIBS)
-LumFunc_LDFLAGS =
+LumFunc_LDADD = $(LUMIERE_LIBS) 
+LumFunc_LDFLAGS = 
 LumFunc_CFLAGS = $(LUMIERE_INCLUDES)
 LumFunc_SOURCES = LumFunc.c
 
-ComputeDistribution_LDADD = $(LUMIERE_LIBS)
+ComputeDistribution_LDADD = $(LUMIERE_LIBS) 
 ComputeDistribution_LDFLAGS =
 ComputeDistribution_CFLAGS = $(LUMIERE_INCLUDES)
 ComputeDistribution_SOURCES = ComputeDistribution.c
