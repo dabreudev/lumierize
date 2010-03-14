@@ -16,6 +16,7 @@
 #include "elip.h"
 #include "vvmax.h"
 #include "quartil.h"
+#include "step.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6
@@ -220,6 +221,7 @@ double Amoe_Funk_SWML_p_L_main(int n, double *x, double *y, double *p) {
   double funl = 0;
   double Ntot;
   struct Steplf_L lfamo;
+  (void)n;
 
 /*   for(j=0;j<nbin;j++) printf(" EN %f \n ",p[j]); */
   lfamo.lumi =vector_d(nbin+1);
@@ -328,6 +330,8 @@ void   EmpiricalCovars_SWML_p_L(int n,double *flux,double *z, double *par, doubl
   double first, median, third, *distmax;
 
   int nconfl,nconflini;
+  (void)cosmo;
+  (void)flim;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL*lf->nbin;

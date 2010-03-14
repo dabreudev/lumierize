@@ -13,24 +13,37 @@
   Para compilar: 
   cc -c   $s2/Proced/C/modulos/ReadNumcol.c 
 */
+#include  "readcol.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "readcol.h"
-int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin)
+#include <sys/time.h>
+#include <unistd.h>
+
+#define DEBUG 0
+#define DEBUG2 0
+
+
+int ReadNumcol(char file[],int col,float *vector,int *lvec,int *nlin)
 {
   
-  size_t i,j;
+  int i,j;
   int a;
   char c;
-  char  word[200];
-  char nul[1000];
-  size_t nl;
+  char  word[500];
+  char nul[5000];
+  int nl;
+
+  int nullen;
+  
+  
   FILE *fp;
   nl=0;
   
+
+  
   if((fp=fopen(file,"r")) == NULL) {
-    printf(" Cannot open file %s\n",file);
+    printf(" Cannot open file %s\n",file); 
     exit(1);
   }
   while ( (a=getc(fp)) != EOF) 
@@ -41,26 +54,43 @@ int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin)
   fclose(fp);
   fp=fopen(file,"r");
   for (i=0;i<nl;i++) {
-    /*     //    printf("ReadNumcol reading %d row",i); */
-    char * temp = fgets(nul,1000,fp);
-    (void)temp;
+
+    
+    
+    /*         printf("ReadNumcol reading %d row",i); */
+    fgets(nul,5000,fp);
+
+    
+    if(DEBUG)  printf(" NUL <%s>\n",nul);
     c=nul[0];
     if(c=='#') {
       lvec[i]=0;
       continue;
     }
     j=0;
-    while(j<strlen(nul)) {
+    if(DEBUG2) printf(" lon %d\n",strlen(nul));
+
+    
+    nullen=strlen(nul);
+
+    while(j<nullen) {
       if(nul[j]=='\t') {
-        nul[j]=' ';
+	nul[j]=' ';
       }
       j++;
     }
-/*     //    printf("Pasa \n"); */
+    
+
+    
+if(DEBUG)      printf("Pasa \n"); 
     strtok(nul,"\n");
     strcat(nul," ");
+if(DEBUG)  printf(" NUL2 <%s>\n",nul);
+
     LeeWord(nul,col,word);
-/*     //    printf("word <<%s>>\n",word); */
+
+
+if(DEBUG)    printf("word <<%s>>\n",word); 
     
     if(!strcmp(word,"INDEF")) {
       vector[i]=0.;
@@ -69,12 +99,15 @@ int ReadDoublecol(char file[],int col,double *vector,int *lvec,int *nlin)
     }
     else
       {
-/* 	//printf("aqui en medio\n"); */
-	vector[i]=(double)atof(word);
-/* 	//printf("aqui en mas medio\n"); */
+/* 	//	printf("aqui en medio\n"); */
+	vector[i]=atof(word);
+/* 	//	printf("aqui en mas medio\n"); */
 	lvec[i]=1;
       }
 /*     //  printf("Y ahora que\n"); */
+
+
+
   }
   return 0 ;
 } 

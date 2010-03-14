@@ -4,6 +4,7 @@
 #include "gaussj.h"
 
 #define DEBUG 0
+#define SWAP(a,b) {float swap_temp=(a);(a)=(b);(b)=swap_temp;}
 
 /* a[][] debe ser una matriz de dimension n x n */
 

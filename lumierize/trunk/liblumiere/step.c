@@ -8,6 +8,8 @@
 #include "alloc.h"
 #include "functions.h"
 #include "stmedia.h"
+#include "mrqmin.h"
+#include "quartil.h"
 
 #define NSTEP_LF 200
 #define NSTEP_Z  500
@@ -933,6 +935,7 @@ void mrqfunc_fitsch2steplf_L(double x,double *p,double *y,double *dyda,int n) {
   double log_L_Lstar;
 
   struct Schlf_L lf;
+  (void)n;
 
 /*   printf(" AA\n"); */
 
@@ -964,6 +967,7 @@ void mrqfunc_fitsch2steplf_M(double x,double *p,double *y,double *dyda,int n)
   double log_L_Lstar;
 
   struct Schlf_M lf;
+  (void)n;
 
 /*   printf(" AA\n"); */
 
@@ -991,7 +995,8 @@ double amofunc_schechterfitmag_d(int n, double *x, double *y, double *p)
   double f=0.,s;
 
   if(p[2]<=0) p[2]=-p[2];
-  
+  (void)x;
+
   s=0.0;
   for(i=0; i<n; i++)
   {
@@ -1016,6 +1021,8 @@ double amofunc_schechterfitlum_d(int n, double *x, double *y, double *p)
 
   int i;
   double f=0.,s;
+  (void)n;
+  (void)x;
 
 
   if(p[2]<=0) p[2]=-p[2];
