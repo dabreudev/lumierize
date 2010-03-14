@@ -39,17 +39,18 @@ double intgaussian(double x1, double x2, double xmean,double sigma)
   t2=(x2-xmean)/(sqrt(2)*sigma);
   return((erf(t2)-erf(t1))/2.);
 }
-double int2dgaussian(double x1, double x2, double xmean, double y1, double y2, double ymean, double sigma)
+double int2dgaussian(double xx1, double xx2, double xmean, double yy1, double yy2,
+                     double ymean, double sigma)
 {
 
   /* Integral de una gaussiana en dos dimensiones en el rectangulo
   desde x1 hasta x2 y desde y1 a y2*/
   float t1,t2;
   float s1,s2;
-  t1=(x1-xmean)/(sqrt(2)*sigma);
-  t2=(x2-xmean)/(sqrt(2)*sigma);
-  s1=(y1-ymean)/(sqrt(2)*sigma);
-  s2=(y2-ymean)/(sqrt(2)*sigma);
+  t1=(xx1-xmean)/(sqrt(2)*sigma);
+  t2=(xx2-xmean)/(sqrt(2)*sigma);
+  s1=(yy1-ymean)/(sqrt(2)*sigma);
+  s2=(yy2-ymean)/(sqrt(2)*sigma);
   return((erf(t2)-erf(t1))/2.*(erf(s2)-erf(s1))/2.);
 }
 
