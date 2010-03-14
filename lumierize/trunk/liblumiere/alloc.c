@@ -209,6 +209,7 @@ void free_tensor4_f(float ****tensor4, int n1, int n2, int n3, int n4)  {
 void free_matrix_f(float **matrix, int n1, int n2)  {
   
   int i;
+  (void)n2;
   
   for(i=0;i<n1;i++) {
     free(matrix[i]);
@@ -416,6 +417,7 @@ void free_tensor4_d(double ****tensor4, int n1, int n2, int n3, int n4)  {
 void free_matrix_d(double **matrix, int n1, int n2)  {
   
   int i;
+  (void)n2;
   
   for(i=0;i<n1;i++) {
     free(matrix[i]);
@@ -630,6 +632,7 @@ void free_tensor4_i(int ****tensor4, int n1, int n2, int n3, int n4)  {
 void free_matrix_i(int **matrix, int n1, int n2)  {
   
   int i;
+  (void)n2;
   
   for(i=0;i<n1;i++) {
     free(matrix[i]);
@@ -687,6 +690,7 @@ char *alloc_s(int nchar) {
 void free_vector_s(char **v, int n, int nchar) {
 
   int i;
+  (void)nchar;
   
   for(i=0;i<n;i++) {
     free(v[i]);

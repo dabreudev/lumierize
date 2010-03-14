@@ -2,9 +2,12 @@
 #include <math.h>
 #include <gsl/gsl_machine.h>
 #include <gsl/gsl_sf_gamma.h>
+#include <cpgplot.h>
 #include "cosmology.h"
 #include "functions.h"
 #include "schechter.h"
+#include "fermisel.h"
+#include "lagr.h"
 
 //#define NSTEP_LF 200
 #define NSTEP_Z  200
@@ -73,7 +76,7 @@ double Sch_rhoz_L(double zint, struct Schlf_L lf, double zlow,double zup,double 
   double sch_int=0;
   double Dang_DH;  /* Distancia angular segun  Hogg astroph/9905116 */
   double E;        /* Funcion E. */
-  double dVdz;      /* Los factores anteriores , para calcular dVdz */
+  double derVderz;      /* Los factores anteriores , para calcular dVdz */
   static double fz[NSTEP_Z],flogz[NSTEP_Z]; /* //fz es la funcion distribucion en z, y fz_sum es la integral */
   static double fz_int;
   double dz;
@@ -114,12 +117,12 @@ double Sch_rhoz_L(double zint, struct Schlf_L lf, double zlow,double zup,double 
       /*       Ahora calculamos dVdz, pero sin los factores, que no influyen */
       Dang_DH=(2-2*q0*(1-z)-(2-2*q0)*sqrt(1+2*q0*z))/(1+z); /* La distancia angular * (1+z) */
       E=sqrt(2*q0*(1+z)*(1+z)*(1+z)+(1-2*q0)*(1+z)*(1+z));
-      dVdz=(Dang_DH*Dang_DH/E);
+      derVderz=(Dang_DH*Dang_DH/E);
       /*       Aqui iria rho(z) si la densidad comovil variase con el z */
       /*       El z del final es porque estoy integrando en log(z), y dz=z*d(log(z)) */
-      flogz[i]=sch_int*dVdz*z;
+      flogz[i]=sch_int*derVderz*z;
       dz=exp(log(zlow)+i*(log(zup)-log(zlow))/(nstep_z-1.))-exp(log(zlow)+(i-1)*(log(zup)-log(zlow))/(nstep_z-1.));
-      fz[i]=sch_int*dVdz;
+      fz[i]=sch_int*derVderz;
       fz_int+=flogz[i];
 /*       printf(" z %f sch_int %g fz %g\n",zplot[i],sch_int,fz[i]); */
     }
@@ -259,7 +262,7 @@ double Int_sch_M_wC(struct Schlf_M lf, double zlow,double zup, double color_mean
       }
       else
       {
-        if(DEBUG2) printf("alfa %g Llow/Lstar %g dVdz(z,cosmo) %g gsl_sf_gamma %g gsl_sf_gamma %g\n", lf.alfa, Llow/Lstar, dVdz(z,cosmo), gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar), gsl_sf_gamma_inc(1.+lf.alfa,1.03162e-7));
+        if(DEBUG2) printf("alfa %g Llow/Lstar %g derVerdz(z,cosmo) %g gsl_sf_gamma %g gsl_sf_gamma %g\n", lf.alfa, Llow/Lstar, dVdz(z,cosmo), gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar), gsl_sf_gamma_inc(1.+lf.alfa,1.03162e-7));
         Ngal=lf.phistar*(gsl_sf_gamma_inc(1.+lf.alfa,Llow/Lstar))*dVdz(z,cosmo)/1.e18;
       }
       Ncolor += gaussian(color, color_mean, color_stddev)*Ngal;
@@ -523,7 +526,7 @@ double Int_sch_f_L(struct Schlf_L lf, double zlow,double zup,struct fermifsel_L 
   int i,j;
   double Lleft,Lright;
   double Lup=1e60;
-  double L,flux,fmin;
+  double L,flux,fluxmin;
   double xmax;
   double xright;
   double N,Npar;
@@ -539,9 +542,9 @@ double Int_sch_f_L(struct Schlf_L lf, double zlow,double zup,struct fermifsel_L 
   for(i=0;i<nz;i++) {
     z=zlow+i*(zup-zlow)/(nz-1.);
     /* En luminosidades: */
-    fmin=fsel.fluxcut-5*fsel.deltaflux;
-    if(fmin<=0) fmin=fsel.fluxcut/20;
-    Lleft=Lum(z,fmin,cosmo);
+    fluxmin=fsel.fluxcut-5*fsel.deltaflux;
+    if(fluxmin<=0) fluxmin=fsel.fluxcut/20;
+    Lleft=Lum(z,fluxmin,cosmo);
     Lright=Lum(z,fsel.fluxcut+5*fsel.deltaflux,cosmo);
     xright=Lright/lf.Lstar;
     xmax=200;

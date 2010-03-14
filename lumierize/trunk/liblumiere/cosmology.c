@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "cosmology.h"
+#include "minmax.h"
 
 #define LSPEED 299792.46 /* LSPEED: light speed in km/sec */
 
@@ -313,7 +314,7 @@ double dLumdflux(double z, struct cosmo_param cosmo)
   return(dLdf);
 }
 
-double Flux(double z, double Lum, struct cosmo_param cosmo)
+double Flux(double z, double Lumi, struct cosmo_param cosmo)
 {
   /* Devuelve el flujo aparente dada la luminosidad */
   /* La luminosidad debe ir in watt y
@@ -335,7 +336,7 @@ double Flux(double z, double Lum, struct cosmo_param cosmo)
 //  dlum=c/cosmo.H0*2*(1+z)*(2-2*cosmo.q0*(1-z)-(2-2*cosmo.q0)*sqrt(1+2*cosmo.q0*z))/(4*cosmo.q0*cosmo.q0*(1+z));
   /* Esta dlum esta dada en Megaparsec. 
      Para pasar a metros: 3.08567818589e22 metros  = 1 Mpc */
-  flux=Lum/4/M_PI/dlum/3.08567818589e22/dlum/3.08567818589e22;
+  flux=Lumi/4/M_PI/dlum/3.08567818589e22/dlum/3.08567818589e22;
   return(flux);
 }
 
@@ -424,7 +425,7 @@ double Mag_OmegaLambda0(double z, double m, struct cosmo_param cosmo)
   return(-5.*log10(dlum)-25.+m);
 }
 
-void Mag_err(double z, double errz, double m, double errm, struct cosmo_param cosmo, double *Mag, double *errMag)
+void Mag_err(double z, double errz, double m, double errm, struct cosmo_param cosmo, double *Magn, double *errMag)
 {
   double c=299792.46; /*  En km/s */
   double dlum;
@@ -441,7 +442,7 @@ void Mag_err(double z, double errz, double m, double errm, struct cosmo_param co
     ddldz=dlum/(1+z)+c/cosmo.H0*2*(1+z)*(cosmo.OM-cosmo.OM*(1-0.5*cosmo.OM)/sqrt(1+cosmo.OM*z))/(cosmo.OM*cosmo.OM*(1+z))+c/cosmo.H0*2*(1+z)*(2-cosmo.OM*(1-z)-(2-cosmo.OM)*sqrt(1+cosmo.OM*z))/(cosmo.OM*cosmo.OM*(1+z))/(cosmo.OM*cosmo.OM*(1+z))*(cosmo.OM*cosmo.OM);
     /*   Esto es la distancia de luminosidad seg�n Hogg. */
     deltaM=-5*log10(dlum/10e-6);  /* 10e6 son 10pc en megaparsecs.Segun Hogg astroph9905116 */
-    *Mag=deltaM+m;
+    *Magn=deltaM+m;
     *errMag=sqrt(errm*errm+errz*errz*(5/dlum/log(10))*(5/dlum/log(10))*ddldz*ddldz);
   }
 }

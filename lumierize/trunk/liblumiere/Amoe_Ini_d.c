@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include "amoeba.h"
+#include "random.h"
 
 #define DEBUG 0
 
