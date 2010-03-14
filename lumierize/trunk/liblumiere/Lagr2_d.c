@@ -15,7 +15,7 @@
 /*       X0 ES EL PUNTO DONDE QUIERO INTERPOLAR */
 /*       SI LLAMO LAGR(X,Y,N,Z) HALLARE Y(Z) */
 
-#include "modulos.h"
+#include "lagr.h"
 
 double   Lagr2_d(double *x, double *y, int n, double x0)
 {
