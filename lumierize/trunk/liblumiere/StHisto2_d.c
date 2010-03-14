@@ -1,4 +1,6 @@
-#include "modulos.h"
+#include <stdlib.h>
+#include <malloc.h>
+#include "sthisto.h"
 
 int *StHisto2_d(int n, double *a, int nbin, double *amin, double *amax)
 

@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "sthisto.h"
 #define DEBUG 0
 
 int *StHisto_d(int n, double *a, int nbin, double *amin, double *amax)

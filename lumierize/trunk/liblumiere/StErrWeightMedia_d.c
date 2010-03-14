@@ -1,4 +1,4 @@
-#include "modulos.h" 
+#include "stmedia.h"
 
 
 double StErrWeightMedia_d(int n, double *x, double *err,double *sigma)
