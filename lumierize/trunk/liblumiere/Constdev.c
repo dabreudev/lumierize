@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "random.h"
 
 double Constdev(double xmin, double xmax) {
   static long idum =-1;

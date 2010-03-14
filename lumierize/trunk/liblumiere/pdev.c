@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "random.h"
 
 
 int    Pdev(double prob) {

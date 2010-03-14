@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "random.h"
 
     
 double Powdev(double xmin, double xmax,double alfa) {

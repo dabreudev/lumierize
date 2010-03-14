@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "schechter.h"
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_machine.h>
 
@@ -64,7 +64,7 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
   static double fz[NSTEP_Z],fz_sum[NSTEP_Z],flogz[NSTEP_Z]; /* //fz es la funcion distribucion en z, y fz_sum es la integral */
   static double fz_int;
   double dz;
-  //double elev,tmp; /* integración "a pelo" */
+  //double elev,tmp; /* integraciï¿½n "a pelo" */
   static double zplot[NSTEP_Z],logzplot[NSTEP_Z];
   static double Mstarold,alfaold,zupold,zlowold,mlowold,mupold;
   int oldflag=0;
@@ -105,7 +105,7 @@ double zSchdev_M(struct Schlf_M lf, double zlow,double zup,double mlow,double mu
         tmp=pow(elev,lf.alfa+1.);  
         tmp=tmp*exp(-elev);
         sch_int+=tmp;
-      } sabemos la forma analítica */
+      } sabemos la forma analï¿½tica */
       //sch_int*=(Mlow-Mup)/nstep_lf;
       Llow=pow(10.,-0.4*Mlow);
       Lup=pow(10.,-0.4*Mup);
