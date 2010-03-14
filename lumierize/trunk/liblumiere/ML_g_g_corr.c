@@ -317,8 +317,8 @@ float Amoe_Funk(int n, float *x, float *y, float *p) {
       logL-=-0.5*log(sig[i]*sig[i]+parconf1*parconf1);
       logL-=-(x[i]-p[0])*(x[i]-p[0])/2./(sig[i]*sig[i]+parconf1*parconf1);
     }
-    if(DEBUG2) printf(" logL %f logL-logLmax %f p[0] %f parconf1 %f\n",logL,fabs(logL-(ML[iter-1]-log(conflim))),p[0],parconf1);
-    return(fabs(logL-(ML[iter-1]-log(conflim))));
+    if(DEBUG2) printf(" logL %f logL-logLmax %f p[0] %f parconf1 %f\n",logL,fabs(logL-(ML[iter_g_g_corr-1]-log(conflim))),p[0],parconf1);
+    return(fabs(logL-(ML[iter_g_g_corr-1]-log(conflim))));
   }
 
   if(amoeba_use==3) {
@@ -329,8 +329,8 @@ float Amoe_Funk(int n, float *x, float *y, float *p) {
       logL-=-0.5*log(sig[i]*sig[i]+p[0]*p[0]);
       logL-=-(x[i]-parconf0)*(x[i]-parconf0)/2./(sig[i]*sig[i]+p[0]*p[0]);
     }
-    if(DEBUG2) printf(" logL %f logL-logLmax %f p[0] %f parconf0 %f\n",logL,fabs(logL-(ML[iter-1]-log(conflim))),p[0],parconf0);
-    return(fabs(logL-(ML[iter-1]-log(conflim))));
+    if(DEBUG2) printf(" logL %f logL-logLmax %f p[0] %f parconf0 %f\n",logL,fabs(logL-(ML[iter_g_g_corr-1]-log(conflim))),p[0],parconf0);
+    return(fabs(logL-(ML[iter_g_g_corr-1]-log(conflim))));
   }
   return 0;
 }

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_machine.h>
+#include "stmedia.h"
 
 #define DEBUG 0
 #define DEBUG2 0

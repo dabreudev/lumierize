@@ -3,12 +3,12 @@
 #include "stdio.h"
 #include "math.h"
 #include <gsl/gsl_machine.h>
+#include <gsl/gsl_sf_gamma.h>
 #include "mlsty.h"
 #include "cosmology.h"
 #include "schechter.h"
 #include "alloc.h"
 #include "mlsty.h"
-#include <gsl/gsl_sf_gamma.h>
 #include "vvmax.h"
 #include "minmax.h"
 #include "amoeba.h"
@@ -16,6 +16,9 @@
 #include "random.h"
 #include "quartil.h"
 #include "step.h"
+#include "gaussj.h"
+#include "elip.h"
+#include "stmedia.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6
@@ -85,6 +88,7 @@ int  MLA_STY_M(int n,double *magn,double *z,double mlim, double strrad, double z
   double *Mabs;
   struct Schlf_M  lffit;
   double chisq;
+  (void)mlinfo;
 
   /* Copias globales de estas variables para que se vean en toda la subrutina */
 
@@ -212,6 +216,7 @@ double Amoe_Funk_STY_M_main(int n, double *x, double *y, double *p) {
 /*   double Mup=-30; */
 /*   double Lup; */
   double log_gamma_int;
+  (void)n;
 
   lfamo.alfa=p[0];
   lfamo.phistar=1;
@@ -270,6 +275,8 @@ void   EmpiricalCovars_STY_M(int n,double *magn,double *z,double *par, double *s
   double **bb;
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)mlim;
+  (void)cosmo;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

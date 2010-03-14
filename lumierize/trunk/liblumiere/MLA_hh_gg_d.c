@@ -8,6 +8,12 @@
 #include "mlhist.h"
 #include "sthisto.h"
 #include "amoeba.h"
+#include "random.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "elip.h"
+#include "quartil.h"
+
 
 
 /*#define FTOL  1e-12  <-- Valor anterior*/
@@ -227,6 +233,7 @@ double Amoe_Funk_hh_gg_d_main(int n, double *x, double *y, double *p)
   double ltmp;
   double tmp1,priori;
   double norm=0;
+  (void)n;
 
   logL=0.;
 
@@ -430,6 +437,8 @@ void   EmpiricalCovars_hh_gg_d(int n,double *x,double *errx,int k,double *xk,dou
   
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)xk;
+  (void)errx;
 
 /*   double a,b,c,d,f,e;  */
 /*   double xcelip,ycelip,elipa,elipb,elipt;  */

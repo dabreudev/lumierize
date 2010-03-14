@@ -13,6 +13,8 @@
 #include "step.h"
 #include "functions.h"
 #include "random.h"
+#include "gaussj.h"
+#include "elip.h"
 
 #define FTOL  1e-10
 #define FTOL2 1e-6

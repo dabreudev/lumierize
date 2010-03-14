@@ -1,6 +1,13 @@
-#include "schechter.h"
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_machine.h>
+#include "schechter.h"
+#include "random.h"
+#include "functions.h"
 
 #define NSTEP_LF 200
 //#define NSTEP_Z  500
@@ -42,7 +49,7 @@ double Schechterdev_M(struct Schlf_M lf, double Mlow,double Mup) {
       e=pow(xe,lf.alfa)/(pow(xmin,lf.alfa));
     } while (ran2(&idum) > e);
     magni=lf.Mstar-2.5*log10(xe); /* Esta es la buena */
-    return mag;
+    return magni;
   }
   else return(0);
 }

@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -9,6 +10,11 @@
 #include "quartil.h"
 #include "step.h"
 #include "amoeba.h"
+#include "random.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "elip.h"
+#include "vvmax.h"
 
 
 #define FTOL  1e-12
@@ -189,6 +195,7 @@ double Amoe_Funk_SWML_L_main(int n, double *x, double *y, double *p) {
   double Llow;
   double norm;
   double funl = 0;
+  (void)n;
 
 /*   for(j=0;j<nbin;j++) printf(" EN %f \n ",p[j]); */
 
@@ -294,6 +301,8 @@ void   EmpiricalCovars_SWML_L(int n,double *flux,double *z,double *par, double *
   double first, median, third, *distmax;
 
   int nconfl,nconflini;
+  (void)flim;
+  (void)cosmo;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL*lf->nbin;

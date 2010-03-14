@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "stmedia.h"
 
 
 double StSuma1_d(int n, double *a, int i)

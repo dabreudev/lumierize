@@ -3,11 +3,20 @@
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_machine.h>
+#include <gsl/gsl_sf_gamma.h>>
 #include "alloc.h"
 #include "cosmology.h"
 #include "schechter.h"
 #include "mlsty.h"
 #include "amoeba.h"
+#include "functions.h"
+#include "random.h"
+#include "gaussj.h"
+#include "step.h"
+#include "minmax.h"
+#include "elip.h"
+#include "quartil.h"
+#include "stmedia.h"
 
 #define ZMIN 0.00001
 #define FTOL  1e-13

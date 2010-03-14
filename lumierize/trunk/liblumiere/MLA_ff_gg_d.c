@@ -1,7 +1,18 @@
+#include <string.h>
 #include <stdlib.h>
-#include "mlhist.h"
+#include <stdio.h>
+#include <math.h>
+#include <gsl/gsl_machine.h>
+#include <cpgplot.h>
 #include "alloc.h"
+#include "mlhist.h"
+#include "sthisto.h"
 #include "amoeba.h"
+#include "random.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "elip.h"
+#include "quartil.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6
@@ -32,8 +43,6 @@
 double Amoe_Funk_ff_gg_d_main(int n, double *x, double *y, double *p);
 double Amoe_Funk_ff_gg_d_conf(int n, double *x, double *y, double *p);
 void   TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int kx,double *xk,double yff,double yinter,double *P,double **covar);
-int  **StHisto2DFF_d(int n, double *x, double *y, int nbinx, double *xmin, double *xmax, double yff);
-
 
 
 double *_errx_MLA_ff_gg_d;
@@ -256,6 +265,8 @@ double Amoe_Funk_ff_gg_d_main(int n, double *x, double *y, double *p)
   double ltmp;
   double tmp1,priori;
   double norm=0;
+  (void)n;
+
 
   logL=0.;
 
@@ -303,7 +314,10 @@ double Amoe_Funk_ff_gg_d_main(int n, double *x, double *y, double *p)
 
  double Amoe_Funk_ff_gg_d_conf(int n, double *x, double *y, double *p)
 {
-   
+   (void)n;
+   (void)x;
+   (void)y;
+   (void)p;
 /*   int i,j;
   double logL=0.;
   double ltmp;
@@ -362,6 +376,7 @@ void TeorCovars_ff_gg_d(int n,double *x,double *errx,double *y,double *erry,int 
   double tmp1,tmp2,tmp3,tmp4;
   double **hessian;
   double **b;
+  (void)yinter;
    
   hessian=matrix_d(_kpar_MLA_ff_gg_d+1,_kpar_MLA_ff_gg_d+1);
   b=matrix_d(_kpar_MLA_ff_gg_d+1,1);

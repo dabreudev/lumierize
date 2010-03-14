@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include "minmax.h"
 #include "sthisto.h"
 #define DEBUG 0
 

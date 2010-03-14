@@ -1,4 +1,4 @@
-#include "modulos.h"
+#include "minmax.h"
 
 void MinMax(int n, float *a, float *min, float *max)
 

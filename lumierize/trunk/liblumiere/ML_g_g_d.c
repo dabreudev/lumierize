@@ -4,6 +4,7 @@
 #include <math.h>
 #include <gsl/gsl_machine.h>
 #include "alloc.h"
+#include "stmedia.h"
 
 #define DEBUG 0
 #define DEBUG2 0

@@ -8,6 +8,14 @@
 #include "schechter.h"
 #include "mlsty.h"
 #include "amoeba.h"
+#include "step.h"
+#include "functions.h"
+#include "random.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "elip.h"
+#include "quartil.h"
+#include "stmedia.h"
 
 #define FTOL  1e-13
 #define FTOL2 1e-6

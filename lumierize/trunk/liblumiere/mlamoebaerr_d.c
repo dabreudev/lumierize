@@ -1,7 +1,15 @@
+#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include "mlerramoeba.h"
 #include "alloc.h"
+#include "functions.h"
 #include "amoeba.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "elip.h"
+#include "quartil.h"
 
 #define DEBUG 0
 #define DEBUG2 0 

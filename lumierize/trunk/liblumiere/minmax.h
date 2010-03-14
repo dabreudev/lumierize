@@ -10,6 +10,7 @@ extern "C" {
 	int mini(int   x1,int   x2);
 	int   maxi(int   x1,int   x2);
 	void MinMax_d(int n, double *a, double *min, double *max);
+	void MinMax(int n, float *a, float *min, float *max);
 
 #ifdef __cplusplus
 }

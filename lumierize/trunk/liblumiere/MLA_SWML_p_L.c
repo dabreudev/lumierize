@@ -9,6 +9,13 @@
 #include "alloc.h"
 #include "mlswml.h"
 #include "amoeba.h"
+#include "functions.h"
+#include "random.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "elip.h"
+#include "vvmax.h"
+#include "quartil.h"
 
 #define FTOL  1e-12
 #define FTOL2 1e-6

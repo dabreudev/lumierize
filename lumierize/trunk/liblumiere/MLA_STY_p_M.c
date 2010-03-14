@@ -12,6 +12,7 @@
 #include "amoeba.h"
 #include "functions.h"
 #include "step.h"
+#include "gaussj.h"
 
 #define ZMIN 0.00001
 #define FTOL  1e-12
