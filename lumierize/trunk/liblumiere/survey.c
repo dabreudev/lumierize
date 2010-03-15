@@ -1,7 +1,16 @@
 #include <cpgplot.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "survey.h"
+#include "minmax.h"
+#include "alloc.h"
+#include "filenlin.h"
+#include "readcol.h"
+#include "cpgdoble.h"
+
+
 #define DEBUG 0
 
 
@@ -426,132 +435,132 @@ float Surveyrad(struct SurveyDB sdb) {
 }
 
 void SaveSurDB(char *dbfile, struct SurveyDB sdb) {
-
-  int i;
-  int asstatus=1,mcstatus=1,mlstatus=1,sestatus=1,specstatus=1;
-
-  FILE *fr;
-  char wcsar[16],wcsdec[16];
-  if((fr=fopen(dbfile,"w")) == NULL) {
-    printf(" Couldn't create file %s. Exiting\n",dbfile);
-    exit(1);
-  }
-  fprintf(fr,"#%-51s %-16s  %-16s  %-9s  %-9s  %-8s  %10s  %10s  %10s  %-51s  %-10s  %-9s  %-9s  %-9s  %-9s  %-9s  %-6s  %-7s  %-7s  %-9s  %-9s  %-9s  %-9s  %-9s  %-9s  %-7s  %-7s  %-51s  %-51s  %-51s\n","Image","Center_RA","Center_DEC","RA_size","DEC_size","Rot(ang)","Epoch","Std_X","Std_Y","Calibration_file","Num_obj","Mag_cal_A","Err_Mag_A","Mag_cal_B","Err_Mag_B","Cov_AB","RMS_MC","max_mag","mode_ma","m_fermi","errm_fermi","del_fer","errdel_fer","Alpha_PL","errAlpha_PL","Seeing","Std_See","Spectra_file","Response_file","Instrumental_setup");
-  
-  for(i=0;i<sdb.nitems;i++) {
-    
-    ra2str(wcsar,16,15*sdb.si[i].alfac,3);
-    dec2str(wcsdec,16,sdb.si[i].deltac,3);
-  if(asstatus)
-    fprintf(fr,"%-51s  %-16s  %-16s  %9.2g  %9.2g  %8.3f  %10.3f  %10.5f  %10.5f  ",sdb.si[i].image,wcsar,wcsdec,sdb.si[i].xdim,sdb.si[i].ydim,sdb.si[i].rot,sdb.si[i].epoch,sdb.si[i].stdx,sdb.si[i].stdy);
-  else 
-    fprintf(fr,"%-51s  %-16s  %-16s  %-9s  %-9s  %-8s  %-10s  %10s  %10s  ",sdb.si[i].image,"INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF");
-  if(mcstatus)
-    fprintf(fr,"%-51s  %10d  %9.4f  %9.4g  %9.4f  %9.4g  %9.4g  %6.3f  ",sdb.si[i].calfile,sdb.si[i].nobj,sdb.si[i].a,sdb.si[i].erra,sdb.si[i].b,sdb.si[i].errb,sdb.si[i].covab,sdb.si[i].rms);
-  else 
-    fprintf(fr,"%-51s  %10d  %-9s  %-9s  %-9s  %-9s  %-9s  %-6s  ",sdb.si[i].calfile,sdb.si[i].nobj,"INDEF","INDEF","INDEF","INDEF","INDEF","INDEF");
-  if(mlstatus)
-    fprintf(fr,"%7.3f  %7.3f  %9.4f  %9.4f  %9.4g  %9.4f  %9.4f  %9.4g  ",sdb.si[i].mmaximum,sdb.si[i].mmode,sdb.si[i].mfermicut,sdb.si[i].errmfermicut,sdb.si[i].deltafermi,sdb.si[i].errdeltafermi,sdb.si[i].gammapowerlaw,sdb.si[i].errgammapowerlaw);
-  else 
-    fprintf(fr,"%-7s  %-7s  %-9s  %-9s  %-9s  %-9s  %-9s  %-9s  ","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF");
-  if(sestatus)
-    fprintf(fr,"%7.3f  %7.3f  ",sdb.si[i].seeing,sdb.si[i].stdseeing);
-  else 
-    fprintf(fr,"%-7s  %-7s  ","INDEF","INDEF");
-  if(specstatus)
-    fprintf(fr,"%-51s  %-51s  ",sdb.si[i].specfile,sdb.si[i].respfile);
-  else 
-    fprintf(fr,"%-51s  %-51s  ","INDEF","INDEF");
-  fprintf(fr,"%-51s\n",sdb.si[i].instsetup);
-
-  }
-  fclose(fr);
+//
+//  int i;
+//  int asstatus=1,mcstatus=1,mlstatus=1,sestatus=1,specstatus=1;
+//
+//  FILE *fr;
+//  char wcsar[16],wcsdec[16];
+//  if((fr=fopen(dbfile,"w")) == NULL) {
+//    printf(" Couldn't create file %s. Exiting\n",dbfile);
+//    exit(1);
+//  }
+//  fprintf(fr,"#%-51s %-16s  %-16s  %-9s  %-9s  %-8s  %10s  %10s  %10s  %-51s  %-10s  %-9s  %-9s  %-9s  %-9s  %-9s  %-6s  %-7s  %-7s  %-9s  %-9s  %-9s  %-9s  %-9s  %-9s  %-7s  %-7s  %-51s  %-51s  %-51s\n","Image","Center_RA","Center_DEC","RA_size","DEC_size","Rot(ang)","Epoch","Std_X","Std_Y","Calibration_file","Num_obj","Mag_cal_A","Err_Mag_A","Mag_cal_B","Err_Mag_B","Cov_AB","RMS_MC","max_mag","mode_ma","m_fermi","errm_fermi","del_fer","errdel_fer","Alpha_PL","errAlpha_PL","Seeing","Std_See","Spectra_file","Response_file","Instrumental_setup");
+//
+//  for(i=0;i<sdb.nitems;i++) {
+//
+//    ra2str(wcsar,16,15*sdb.si[i].alfac,3);
+//    dec2str(wcsdec,16,sdb.si[i].deltac,3);
+//  if(asstatus)
+//    fprintf(fr,"%-51s  %-16s  %-16s  %9.2g  %9.2g  %8.3f  %10.3f  %10.5f  %10.5f  ",sdb.si[i].image,wcsar,wcsdec,sdb.si[i].xdim,sdb.si[i].ydim,sdb.si[i].rot,sdb.si[i].epoch,sdb.si[i].stdx,sdb.si[i].stdy);
+//  else
+//    fprintf(fr,"%-51s  %-16s  %-16s  %-9s  %-9s  %-8s  %-10s  %10s  %10s  ",sdb.si[i].image,"INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF");
+//  if(mcstatus)
+//    fprintf(fr,"%-51s  %10d  %9.4f  %9.4g  %9.4f  %9.4g  %9.4g  %6.3f  ",sdb.si[i].calfile,sdb.si[i].nobj,sdb.si[i].a,sdb.si[i].erra,sdb.si[i].b,sdb.si[i].errb,sdb.si[i].covab,sdb.si[i].rms);
+//  else
+//    fprintf(fr,"%-51s  %10d  %-9s  %-9s  %-9s  %-9s  %-9s  %-6s  ",sdb.si[i].calfile,sdb.si[i].nobj,"INDEF","INDEF","INDEF","INDEF","INDEF","INDEF");
+//  if(mlstatus)
+//    fprintf(fr,"%7.3f  %7.3f  %9.4f  %9.4f  %9.4g  %9.4f  %9.4f  %9.4g  ",sdb.si[i].mmaximum,sdb.si[i].mmode,sdb.si[i].mfermicut,sdb.si[i].errmfermicut,sdb.si[i].deltafermi,sdb.si[i].errdeltafermi,sdb.si[i].gammapowerlaw,sdb.si[i].errgammapowerlaw);
+//  else
+//    fprintf(fr,"%-7s  %-7s  %-9s  %-9s  %-9s  %-9s  %-9s  %-9s  ","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF","INDEF");
+//  if(sestatus)
+//    fprintf(fr,"%7.3f  %7.3f  ",sdb.si[i].seeing,sdb.si[i].stdseeing);
+//  else
+//    fprintf(fr,"%-7s  %-7s  ","INDEF","INDEF");
+//  if(specstatus)
+//    fprintf(fr,"%-51s  %-51s  ",sdb.si[i].specfile,sdb.si[i].respfile);
+//  else
+//    fprintf(fr,"%-51s  %-51s  ","INDEF","INDEF");
+//  fprintf(fr,"%-51s\n",sdb.si[i].instsetup);
+//
+//  }
+//  fclose(fr);
 }
 
 
 void PlotSurDB(struct SurveyDB sdb, int labflag) {
-
-  float *ra,*dec;
-  int i;
-
-  double px[4],py[4];
-  double pxrot[4],pyrot[4];
-  double raproj[4],decproj[4];
-  float ramin,ramax,decmin,decmax;
-
-  
-  ra =vector_f(sdb.nitems);
-  dec=vector_f(sdb.nitems);
-
-  for(i=0;i<sdb.nitems;i++) {
-    ra[i] =(sdb.si[i]).alfac;
-    dec[i]=(sdb.si[i]).deltac;
-  }
-  MinMax(sdb.nitems,ra,&ramin,&ramax);
-  MinMax(sdb.nitems,dec,&decmin,&decmax);
-  
-  if(DEBUG)   printf(" decmin %f decmax %f\n",decmin,decmax);
-  if(DEBUG)   printf(" ramin %f ramax %f\n",ramin,ramax);
-  
-  ramin=ramin-(sdb.si[0]).xdim/1./3600./15.;
-  ramax=ramax+(sdb.si[0]).xdim/1./3600./15.;
-  decmin=decmin-(sdb.si[0]).ydim/1./3600.;
-  decmax=decmax+(sdb.si[0]).ydim/1./3600.;    
-
-  if(DEBUG) printf(" decmin %f decmax %f\n",decmin,decmax);
-
-  cpgpage();
-  cpgvstd();
-  cpgwnad(ramax*3600*15.,ramin*3600*15.,decmin*3600,decmax*3600);
-  cpgswin(ramax*3600,ramin*3600,decmin*3600,decmax*3600);
-  cpgswin(ramax*3600,ramin*3600,decmin*3600,decmax*3600);
-  cpgtbox("ZXBCTNSHG",0.0,0,"ZBCTNSDGV",0.0,0);
-  cpgswin(ramax,ramin,decmin,decmax);
-  
-  for(i=0;i<sdb.nitems;i++) {
-    
-    px[0]=-(sdb.si[i]).xdim/3600./2./180*M_PI;py[0]=-(sdb.si[i]).ydim/3600./2./180*M_PI;
-    px[1]=+(sdb.si[i]).xdim/3600./2./180*M_PI;py[1]=-(sdb.si[i]).ydim/3600./2./180*M_PI;
-    px[2]=+(sdb.si[i]).xdim/3600./2./180*M_PI;py[2]=+(sdb.si[i]).ydim/3600./2./180*M_PI;
-    px[3]=-(sdb.si[i]).xdim/3600./2./180*M_PI;py[3]=+(sdb.si[i]).ydim/3600./2./180*M_PI;
-    pxrot[0]= (px[0]*cos((sdb.si[i]).rot/180*M_PI)-py[0]*sin((sdb.si[i]).rot/180*M_PI));
-    pyrot[0]= px[0]*sin((sdb.si[i]).rot/180*M_PI)+py[0]*cos((sdb.si[i]).rot/180*M_PI);
-    pxrot[1]= (px[1]*cos((sdb.si[i]).rot/180*M_PI)-py[1]*sin((sdb.si[i]).rot/180*M_PI));
-    pyrot[1]= px[1]*sin((sdb.si[i]).rot/180*M_PI)+py[1]*cos((sdb.si[i]).rot/180*M_PI);
-    pxrot[2]= (px[2]*cos((sdb.si[i]).rot/180*M_PI)-py[2]*sin((sdb.si[i]).rot/180*M_PI));
-    pyrot[2]= px[2]*sin((sdb.si[i]).rot/180*M_PI)+py[2]*cos((sdb.si[i]).rot/180*M_PI);
-    pxrot[3]= (px[3]*cos((sdb.si[i]).rot/180*M_PI)-py[3]*sin((sdb.si[i]).rot/180*M_PI));
-    pyrot[3]= px[3]*sin((sdb.si[i]).rot/180*M_PI)+py[3]*cos((sdb.si[i]).rot/180*M_PI);
-    Plac2Ecu(pxrot[0],pyrot[0],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+0,decproj+0);
-    Plac2Ecu(pxrot[1],pyrot[1],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+1,decproj+1);
-    Plac2Ecu(pxrot[2],pyrot[2],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+2,decproj+2);
-    Plac2Ecu(pxrot[3],pyrot[3],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+3,decproj+3);
-    raproj[0]*=180/M_PI/15; decproj[0]*=180/M_PI;
-    raproj[1]*=180/M_PI/15; decproj[1]*=180/M_PI;
-    raproj[2]*=180/M_PI/15; decproj[2]*=180/M_PI;
-    raproj[3]*=180/M_PI/15; decproj[3]*=180/M_PI;
-    
-    
-    cpgsfs(1);
-    cpgsci(0);
-    cpgpoly_d(4,raproj,decproj);
-    cpgsci(2);
-    cpgsfs(2);
-    cpgpoly_d(4,raproj,decproj);
-    if(DEBUG) printf(" Image %d ra %f %f %f %f dec %f %f %f %f\n",i,raproj[0],raproj[1],raproj[2],raproj[3],decproj[0],decproj[1],decproj[2],decproj[3]);
-    
-    cpgsci(1);
-    if(labflag) cpgtext((pxrot[0]+pxrot[1]+pxrot[2]+pxrot[3])/4,(pyrot[0]+pyrot[1]+pyrot[2]+pyrot[3])/4,sdb.si[i].image);
-    
-  }
-  
-  cpglab("RA","","");
-  
-  cpgptxt(ramin-(ramax-ramin)*0.08,decmin+(decmax-decmin)/2.,90,0.5,"Dec");
-  
-  
-  free(ra);
-  free(dec);
+//
+//  float *ra,*dec;
+//  int i;
+//
+//  double px[4],py[4];
+//  double pxrot[4],pyrot[4];
+//  double raproj[4],decproj[4];
+//  float ramin,ramax,decmin,decmax;
+//
+//
+//  ra =vector_f(sdb.nitems);
+//  dec=vector_f(sdb.nitems);
+//
+//  for(i=0;i<sdb.nitems;i++) {
+//    ra[i] =(sdb.si[i]).alfac;
+//    dec[i]=(sdb.si[i]).deltac;
+//  }
+//  MinMax(sdb.nitems,ra,&ramin,&ramax);
+//  MinMax(sdb.nitems,dec,&decmin,&decmax);
+//
+//  if(DEBUG)   printf(" decmin %f decmax %f\n",decmin,decmax);
+//  if(DEBUG)   printf(" ramin %f ramax %f\n",ramin,ramax);
+//
+//  ramin=ramin-(sdb.si[0]).xdim/1./3600./15.;
+//  ramax=ramax+(sdb.si[0]).xdim/1./3600./15.;
+//  decmin=decmin-(sdb.si[0]).ydim/1./3600.;
+//  decmax=decmax+(sdb.si[0]).ydim/1./3600.;
+//
+//  if(DEBUG) printf(" decmin %f decmax %f\n",decmin,decmax);
+//
+//  cpgpage();
+//  cpgvstd();
+//  cpgwnad(ramax*3600*15.,ramin*3600*15.,decmin*3600,decmax*3600);
+//  cpgswin(ramax*3600,ramin*3600,decmin*3600,decmax*3600);
+//  cpgswin(ramax*3600,ramin*3600,decmin*3600,decmax*3600);
+//  cpgtbox("ZXBCTNSHG",0.0,0,"ZBCTNSDGV",0.0,0);
+//  cpgswin(ramax,ramin,decmin,decmax);
+//
+//  for(i=0;i<sdb.nitems;i++) {
+//
+//    px[0]=-(sdb.si[i]).xdim/3600./2./180*M_PI;py[0]=-(sdb.si[i]).ydim/3600./2./180*M_PI;
+//    px[1]=+(sdb.si[i]).xdim/3600./2./180*M_PI;py[1]=-(sdb.si[i]).ydim/3600./2./180*M_PI;
+//    px[2]=+(sdb.si[i]).xdim/3600./2./180*M_PI;py[2]=+(sdb.si[i]).ydim/3600./2./180*M_PI;
+//    px[3]=-(sdb.si[i]).xdim/3600./2./180*M_PI;py[3]=+(sdb.si[i]).ydim/3600./2./180*M_PI;
+//    pxrot[0]= (px[0]*cos((sdb.si[i]).rot/180*M_PI)-py[0]*sin((sdb.si[i]).rot/180*M_PI));
+//    pyrot[0]= px[0]*sin((sdb.si[i]).rot/180*M_PI)+py[0]*cos((sdb.si[i]).rot/180*M_PI);
+//    pxrot[1]= (px[1]*cos((sdb.si[i]).rot/180*M_PI)-py[1]*sin((sdb.si[i]).rot/180*M_PI));
+//    pyrot[1]= px[1]*sin((sdb.si[i]).rot/180*M_PI)+py[1]*cos((sdb.si[i]).rot/180*M_PI);
+//    pxrot[2]= (px[2]*cos((sdb.si[i]).rot/180*M_PI)-py[2]*sin((sdb.si[i]).rot/180*M_PI));
+//    pyrot[2]= px[2]*sin((sdb.si[i]).rot/180*M_PI)+py[2]*cos((sdb.si[i]).rot/180*M_PI);
+//    pxrot[3]= (px[3]*cos((sdb.si[i]).rot/180*M_PI)-py[3]*sin((sdb.si[i]).rot/180*M_PI));
+//    pyrot[3]= px[3]*sin((sdb.si[i]).rot/180*M_PI)+py[3]*cos((sdb.si[i]).rot/180*M_PI);
+//    Plac2Ecu(pxrot[0],pyrot[0],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+0,decproj+0);
+//    Plac2Ecu(pxrot[1],pyrot[1],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+1,decproj+1);
+//    Plac2Ecu(pxrot[2],pyrot[2],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+2,decproj+2);
+//    Plac2Ecu(pxrot[3],pyrot[3],(sdb.si[i]).alfac/180*M_PI*15.,(sdb.si[i]).deltac/180*M_PI,raproj+3,decproj+3);
+//    raproj[0]*=180/M_PI/15; decproj[0]*=180/M_PI;
+//    raproj[1]*=180/M_PI/15; decproj[1]*=180/M_PI;
+//    raproj[2]*=180/M_PI/15; decproj[2]*=180/M_PI;
+//    raproj[3]*=180/M_PI/15; decproj[3]*=180/M_PI;
+//
+//
+//    cpgsfs(1);
+//    cpgsci(0);
+//    cpgpoly_d(4,raproj,decproj);
+//    cpgsci(2);
+//    cpgsfs(2);
+//    cpgpoly_d(4,raproj,decproj);
+//    if(DEBUG) printf(" Image %d ra %f %f %f %f dec %f %f %f %f\n",i,raproj[0],raproj[1],raproj[2],raproj[3],decproj[0],decproj[1],decproj[2],decproj[3]);
+//
+//    cpgsci(1);
+//    if(labflag) cpgtext((pxrot[0]+pxrot[1]+pxrot[2]+pxrot[3])/4,(pyrot[0]+pyrot[1]+pyrot[2]+pyrot[3])/4,sdb.si[i].image);
+//
+//  }
+//
+//  cpglab("RA","","");
+//
+//  cpgptxt(ramin-(ramax-ramin)*0.08,decmin+(decmax-decmin)/2.,90,0.5,"Dec");
+//
+//
+//  free(ra);
+//  free(dec);
 
 
 

@@ -34,8 +34,8 @@ noinst_HEADERS =
 lib_LTLIBRARIES = liblumiere.la
 
 liblumiere_la_SOURCES = alloc.c Amoe_Ini_d.c Amoe_Init.d Amoeba_d.c Amoeba.c \
-            Bnldev.c Constdev.c cosmology.c cpgdoble.c Expdev.c FileNLin.c \
-            functions.c gaussint_d.c \
+            Bnldev.c Constdev.c cosmology.c cpgdoble.c Expdev.c Ecu2Plac.c \
+            FileNLin.c functions.c gaussint_d.c \
             gaussj.c gaussj_d.c getline.c \
             Gasdev.c hessian.c Histdev.c Histfunc.c \
             Lagr2_d.c mlamoebaerr.c mlamoebaerr_d.c minmax.c MinMax_d.c MCElipN_d.c \
@@ -50,7 +50,7 @@ liblumiere_la_SOURCES = alloc.c Amoe_Ini_d.c Amoe_Init.d Amoeba_d.c Amoeba.c \
             ML_g_g_corr_g.c MLA_hh_gg_d.c MLA_STY_gz_p_L.c MLA_STY_p_M.c \
             ML_g_g_d.c \
             mrqmin.c mrqmin_d.c pgLimits_d.c \
-            Powdev.c Quartil_d.c random.c \
+            Powdev.c Quartil_d.c random.c ReadWCScol.c\
             ReadKbd.c ReadDoublecol.c ReadNumcol.c ReadCharcol.c \
             schechter.c schechterdev.c step.c StMedia_d.c StModa_d.c StSuma1_d.c\
             StErrWeightMedia_d.c StHisto2_d.c StHisto_d.c StHisto2D_d.c\
