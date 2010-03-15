@@ -1,10 +1,20 @@
-#include "mlsty.h"
-#include "gsl_hessian.h"
 #include <gsl/gsl_machine.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multimin.h>
+#include "mlsty.h"
+#include "gsl_hessian.h"
+#include "amoeba.h"
+#include "alloc.h"
+#include "fermisel.h"
+#include "functions.h"
+#include "step.h"
+#include "gaussj.h"
+#include "minmax.h"
+#include "vvmax.h"
+#include "gaussint.h"
+
 
 /* VEGAS */
 #include <gsl/gsl_math.h>
@@ -27,7 +37,7 @@
 /* Este contiene STY con colores y errores en los colores */
 
 /* #define TOLERR 0.0001 */
-/* Estructura para contener los parámetros de Amo..main_gsl_multimin */
+/* Estructura para contener los parï¿½metros de Amo..main_gsl_multimin */
 struct Amoe_Funk_gsl_param_STY_gc_p_M_wC
 {
   int nData;
@@ -241,6 +251,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
   double probabajo;
 
   double intsup;
+  (void)n;
 
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
@@ -272,7 +283,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
     }
     else 
     {
-      x1=lfamo.Mstar-10.0; /* 5 por poner un número (debería ser -inf) */
+      x1=lfamo.Mstar-10.0; /* 5 por poner un nï¿½mero (deberï¿½a ser -inf) */
       x2=Mag(y[i],_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       probabajo=gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npb);
       if(DEBUG2) printf(" Primer abajo %g con 1000 %g x1 %f x2 %f\n",probabajo,gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1-10,x2,1000),x1,x2);
@@ -280,7 +291,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
       x1=Mag(y[i],_mlim_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       probabajo+=gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npc);
       if(DEBUG2) printf(" Segundo abajo %g con 1000 %g x1 %f x2 %f\n",gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,x2,npc),gaussintleg_d(Funk1_intMag_STY_gc_p_M_wC,x1,Mag(y[i],_mlim_STY_gc_p_M_wC+12*_errColorn_i_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC),1000),x1,x2); */
-      /* La integral de abajo se hacía en dos intervalos, ahora vamos a probar de un tirón */
+      /* La integral de abajo se hacï¿½a en dos intervalos, ahora vamos a probar de un tirï¿½n */
 
       if(DEBUG2) printf(" Calculo abajo %g old %g \n",probabajo,lfamo.phistar*(incom(1+lfamo.alfa,200.)-incom(1+lfamo.alfa,pow(10.,-0.4*Mlow)/Lstar)));
 
@@ -293,7 +304,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
 
       if(_errColorn_i_STY_gc_p_M_wC==0)
       {
-        probarriba=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: esto seguro que es así? */
+        probarriba=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: esto seguro que es asï¿½? */
       }
       else
       {
@@ -340,8 +351,8 @@ double Amoe_Funk_STY_gc_p_M_wC_main(int n, double *x, double *y, double *p) {
 double Funk1_intMag_STY_gc_p_M_wC(double Mabs) 
 {
   /* Lo suyo es que sea en magnitudes absolutas, ya que 
-     la FL está expresada en intervalos de Mabs. 
-     Si no, tendría que multiplicar por dMabs/dmag */
+     la FL estï¿½ expresada en intervalos de Mabs. 
+     Si no, tendrï¿½a que multiplicar por dMabs/dmag */
 
   int npa=21;
 /*   double scale,offset; */
@@ -355,13 +366,13 @@ double Funk1_intMag_STY_gc_p_M_wC(double Mabs)
   x1=_colorn_i_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC; 
   x2=_colorn_i_STY_gc_p_M_wC+6*_errColorn_i_STY_gc_p_M_wC;
 
-  /* la integral será entre color-6*errcolor y color+6*errcolor */
-  /* los límites se chequean para que la magSel de aplicar este color a la magDist no se salga de mlim */
+  /* la integral serï¿½ entre color-6*errcolor y color+6*errcolor */
+  /* los lï¿½mites se chequean para que la magSel de aplicar este color a la magDist no se salga de mlim */
  
   /* if(_mlim_STY_gc_p_M_wC<_magDistn_i_STY_gc_p_M_wC-5*_errColorn_i_STY_gc_p_M_wC) x1=x2-6*_errColorn_i_STY_gc_p_M_wC; */
   if(_errColorn_i_STY_gc_p_M_wC==0)
   {
-    firstint=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: seguro que así no */
+    firstint=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: seguro que asï¿½ no */
   }
   else
   { 
@@ -379,7 +390,7 @@ double Funk2_intmag_STY_gc_p_M_wC(double colornreal)
   double logfacLF,logfacerr, logColor;
   double magDistnreal;
   magDistnreal=colornreal+_magSeln_i_STY_gc_p_M_wC;
-  if((_magDistn_i_STY_gc_p_M_wC-colornreal)>_mlim_STY_gc_p_M_wC) return(0); /* mirar si esto está bien */
+  if((_magDistn_i_STY_gc_p_M_wC-colornreal)>_mlim_STY_gc_p_M_wC) return(0); /* mirar si esto estï¿½ bien */
   else 
   {
     Mabs=Mag(_z_i_STY_gc_p_M_wC,magDistnreal,*_cosmo_STY_gc_p_M_wC);
@@ -399,13 +410,13 @@ double Funk2_intmag_STY_gc_p_M_wC(double colornreal)
     else
     { */
     logfacerr= lngaussian(colornreal,_colorn_i_STY_gc_p_M_wC,_errColorn_i_STY_gc_p_M_wC);
-      /* no estoy seguro de si va primero colornreal, pero la función es simétrica respecto a los dos primeros parámetros */
+      /* no estoy seguro de si va primero colornreal, pero la funciï¿½n es simï¿½trica respecto a los dos primeros parï¿½metros */
     /* } */
-    return(exp(logfacLF+logfacerr+logColor)); /* aquí va +logColor ? */
+    return(exp(logfacLF+logfacerr+logColor)); /* aquï¿½ va +logColor ? */
   }
 }
 
-/* Errores utilizando derivadas numéricas con GSL */
+/* Errores utilizando derivadas numï¿½ricas con GSL */
 
 void NumericalHessianCovars_STY_gc_p_M_wC(int n,double *magDistn,double *errColorn,double *z,double *par, double *sigpar,double mlim, struct cosmo_param cosmo,struct Schlf_M *lf)
 {
@@ -416,6 +427,9 @@ void NumericalHessianCovars_STY_gc_p_M_wC(int n,double *magDistn,double *errColo
   size_t i,j;
 
   double hessianStep = GSL_ROOT4_DBL_EPSILON;
+  struct Amoe_Funk_gsl_param_STY_gc_p_M_wC deriv_param;
+  gsl_multimin_function LogLFunction;
+  (void)cosmo;
   /* derivStep = 0.01; */
 
   gsl_hessian=gsl_matrix_alloc(3,3);
@@ -427,13 +441,11 @@ void NumericalHessianCovars_STY_gc_p_M_wC(int n,double *magDistn,double *errColo
   covar=matrix_d(3 ,3 );
   bb=matrix_d(3,1);
 
-  struct Amoe_Funk_gsl_param_STY_gc_p_M_wC deriv_param;
 
   deriv_param.nData = _ndata_STY_gc_p_M_wC;
   deriv_param.magn = magDistn;
   deriv_param.z = z;
 
-  gsl_multimin_function LogLFunction;
   LogLFunction.f = &Amoe_Funk_STY_gc_p_M_wC_main_gsl_multimin;
   LogLFunction.params = &deriv_param;
   LogLFunction.n = 3;
@@ -503,10 +515,6 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
   const gsl_rng_type *T;
   gsl_rng *r1;
   gsl_rng *r2;
-  gsl_rng_env_setup();
-  T = gsl_rng_default;
-  r1 = gsl_rng_alloc(T);
-  r2 = gsl_rng_alloc(T);
   double res, err;
   double xl1[2];
   double xu1[2];
@@ -515,6 +523,10 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
   size_t calls=100;
   gsl_monte_function F1 = {&f1, 2, p};
   gsl_monte_function F2 = {&f2, 1, p};
+  gsl_rng_env_setup();
+  T = gsl_rng_default;
+  r1 = gsl_rng_alloc(T);
+  r2 = gsl_rng_alloc(T);
   /* falta definir la f1 y la f2 -> parecidas a Funk1 y Funk2 */
 
 
@@ -548,7 +560,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
     }
     else 
     {
-      x1=lfamo.Mstar-10.0; /* 5 por poner un número (debería ser -inf) */
+      x1=lfamo.Mstar-10.0; /* 5 por poner un nï¿½mero (deberï¿½a ser -inf) */
       x2=Mag(y[i],_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       xl1[0]=x1;
       xu1[0]=x2;
@@ -575,7 +587,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
 
       if(_errColorn_i_STY_gc_p_M_wC==0)
       {
-        probarriba=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: esto seguro que es así? */
+        probarriba=Schechter_M(Mabs,*_lf_STY_gc_p_M_wC); /* FIXME: esto seguro que es asï¿½? */
       }
       else
       {
@@ -629,12 +641,14 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
 double f1 (double *k1, size_t dim1, void *params1)
 {
   double firstint=0.;
+  (void)dim1;
   firstint=Funk1_intMag_STY_gc_p_M_wC(k1[0]);
   return firstint;
 }
 double f2 (double *k2, size_t dim2, void *params2)
 {
   double firstint=0.;
+  (void)dim2;
   Funk2_intmag_STY_gc_p_M_wC(k2[0]);
   return firstint;
 }

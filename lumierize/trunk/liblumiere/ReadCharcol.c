@@ -12,7 +12,11 @@
   Para compilar: 
   cc -c   $s2/Proced/C/modulos/ReadNumcol.c 
 */
-#include  "modulos.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "readcol.h"
+
 #define DEBUG 0
 int ReadCharcol(char file[],int col,char *vector,int *lvec,int charlen,int *nlin)
 {
