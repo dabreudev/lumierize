@@ -23,6 +23,7 @@
 #include "filenlin.h"
 #include "readcol.h"
 #include "cpgdoble.h"
+#include "readcol.h"
 
 #define ZMIN 0.00001
 #define NSTEP_LF 200
@@ -904,9 +905,11 @@ void CEG(void)
   int *ewhisto;
   int nbinhist=12;
 
+  printf("This option is now not supported");
+  return;
   
-  get_sample_ceg(&sample);
-  set_lf_ceg(&ceg); 
+//  get_sample_ceg(&sample);
+  //set_lf_ceg(&ceg);
   isurvey=vector_i(sample.ngalax);
   
 
@@ -2195,7 +2198,7 @@ void set_lf_ceg(struct lum_func_ceg *lf)
   reads(surveyfile,surveyfile);
 
   readposelfunc(&(lf->fsel),fsfile);
-  ReadSurDB(surveyfile,&(lf->sdb));
+//  ReadSurDB(surveyfile,&(lf->sdb));
 
   printf(" Limiting EW: ");
   lf->ewlim=readd(lf->ewlim);
