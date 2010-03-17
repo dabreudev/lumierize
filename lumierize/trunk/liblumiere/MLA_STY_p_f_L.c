@@ -215,6 +215,8 @@ double Amoe_Funk_STY_p_f_L_main(int n, double *x, double *y, double *p) {
   double intsup;
   int j;
   int nL_fs=200;
+  (void)n;
+
 
   lfamo.alfa=p[0];
   lfamo.Lstar=pow(10.,p[1]);
@@ -301,6 +303,9 @@ void   EmpiricalCovars_STY_p_f_L(int n,double *flux,double *z,double *par, doubl
   double **bb;
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)cosmo;
+  (void)fsel;
+
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

@@ -246,6 +246,8 @@ double Amoe_Funk_SWML_p_M_main(int n, double *x, double *y, double *p) {
   double funl = 0;
   double Ntot;
   struct Steplf_M lfamo;
+  (void)n;
+
 
   if(DEBUG3) printf(" Dentro amobe   ddd+1\n");
 

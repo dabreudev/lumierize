@@ -430,6 +430,10 @@ void NumericalHessianCovars_STY_gc_p_M_wC(int n,double *magDistn,double *errColo
   struct Amoe_Funk_gsl_param_STY_gc_p_M_wC deriv_param;
   gsl_multimin_function LogLFunction;
   (void)cosmo;
+  (void)mlim;
+  (void)n;
+  (void)sigpar;
+  (void)errColorn;
   /* derivStep = 0.01; */
 
   gsl_hessian=gsl_matrix_alloc(3,3);
@@ -523,6 +527,9 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
   size_t calls=100;
   gsl_monte_function F1 = {&f1, 2, p};
   gsl_monte_function F2 = {&f2, 1, p};
+  (void)n;
+
+
   gsl_rng_env_setup();
   T = gsl_rng_default;
   r1 = gsl_rng_alloc(T);
@@ -560,12 +567,12 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
     }
     else 
     {
+      gsl_monte_vegas_state *s1 = gsl_monte_vegas_alloc(2);
       x1=lfamo.Mstar-10.0; /* 5 por poner un n�mero (deber�a ser -inf) */
       x2=Mag(y[i],_mlim_STY_gc_p_M_wC,*_cosmo_STY_gc_p_M_wC);
       xl1[0]=x1;
       xu1[0]=x2;
       /* falta xl1[1] y xu1[1] */
-      gsl_monte_vegas_state *s1 = gsl_monte_vegas_alloc(2);
       gsl_monte_vegas_integrate (&F1, xl1, xu1, 2, calls/10., r1, s1, &res, &err); /* warm up */
       if(DEBUG2) printf("Warm up in VEGAS %g %g",res,err);
       gsl_monte_vegas_integrate (&F1, xl1, xu1, 2, calls, r1, s1, &res, &err);
@@ -591,6 +598,7 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
       }
       else
       {
+        gsl_monte_vegas_state *s2 = gsl_monte_vegas_alloc(1);
         offset=_magDistn_i_STY_gc_p_M_wC;
         scale=_errColorn_i_STY_gc_p_M_wC*sqrt(2.);
         x1=_colorn_i_STY_gc_p_M_wC-6*_errColorn_i_STY_gc_p_M_wC; 
@@ -599,7 +607,6 @@ double Amoe_Funk_STY_gc_p_M_wC_main_VEGAS(int n, double *x, double *y, double *p
         xl2[0]=x1;
         xu2[0]=x2;
 
-        gsl_monte_vegas_state *s2 = gsl_monte_vegas_alloc(1);
         gsl_monte_vegas_integrate (&F2, xl2, xu2, 1, calls/10., r2, s2, &res, &err); /* warm up */
         if(DEBUG2) printf("Warm up in VEGAS %g %g",res,err);
         gsl_monte_vegas_integrate (&F2, xl2, xu2, 1, calls, r2, s2, &res, &err);
@@ -642,6 +649,7 @@ double f1 (double *k1, size_t dim1, void *params1)
 {
   double firstint=0.;
   (void)dim1;
+  (void)params1;
   firstint=Funk1_intMag_STY_gc_p_M_wC(k1[0]);
   return firstint;
 }
@@ -649,6 +657,7 @@ double f2 (double *k2, size_t dim2, void *params2)
 {
   double firstint=0.;
   (void)dim2;
+  (void)params2;
   Funk2_intmag_STY_gc_p_M_wC(k2[0]);
   return firstint;
 }

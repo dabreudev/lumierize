@@ -1,12 +1,11 @@
-#include <math.h>
-#include "stmedia.h"
+#include "modulos.h" 
 
 
-double StErrWeightMedia_d(int n, double *x, double *err,double *sigma)
+float StErrWeightMedia(int n, float *x, float *err,float *sigma)
 {
   int i;
-  double m=0,s=0;
-  double sumerr=0;
+  float m=0,s=0;
+  float sumerr=0;
   
   
   for(i=0;i<n;i++) {

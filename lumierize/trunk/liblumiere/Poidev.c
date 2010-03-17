@@ -1,4 +1,8 @@
+#include <stdlib.h>
+#include <sys/time.h>
+#include <math.h>
 #include "random.h"
+#include "functions.h"
 
 
 /* La siguiente subrutina parece que hace tonterias para xm>1e7. Las desviaciones

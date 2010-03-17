@@ -406,6 +406,7 @@ void   EmpiricalCovars_STY_s_p_f_PO(int n,double *magn,double *ew, double *z,int
   (void)ewd;
   (void)cosmo;
   (void)ew;
+  (void)gamma_f;
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

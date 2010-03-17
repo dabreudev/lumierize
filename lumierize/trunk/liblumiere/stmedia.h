@@ -13,6 +13,8 @@ extern "C" {
 	double StErrWeightMedia_d(int n, double *x, double *err,double *sigma);
 
 	double StSuma1_d(int n, double *a, int i);
+	float StSuma1(int n, float *a, int i);
+	double StSuma2_d(int n, double *a, int i, double *b, int j);
 
 #ifdef __cplusplus
 }

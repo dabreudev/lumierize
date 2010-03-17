@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include "sthisto.h"
+#include "minmax.h"
 
 int *StHisto2_d(int n, double *a, int nbin, double *amin, double *amax)
 

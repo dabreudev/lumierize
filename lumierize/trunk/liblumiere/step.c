@@ -11,6 +11,7 @@
 #include "mrqmin.h"
 #include "quartil.h"
 #include "cpgdoble.h"
+#include "random.h"
 
 #define NSTEP_LF 200
 #define NSTEP_Z  500
