@@ -1,3 +1,4 @@
+#include <math.h>
 #include "stmedia.h"
 
 /* //De Javier Gorgas */

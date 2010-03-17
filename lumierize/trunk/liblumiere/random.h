@@ -17,8 +17,6 @@ extern "C" {
   double Histdev(int k,double *Pk,double *xk);
   double Powdev(double xmin, double xmax,double alfa);
   double Constdev(double xmin, double xmax);
-  float ran1(long *idum);
-  float ran2(long *idum);
 
 #ifdef __cplusplus
 }

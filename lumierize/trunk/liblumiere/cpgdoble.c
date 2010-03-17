@@ -1,6 +1,6 @@
 #include <cpgplot.h>
 #include <stdlib.h>
-#include "cpgdoble.h""
+#include "cpgdoble.h"
 #include "alloc.h"
 
 

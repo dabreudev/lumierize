@@ -1,4 +1,7 @@
+#include <stdlib.h>
+#include <malloc.h>
 #include "amoeba.h"
+#include "random.h"
 
 void Amoe_Ini(int ndata, float *xdata, float *ydata,
               int ndim, float *p0, float *sigp0, float *p, float *y,

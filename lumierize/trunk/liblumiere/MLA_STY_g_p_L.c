@@ -16,6 +16,7 @@
 #include "elip.h"
 #include "quartil.h"
 #include "stmedia.h"
+#include "vvmax.h"
 
 #define FTOL  1e-13
 #define FTOL2 1e-6
@@ -234,6 +235,7 @@ double Amoe_Funk_STY_g_p_L_main(int n, double *x, double *y, double *p) {
 /*   double Lup; */
   double intsup;
   double Ntot;
+  (void)n;
 
 
   lfamo.alfa=p[0];
@@ -300,6 +302,12 @@ void   EmpiricalCovars_STY_g_p_L(int n,double *flux,double *errflux,double *z,do
   double **bb;
   int nconfl,nconflini;
   double first, median, third, *distmax;
+  (void)cosmo;
+  (void)errz;
+  (void)errflux;
+  (void)flim;
+
+
 
   if(DEBUG) printf(" n vale %d \n",n);
   nconfl=NCONFL;

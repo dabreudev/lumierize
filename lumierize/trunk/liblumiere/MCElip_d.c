@@ -1,4 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "alloc.h"
 #include "elip.h"
+#include "gaussj.h"
 
 
 int  MCElip_d(int n, double *x, double *y, 

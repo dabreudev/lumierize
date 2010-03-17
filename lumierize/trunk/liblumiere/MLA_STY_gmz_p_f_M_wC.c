@@ -273,7 +273,6 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
   double colori;
   double logColor;
 
-
   size_t dim_den=3, dim_num=2;
   double xl_den[3], xu_den[3];
   double xl_num[2], xu_num[2];
@@ -284,6 +283,8 @@ double Amoe_Funk_STY_gmz_p_f_M_wC_main(int n, double *x, double *y, double *p) {
 
   size_t calls_den = 500000;
   size_t calls_num = 5000;
+  (void)n;
+
 
   lfamo.alfa=p[0];
   lfamo.Mstar=p[1];
@@ -529,6 +530,9 @@ double vegas_funk_numerator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *param
   double logfacLF;
   double facsel;
   double dVdzreal, rhoz;
+  (void)dim;
+  (void)params;
+
 
   if(DEBUG4) printf(" inside vegas_funk_numerator.\n");
   /* x[0] -> zreal - zobs
@@ -590,6 +594,8 @@ double vegas_funk_denominator_STY_gmz_p_f_M_wC (double *x, size_t dim, void *par
   double logfacColor;
   double facsel;
   double dVdzreal;
+  (void)params;
+  (void)dim;
 
   if(DEBUG4) printf(" inside vegas_funk_denominator.\n");
 
@@ -640,6 +646,11 @@ void NumericalHessianCovars_STY_gmz_p_f_M_wC(int n,double *magn,double *errmagn,
   struct Amoe_Funk_gsl_param_STY_gmz_p_f_M_wC deriv_param;
   gsl_multimin_function LogLFunction;
   /* derivStep = 0.01; */
+  (void)n;
+  (void)cosmo;
+  (void)mlim;
+  (void)errmagn;
+  (void)sigpar;
 
   gsl_hessian=gsl_matrix_alloc(3,3);
   param=gsl_vector_alloc(3);

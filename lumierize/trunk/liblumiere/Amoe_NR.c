@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <malloc.h>
+#include <math.h>
 #include "amoeba.h"
 
 int Amoe_NR(int ndata, float *xdata, float *ydata,
@@ -6,7 +9,7 @@ int Amoe_NR(int ndata, float *xdata, float *ydata,
 
 {
   int mpts,ilo,ihi,inhi,i,j,mp,np;
-  float alpha=1.0, beta=0.5, gamma=2.0;
+  float alpha=1.0, beta=0.5, gammaval=2.0;
   float *pr,*prr,*pbar;
   float rtol,ypr,yprr;
   float dum1;
@@ -73,7 +76,7 @@ int Amoe_NR(int ndata, float *xdata, float *ydata,
       ypr=(*amofunc)(ndata,xdata,ydata,pr);
 
       if(ypr < y[ilo]) {
-	for(j=0; j<ndim; j++) prr[j]=gamma*pr[j]+(1.-gamma)*pbar[j];
+	for(j=0; j<ndim; j++) prr[j]=gammaval*pr[j]+(1.-gammaval)*pbar[j];
         yprr=(*amofunc)(ndata,xdata,ydata,prr);
         if(yprr < y[ilo]) {
 	  for(j=0; j<ndim; j++) p[ihi+j*mp]=prr[j];

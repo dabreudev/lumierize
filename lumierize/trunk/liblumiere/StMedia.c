@@ -1,3 +1,4 @@
+#include <math.h>
 #include "stmedia.h"
 
 float StMedia(int n, float *x, float *sigma)

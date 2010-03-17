@@ -30,7 +30,6 @@ extern "C" {
 	int  MLA_STY_p_f_PO  (int n,double *magn,double *ew,double *z,char photband[51], float gamma, float delta, float Kcoc, struct poselfunc fsel, struct SurveyItem si, double ewlim, struct Histdist ewd, double strrad, struct cosmo_param cosmo,struct Schlf_L *lf);
 
 	/* Con errores en color */
-
 	int MLA_STY_gc_p_M_wC(int n,double *magSeln, double *magDistn, double color_mean, double color_stddev, double *errColorn,double *z,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf, struct MLProcessInfo *mlinfo);
 
 
@@ -54,6 +53,7 @@ extern "C" {
 	int  MLA_STY_gfz_L   (int n,double *flux,double *errflux,double *z, double *errz,double flim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_L *lf);
 	int  MLA_STY_gmz_p_M (int n,double *magn,double *errmag ,double *z, double *errz,double mlim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_M *lf);
 	int  MLA_STY_gfz_p_L (int n,double *flux,double *errflux,double *z, double *errz,double flim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_L *lf);
+  int  MLA_STY_g_p_L   (int n,double *flux,double *errflux,double *z, double *errz,double flim, double strrad, double zlow, double zup, struct cosmo_param cosmo,struct Schlf_L *lf);
 
 	/* Con funciones de selecci�n y varias im�genes */
 
